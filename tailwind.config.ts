@@ -10,8 +10,8 @@ const config: Config = {
   theme: {
   	extend: {
   		colors: {
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
+  			background: '#0D0D0D',
+  			foreground: '#FFFFFF',
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
@@ -21,12 +21,35 @@ const config: Config = {
   				foreground: 'hsl(var(--popover-foreground))'
   			},
   			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+				"700": "#540003",
+				"600": "#870005",
+				"500": "#BA050C",
+				"400": "#ED1C24",
+				"300": "#FF5157",
+				"200": "#FF8388",
+				"100": "#FF8388",
+				"50": "#FFEEEF",
+				 
   			},
   			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
+				"700": "#AD8D19",
+				"600": "#DDB420",
+				"500": "#F3C623",
+				"400": "#F5D14F",
+				"300": "#F7D96C",
+				"200": "#F9E59A",
+				"100": "#FBEDBB",
+				"50": "#FEF9E9",
+  			},
+  			 neutral: {
+				"700": "#454242",
+				"600": "#5F5C5C",
+				"500": "#787777",
+				"400": "#929292",
+				"300": "#ABABAB",
+				"200": "#C5C5C5",
+				"100": "#DBDBDB",
+				"50": "#F8F8F8",
   			},
   			muted: {
   				DEFAULT: 'hsl(var(--muted))',
