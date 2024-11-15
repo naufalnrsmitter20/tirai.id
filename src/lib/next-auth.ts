@@ -9,6 +9,7 @@ import { compareHash } from "@/utils/encryption";
 import type { DefaultJWT } from "next-auth/jwt";
 
 import prisma from "./prisma";
+import { Role } from "@prisma/client";
 
 declare module "next-auth" {
   /**
@@ -17,8 +18,7 @@ declare module "next-auth" {
   interface Session {
     user?: {
       id: string;
-      // TODO: Change this to the actual role of user in your app
-      role: "GUEST" | "ADMIN";
+      role: Role;
       name: string;
       email: string;
     };
@@ -29,14 +29,12 @@ declare module "next-auth/jwt" {
   /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
   interface JWT extends DefaultJWT {
     id: string;
-    // TODO: Change this to the actual role of user in your app
-    role: "GUEST" | "ADMIN";
+    role: Role;
     name: string;
     email: string;
   }
 }
 
-// TODO: Change the logic of authentication according to your app needs
 export const authOptions: AuthOptions = {
   theme: {
     colorScheme: "dark",
@@ -71,25 +69,26 @@ export const authOptions: AuthOptions = {
 
           const isPasswordCorrect = compareHash(
             credentials?.password as string,
-            user.password
+            user.password,
           );
 
           if (!isPasswordCorrect) return null;
 
           const userPayload = {
             id: user.id,
-            role: user.role,
             name: user.name,
             email: user.email,
+            role: user.role,
           };
 
           return userPayload;
         } catch (e) {
-          console.error(e);
+          console.error("Authorization Error:", e);
           return null;
         }
       },
     }),
+    // TODO: Work on Google sign-in provider
     // GoogleProvider({
     //   clientId: process.env.GOOGLE_CLIENT_ID,
     //   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -98,38 +97,45 @@ export const authOptions: AuthOptions = {
   ],
   callbacks: {
     async redirect({ url, baseUrl }) {
-      const redirectUrl = url.startsWith("/")
-        ? new URL(url, baseUrl).toString()
-        : url;
-      return redirectUrl;
+      return url.startsWith("/") ? new URL(url, baseUrl).toString() : url;
     },
     async signIn({ user }) {
-      if (user.email) {
-        const findUser = await prisma.user.findUnique({
-          where: { email: user.email },
-        });
-        if (!findUser) {
+      if (!user.email) return false;
+
+      const existingUser = await prisma.user.findUnique({
+        where: { email: user.email },
+      });
+
+      if (!existingUser) {
+        try {
           await prisma.user.create({
             data: {
               email: user.email,
-              name: user.name || "",
-              verified: true,
+              name: user.name || user.email.split("@")[0],
+              role: "CUSTOMER",
+              is_verified: true,
             },
           });
+        } catch (error) {
+          console.error("Error creating user:", error);
+          return false;
         }
       }
 
       return true;
     },
     async jwt({ token, user }) {
-      if (user?.email) {
-        const findUser = await prisma.user.findUnique({
-          where: { email: user.email },
+      if (user) {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email! },
         });
-        if (!findUser) return token;
-        token.id = findUser?.id;
-        token.role = findUser?.role;
+
+        if (!existingUser) return token;
+
+        token.id = existingUser.id;
+        token.role = existingUser?.role;
       }
+
       return token;
     },
     async session({ session, token }) {
@@ -137,7 +143,7 @@ export const authOptions: AuthOptions = {
         const findUser = await prisma.user.findUnique({
           where: { id: token.id },
         });
-        session.user.role = findUser?.role || "GUEST";
+        session.user.role = findUser?.role || "CUSTOMER";
         session.user.name = findUser?.name as string;
         session.user.email = findUser?.email as string;
         session.user.id = findUser?.id as string;
