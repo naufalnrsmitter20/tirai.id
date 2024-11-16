@@ -93,6 +93,7 @@ model Article {
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
   is_published Boolean  @default(false)
+  views        Int      @default(0)
 
   author    User   @relation(fields: [author_id], references: [id])
   author_id String
