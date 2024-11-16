@@ -11,7 +11,7 @@ import { Article } from "@prisma/client";
 import { uploadImageCloudinary, deleteImageCloudinary } from "./fileUploader";
 import { ActionResponse, ActionResponses } from "@/lib/actions";
 
-export async function articleUpsert({
+export async function upsertArticle({
   data,
   id,
 }: {
