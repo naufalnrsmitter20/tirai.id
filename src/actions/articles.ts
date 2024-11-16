@@ -10,6 +10,7 @@ import {
 import { Article } from "@prisma/client";
 import { uploadImageCloudinary, deleteImageCloudinary } from "./fileUploader";
 import { ActionResponse, ActionResponses } from "@/lib/actions";
+import { Prisma } from "@prisma/client";
 
 export const upsertArticle = async ({
   data,
@@ -123,16 +124,22 @@ export const deleteArticle = async (
 export const getArticles = async ({
   tags,
   order,
+  keyword,
 }: {
   tags?: string[];
   order?: "latest" | "popular";
+  keyword?: string;
 }): Promise<ActionResponse<Article[]>> => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: any = {};
+    const query: Prisma.ArticleWhereInput = {};
     if (tags && tags.length > 0) {
       query.tags = { hasSome: tags };
     }
+
+    if (keyword && keyword.trim() !== "") {
+      query.title = { contains: keyword, mode: "insensitive" };
+    }
+
     const articles = await findArticles(query, order);
     return ActionResponses.success(articles);
   } catch (error) {
