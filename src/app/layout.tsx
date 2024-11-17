@@ -21,16 +21,70 @@ const robots =
 
 // TOOD: Change this metadata
 export const metadata: Metadata = {
-  title: { default: "My App", template: "%s | My App" },
+  title: {
+    default:
+      "Tirai.id - Produsen dan pemasar gorden bermerek terkemuka dengan jangkauan global",
+    template: "%s | Tirai.id",
+  },
   description:
-    "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Sint, porro.",
-  authors: [{ name: "Ahsan Azizan", url: "https://ahsanzizan.xyz/" }],
-  creator: "My Team",
-  publisher: "My Publisher",
+    "Kami menyediakan gorden ready stock dan dalam kemasan, tersedia di pasar modern seperti Giant dan Marco, serta melalui pemasaran MLM Sophie Paris (Sophie Martin). Target kami adalah kalangan menengah modern minimalis, namun tetap terbuka untuk kalangan atas dengan gaya klasik.",
+  authors: [{ name: "MokletDev", url: "https://dev.moklet.org/" }],
+  creator: "MokletDev",
   openGraph: {
     images: `${process.env.URL}/logo-horizontal.png`,
   },
-  keywords: ["my", "app"],
+  keywords: [
+    // Short
+    "gorden",
+    "tirai",
+    "tirai.id",
+    "yumindo",
+    "gorden murah",
+    "yumindo.net",
+    "gorden kantor",
+    "gorden surabaya",
+    "jual gorden murah",
+    "yumindo.co.id",
+    "jual gorden",
+    "jual tirai",
+    "curtain",
+    "classy curtain",
+
+    // Utama (Primary Keywords)
+    "Gorden Ready Stock",
+    "Gordyn dalam kemasan",
+    "Gorden Sophie Martin",
+    "Gorden Sophie Paris",
+    "Jual Gorden Modern Minimalis",
+    "Gorden Pasar Modern",
+    "Gorden Giant dan Marco",
+
+    // Pendukung (Secondary Keywords)
+    "Gorden Minimalis",
+    "Gorden Klasik",
+    "Gorden Murah Berkualitas",
+    "Gorden untuk Rumah Modern",
+    "Jual Gorden Online",
+    "Gorden Eksklusif untuk Ruang Tamu",
+    "Gorden Rumah Minimalis",
+
+    // Long-Tail Keywords
+    "Jual gorden minimalis untuk rumah modern",
+    "Gorden klasik untuk rumah mewah",
+    "Gorden ready stock murah dan berkualitas",
+    "Gorden dalam kemasan di Giant dan Marco",
+    "Pilihan gorden modern minimalis terbaru",
+
+    // Lokal
+    "Gorden Ready Stock Surabaya Malang",
+    "Jual Gorden Minimalis di Surabaya Malang",
+    "Toko Gorden di Surabaya Malang",
+
+    // Brand-Specific Keywords
+    "Gorden Sophie Paris original",
+    "Sophie Martin gordyn collection",
+    "Produk gorden di Sophie Paris",
+  ],
   robots,
 };
 
@@ -51,7 +105,7 @@ export default function RootLayout({
           <GoogleAnalytics gaId={process.env.GA_ID} />
         )}
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
+          className={`${geistSans.variable} ${geistMono.variable} overflow-x-hidden antialiased`}
         >
           <main>{children}</main>
           <Toaster />
