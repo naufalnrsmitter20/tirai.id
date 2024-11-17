@@ -1,16 +1,22 @@
 "use server";
-import { revalidatePath } from "next/cache";
+import { ActionResponse, ActionResponses } from "@/lib/actions";
 import {
   createArticle,
-  updateArticle,
   findArticle,
-  hardDeleteArticle,
   findArticles,
+  hardDeleteArticle,
+  updateArticle,
 } from "@/utils/database/article.query";
+<<<<<<< Updated upstream
 import { Article } from "@prisma/client";
 import { uploadImageCloudinary, deleteImageCloudinary } from "./fileUploader";
 import { ActionResponse, ActionResponses } from "@/lib/actions";
 import { Prisma } from "@prisma/client";
+=======
+import { Article, Prisma } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+import { deleteImageCloudinary, uploadImageCloudinary } from "./fileUploader";
+>>>>>>> Stashed changes
 
 export const upsertArticle = async ({
   data,
@@ -36,9 +42,9 @@ export const upsertArticle = async ({
     let uploadedImage;
     if (image) {
       if (id) {
-        const articleData = await findArticle({ id });
-        if (articleData?.cover_url) {
-          await deleteImageCloudinary(articleData.cover_url);
+        const article = await findArticle({ id });
+        if (article?.cover_url) {
+          await deleteImageCloudinary(article.cover_url);
         }
       }
       const imageBuffer = await image.arrayBuffer();
@@ -62,17 +68,21 @@ export const upsertArticle = async ({
         cover_url: uploadedImage?.data?.url,
         author: { connect: { id: author_id } },
       });
-    } else {
-      await updateArticle(
-        { id },
-        {
-          ...articleInput,
-          cover_url: uploadedImage?.data?.url,
-        },
-      );
+
+      revalidatePath("/");
+      return ActionResponses.success({ message: "Article updated" });
     }
+
+    await updateArticle(
+      { id },
+      {
+        ...articleInput,
+        cover_url: uploadedImage?.data?.url,
+      },
+    );
+
     revalidatePath("/");
-    return ActionResponses.success({ message: "Article upserted" });
+    return ActionResponses.success({ message: "Article created" });
   } catch (error) {
     console.log(error);
     return ActionResponses.serverError("Failed to upsert article");
@@ -96,13 +106,27 @@ export const getArticleById = async (
   id: string,
 ): Promise<ActionResponse<Article>> => {
   try {
-    const articleData = await findArticle({ id });
-    if (!articleData) {
+    const article = await findArticle({ id });
+    if (!article) {
       return ActionResponses.notFound("Article not found");
     }
-    await updateArticle({ id }, { views: articleData.views + 1 });
+    await updateArticle({ id }, { views: article.views + 1 });
 
-    return ActionResponses.success(articleData);
+    return ActionResponses.success(article);
+  } catch (error) {
+    console.log(error);
+    return ActionResponses.serverError("Failed to get article");
+  }
+};
+
+export const getArticleBySlug = async (slug: string) => {
+  try {
+    const article = await findArticle({ slug });
+    if (!article) {
+      return ActionResponses.notFound(`Article ${slug} is not found`);
+    }
+
+    return ActionResponses.success(article);
   } catch (error) {
     console.log(error);
     return ActionResponses.serverError("Failed to get article");
@@ -113,6 +137,11 @@ export const deleteArticle = async (
   id: string,
 ): Promise<ActionResponse<{ id: string }>> => {
   try {
+    const article = await findArticle({ id });
+    if (!article) {
+      return ActionResponses.notFound(`Article with ${id} is not found`);
+    }
+
     await hardDeleteArticle({ id });
     return ActionResponses.success({ id });
   } catch (error) {
@@ -136,6 +165,7 @@ export const getArticles = async ({
       query.tags = { hasSome: tags };
     }
 
+<<<<<<< Updated upstream
     if (searchQuery && searchQuery.trim() !== "") {
       query.OR = [
         {
@@ -147,6 +177,8 @@ export const getArticles = async ({
       ];
     }
 
+=======
+>>>>>>> Stashed changes
     const articles = await findArticles(query, order);
     return ActionResponses.success(articles);
   } catch (error) {
