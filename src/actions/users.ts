@@ -1,34 +1,41 @@
 "use server";
-import { revalidatePath } from "next/cache";
-import { createUser, findUser, updateUser } from "@/utils/database/user.query";
 import { ActionResponse, ActionResponses } from "@/lib/actions";
+import { createUser, findUser, updateUser } from "@/utils/database/user.query";
 import { encrypt } from "@/utils/encryption";
+import { Prisma } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 
 export const upsertUser = async ({
   data,
-  id,
 }: {
-  data: FormData;
-  id?: string;
+  data: {
+    id?: string;
+    phone_number?: string;
+    name: string;
+    email: string;
+    password: string;
+  };
 }): Promise<ActionResponse<{ message: string }>> => {
+  const { id, name, email, password, phone_number } = data;
+
   try {
-    const name = data.get("name") as string;
-    const email = data.get("email") as string;
-    const password = data.get("password") as string;
-    const phone_number = data.get("phone_number") as string | null;
+    if (!id) {
+      const existingEmail = await findUser({ email });
+      if (existingEmail) {
+        return ActionResponses.badRequest("This email is already in use");
+      }
 
-    const existingEmail = await findUser({ email });
-    if (existingEmail && !id) {
-      return ActionResponses.badRequest("This email is already in use");
-    }
-    if (phone_number && !id) {
-      const existingPhoneNumber = await findUser({ phone_number });
-      if (existingPhoneNumber)
-        return ActionResponses.badRequest("This number is already in use");
+      if (phone_number) {
+        const existingPhone = await findUser({ phone_number });
+        if (existingPhone) {
+          return ActionResponses.badRequest(
+            "This phone number is already in use",
+          );
+        }
+      }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const userInput: any = {
+    const userData: Prisma.UserCreateInput = {
       name,
       email,
       phone_number,
@@ -38,19 +45,22 @@ export const upsertUser = async ({
 
     if (!id) {
       await createUser({
-        ...userInput,
+        ...userData,
       });
-    } else {
-      await updateUser(
-        { id },
-        {
-          ...userInput,
-        },
-      );
+      return ActionResponses.success({
+        message: "User registered successfully",
+      });
     }
 
+    await updateUser(
+      { id },
+      {
+        ...userData,
+      },
+    );
+
     revalidatePath("/");
-    return ActionResponses.success({ message: "User upserted successfully" });
+    return ActionResponses.success({ message: "User updated successfully" });
   } catch (error) {
     console.error(error);
     return ActionResponses.serverError("Failed to upsert user");
