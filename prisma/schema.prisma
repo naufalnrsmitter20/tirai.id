@@ -28,17 +28,28 @@ model Product {
   name        String
   description String
   price       Float
+  material    Material[]
   stock       Int
   category    ProductCategory
   is_custom   Boolean
   slug        String          @unique
   is_public   Boolean         @default(false)
 
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  model          Model[]
   custom_options CustomOption[]
   order_products OrderItem[]
+  customRequest  CustomRequest[]
+}
+
+model Material {
+  id            String          @id @default(uuid())
+  name          String
+  Description   String
+  customRequest CustomRequest[]
+  price         Float
+  product       Product[]
 }
 
 model CustomOption {
@@ -53,6 +64,28 @@ model CustomOption {
   items      OrderItem[]
 
   @@unique([product_id, color, size])
+}
+
+model Model {
+  id            String          @id @default(uuid())
+  model         String
+  Description   String
+  product       Product[]
+  customRequest CustomRequest[]
+}
+
+model CustomRequest {
+  id          String     @id @default(uuid())
+  material    Material[]
+  model       Model[]
+  color       String
+  width       String
+  Height      String
+  Price       Float
+  Description String //bisa berisi model
+  size        String
+  productId   String
+  product     Product    @relation(fields: [productId], references: [id])
 }
 
 model Order {
