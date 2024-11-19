@@ -26,7 +26,7 @@ export const deleteModel = async (where:Prisma.ModelWhereUniqueInput) => {
     return await prisma.model.delete({ where  });
 }
 export const findModel = async (where:Prisma.ModelWhereUniqueInput) => {
-    return await prisma.model.findUnique({ where  });
+    return await prisma.model.findMany({ where, include:{product:true}  });
 }
 
 // material
@@ -40,6 +40,6 @@ export const deleteMaterial = async (where:Prisma.MaterialWhereUniqueInput) => {
     return await prisma.material.delete({ where  });
 }
 export const findMaterial = async (where:Prisma.MaterialWhereUniqueInput) => {
-    return await prisma.material.findUnique({ where  });
+    return await prisma.material.findMany({ where, include: {product:true}  });
 }
 

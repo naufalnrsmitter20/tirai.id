@@ -12,6 +12,7 @@ import {
 } from "@/utils/database/customProduct.query";
 import { revalidatePath } from "next/cache";
 
+// handling user request custom product
 export const addCustomProductByUser = async (
   data: FormData,
 ) => {
@@ -89,6 +90,7 @@ export const deleteCustomProduct = async (id: string) => {
   }
 };
 
+// model
 export const addModel = async (
   id: string | null,
   data: FormData,
@@ -148,6 +150,7 @@ export const deleteModelbyUser = async (id: string) => {
     return ActionResponses.serverError("Failed to delete Product Custom");
   }
 };
+// material
 export const addMaterial = async (
   id: string | null,
   data: FormData,
@@ -193,6 +196,7 @@ export const addMaterial = async (
   }
 };
 
+
 export const deleteMaterialbyUser = async (id: string) => {
   try {
     const deleteMaterials = await deleteMaterial({ id });
@@ -208,3 +212,7 @@ export const deleteMaterialbyUser = async (id: string) => {
     return ActionResponses.serverError("Failed to delete Product Custom");
   }
 };
+
+export const GetMaterials = async()=>{
+  
+}
