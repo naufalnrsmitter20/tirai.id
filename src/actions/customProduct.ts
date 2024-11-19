@@ -14,12 +14,11 @@ import { revalidatePath } from "next/cache";
 
 export const addCustomProductByUser = async (
   data: FormData,
-  model: {model:string, Description:string},
 ) => {
   const width = data.get("width") as string;
   const height = data.get("height") as string;
-  const name_material=data.get("name_material") as string
-  const price_material=parseFloat(data.get("price_material") as string)
+  const Material=data.get("Material") as string
+  const Model=data.get("model") as string
   const Price = parseFloat(data.get("price") as string);
   const size = data.get("size") as string;
   const color = data.get("color") as string;
@@ -30,15 +29,8 @@ export const addCustomProductByUser = async (
       size,
       color,
       Price,
-      model: {
-        create: model
-      },
-      material:{
-        create:{
-          name: name_material,
-          price: price_material,
-        }
-      }
+      Material,
+      Model
     });
     if (!productCustom) {
       return ActionResponses.serverError("Failed to get create Product Custom");

@@ -35,19 +35,18 @@ model Product {
   slug        String          @unique
   is_public   Boolean         @default(false)
 
-  created_at     DateTime        @default(now())
-  updated_at     DateTime        @updatedAt
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
   model          Model[]
   custom_options CustomOption[]
   order_products OrderItem[]
 }
 
 model Material {
-  id            String          @id @default(uuid())
-  name          String
-  customRequest CustomRequest[]
-  price         Float
-  product       Product[]
+  id      String    @id @default(uuid())
+  name    String
+  price   Float
+  product Product[]
 }
 
 model CustomOption {
@@ -65,22 +64,21 @@ model CustomOption {
 }
 
 model Model {
-  id            String          @id @default(uuid())
-  model         String
-  Description   String
-  product       Product[]
-  customRequest CustomRequest[]
+  id          String    @id @default(uuid())
+  model       String
+  Description String
+  product     Product[]
 }
 
 model CustomRequest {
-  id          String     @id @default(uuid())
-  material    Material[]
-  model       Model[]
-  color       String
-  width       String
-  height      String
-  Price       Float
-  size        String
+  id       String @id @default(uuid())
+  Material String
+  Model    String
+  color    String
+  width    String
+  height   String
+  Price    Float
+  size     String
 }
 
 model Order {
