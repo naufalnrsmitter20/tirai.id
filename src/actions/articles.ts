@@ -32,6 +32,7 @@ export const upsertArticle = async ({
     const content = data.get("content") as string;
     const author_id = data.get("author_id") as string;
     const image = data.get("image") as File;
+    const is_published = data.get("is_published") === "true";
 
     let uploadedImage;
     if (image) {
@@ -50,6 +51,7 @@ export const upsertArticle = async ({
       title,
       slug,
       content,
+      is_published,
     };
 
     if (tags.length > 0) {
@@ -59,7 +61,7 @@ export const upsertArticle = async ({
     if (!id) {
       await createArticle({
         ...articleInput,
-        cover_url: uploadedImage?.data?.url,
+        cover_url: uploadedImage!.data!.url,
         author: { connect: { id: author_id } },
       });
     } else {
@@ -72,10 +74,10 @@ export const upsertArticle = async ({
       );
     }
     revalidatePath("/");
-    return ActionResponses.success({ message: "Article upserted" });
+    return (await ActionResponses()).success({ message: "Article upserted" });
   } catch (error) {
     console.log(error);
-    return ActionResponses.serverError("Failed to upsert article");
+    return (await ActionResponses()).serverError("Failed to update article");
   }
 };
 
@@ -85,10 +87,10 @@ export const updateArticleStatus = async (
 ): Promise<ActionResponse<{ id: string }>> => {
   try {
     await updateArticle({ id }, { is_published });
-    return ActionResponses.success({ id });
+    return (await ActionResponses()).success({ id });
   } catch (error) {
     console.log(error);
-    return ActionResponses.serverError("Failed to update article");
+    return (await ActionResponses()).serverError("Failed to update article");
   }
 };
 
@@ -98,14 +100,14 @@ export const getArticleById = async (
   try {
     const articleData = await findArticle({ id });
     if (!articleData) {
-      return ActionResponses.notFound("Article not found");
+      return (await ActionResponses()).notFound("Article not found");
     }
     await updateArticle({ id }, { views: articleData.views + 1 });
 
-    return ActionResponses.success(articleData);
+    return (await ActionResponses()).success(articleData);
   } catch (error) {
     console.log(error);
-    return ActionResponses.serverError("Failed to get article");
+    return (await ActionResponses()).serverError("Failed to get article");
   }
 };
 
@@ -114,10 +116,10 @@ export const deleteArticle = async (
 ): Promise<ActionResponse<{ id: string }>> => {
   try {
     await hardDeleteArticle({ id });
-    return ActionResponses.success({ id });
+    return (await ActionResponses()).success({ id });
   } catch (error) {
     console.log(error);
-    return ActionResponses.serverError("Failed to delete article");
+    return (await ActionResponses()).serverError("Failed to delete article");
   }
 };
 
@@ -148,9 +150,9 @@ export const getArticles = async ({
     }
 
     const articles = await findArticles(query, order);
-    return ActionResponses.success(articles);
+    return (await ActionResponses()).success(articles);
   } catch (error) {
     console.error(error);
-    return ActionResponses.serverError("Failed to get articles");
+    return (await ActionResponses()).serverError("Failed to get articles");
   }
 };
