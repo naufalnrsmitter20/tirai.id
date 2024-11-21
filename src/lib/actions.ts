@@ -17,13 +17,13 @@ export type ActionError = {
   field?: string;
 };
 
-export async function createError(
+export const createError = async (
   code: ErrorCodeType,
   message: string,
   field?: string,
-): Promise<ActionError> {
+): Promise<ActionError> => {
   return { code, message, field };
-}
+};
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ActionResponse<T = any> = {
   success: boolean;
@@ -31,7 +31,7 @@ export type ActionResponse<T = any> = {
   error?: ActionError;
 };
 
-export async function ActionResponses() {
+export const ActionResponses = async () => {
   return {
     async success<T>(data: T): Promise<ActionResponse<T>> {
       return {
@@ -77,4 +77,4 @@ export async function ActionResponses() {
       };
     },
   };
-}
+};
