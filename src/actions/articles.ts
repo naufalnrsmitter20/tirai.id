@@ -7,16 +7,9 @@ import {
   hardDeleteArticle,
   updateArticle,
 } from "@/utils/database/article.query";
-<<<<<<< Updated upstream
-import { Article } from "@prisma/client";
 import { uploadImageCloudinary, deleteImageCloudinary } from "./fileUploader";
-import { ActionResponse, ActionResponses } from "@/lib/actions";
-import { Prisma } from "@prisma/client";
-=======
 import { Article, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { deleteImageCloudinary, uploadImageCloudinary } from "./fileUploader";
->>>>>>> Stashed changes
 
 export const upsertArticle = async ({
   data,
@@ -72,7 +65,7 @@ export const upsertArticle = async ({
       });
 
       revalidatePath("/");
-      return ActionResponses.success({ message: "Article updated" });
+      return (await ActionResponses()).success({ message: "Article updated" });
     }
 
     await updateArticle(
@@ -112,13 +105,12 @@ export const getArticleById = async (
     if (!articleData) {
       return (await ActionResponses()).notFound("Article not found");
     }
-    await updateArticle({ id }, { views: article.views + 1 });
+    await updateArticle({ id }, { views: articleData.views + 1 });
 
     return (await ActionResponses()).success(articleData);
-    return ActionResponses.success(article);
   } catch (error) {
     console.log(error);
-    return ActionResponses.serverError("Failed to get article");
+    return (await ActionResponses()).serverError("Failed to get article");
   }
 };
 
@@ -126,10 +118,10 @@ export const getArticleBySlug = async (slug: string) => {
   try {
     const article = await findArticle({ slug });
     if (!article) {
-      return ActionResponses.notFound(`Article ${slug} is not found`);
+      return (await ActionResponses()).notFound(`Article ${slug} is not found`);
     }
 
-    return ActionResponses.success(article);
+    return (await ActionResponses()).success(article);
   } catch (error) {
     console.log(error);
     return (await ActionResponses()).serverError("Failed to get article");
@@ -142,7 +134,9 @@ export const deleteArticle = async (
   try {
     const article = await findArticle({ id });
     if (!article) {
-      return ActionResponses.notFound(`Article with ${id} is not found`);
+      return (await ActionResponses()).notFound(
+        `Article with ${id} is not found`,
+      );
     }
 
     await hardDeleteArticle({ id });
@@ -168,7 +162,6 @@ export const getArticles = async ({
       query.tags = { hasSome: tags };
     }
 
-<<<<<<< Updated upstream
     if (searchQuery && searchQuery.trim() !== "") {
       query.OR = [
         {
@@ -180,8 +173,6 @@ export const getArticles = async ({
       ];
     }
 
-=======
->>>>>>> Stashed changes
     const articles = await findArticles(query, order);
     return (await ActionResponses()).success(articles);
   } catch (error) {
