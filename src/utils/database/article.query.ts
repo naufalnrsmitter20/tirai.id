@@ -17,11 +17,29 @@ export const findArticles = async (
         : sort === "popular"
           ? { views: "desc" }
           : undefined,
+    include: {
+      author: {
+        select: {
+          name: true,
+          role: true,
+        },
+      },
+    },
   });
 };
 
 export const findArticle = async (where: Prisma.ArticleWhereUniqueInput) => {
-  return await prisma.article.findUnique({ where });
+  return await prisma.article.findUnique({
+    where,
+    include: {
+      author: {
+        select: {
+          name: true,
+          role: true,
+        },
+      },
+    },
+  });
 };
 
 export const updateArticle = async (

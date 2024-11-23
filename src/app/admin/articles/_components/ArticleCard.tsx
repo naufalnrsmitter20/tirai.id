@@ -1,5 +1,5 @@
 "use client";
-import { CalendarIcon, HashIcon, LinkIcon } from "lucide-react";
+import { CalendarIcon, HashIcon, LinkIcon, User } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Role } from "@prisma/client";
 
 interface ArticleCardProps {
   title: string;
@@ -17,6 +18,8 @@ interface ArticleCardProps {
   tags?: string[];
   createdAt: string;
   slug: string;
+  author: string;
+  author_role: Role;
 }
 
 export default function ArticleCard({
@@ -25,9 +28,11 @@ export default function ArticleCard({
   tags,
   createdAt,
   slug,
+  author,
+  author_role,
 }: ArticleCardProps) {
   return (
-    <Card className="w-full max-w-[580px]">
+    <Card className="w-full max-w-[595px]">
       <CardHeader>
         <CardTitle className="text-xl sm:text-2xl">{title}</CardTitle>
       </CardHeader>
@@ -59,6 +64,10 @@ export default function ArticleCard({
         <div className="flex items-center text-xs text-muted-foreground sm:text-sm">
           <LinkIcon className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
           Slug: {slug}
+        </div>
+        <div className="flex items-center text-xs text-muted-foreground sm:text-sm">
+          <User className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+          Written By: {author} - {author_role}
         </div>
       </CardContent>
       <CardFooter className="flex justify-end">

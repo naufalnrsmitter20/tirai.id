@@ -7,7 +7,7 @@ import {
   hardDeleteArticle,
   findArticles,
 } from "@/utils/database/article.query";
-import { Article } from "@prisma/client";
+import { ArticlesWithUser } from "@/types/entityRelations";
 import { uploadImageCloudinary, deleteImageCloudinary } from "./fileUploader";
 import { ActionResponse, ActionResponses } from "@/lib/actions";
 import { Prisma } from "@prisma/client";
@@ -96,7 +96,7 @@ export const updateArticleStatus = async (
 
 export const getArticleById = async (
   id: string,
-): Promise<ActionResponse<Article>> => {
+): Promise<ActionResponse<ArticlesWithUser>> => {
   try {
     const articleData = await findArticle({ id });
     if (!articleData) {
@@ -131,7 +131,7 @@ export const getArticles = async ({
   tags?: string[];
   order?: "latest" | "popular";
   searchQuery?: string;
-}): Promise<ActionResponse<Article[]>> => {
+}): Promise<ActionResponse<ArticlesWithUser[]>> => {
   try {
     const query: Prisma.ArticleWhereInput = {};
     if (tags && tags.length > 0) {
