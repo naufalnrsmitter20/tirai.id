@@ -12,28 +12,23 @@ import {
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
 
 interface SortFormValues {
-  sort: "latest" | "popular";
-  status: "all" | "published" | "archived";
+  sort: "latest" | "popular" | "";
+  status: "all" | "published" | "archived" | "";
 }
 
 export function SearchSelector({
   searchTerm,
   setSort,
   setStatus,
-  handleSearch,
 }: {
   searchTerm: SortFormValues;
   setSort: (sort: SortFormValues["sort"]) => void;
   setStatus: (sort: SortFormValues["status"]) => void;
-  handleSearch: (
-    sort?: SortFormValues["sort"],
-    status?: SortFormValues["status"],
-  ) => void;
 }) {
   const form = useForm<SortFormValues>({
     defaultValues: {
-      sort: searchTerm.sort || "latest",
-      status: searchTerm.status || "all",
+      sort: searchTerm.sort || "",
+      status: searchTerm.status || "",
     },
   });
 
@@ -42,7 +37,6 @@ export function SearchSelector({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          handleSearch();
         }}
         className="flex w-full max-w-[400px] items-center space-x-2"
       >
@@ -56,7 +50,6 @@ export function SearchSelector({
                   const sortValue = value as SortFormValues["sort"];
                   field.onChange(sortValue);
                   setSort(sortValue);
-                  handleSearch(sortValue, searchTerm.status);
                 }}
                 value={field.value}
               >
@@ -86,13 +79,12 @@ export function SearchSelector({
                   const statusValue = value as SortFormValues["status"];
                   setStatus(statusValue);
                   field.onChange(value);
-                  handleSearch(searchTerm.sort, statusValue);
                 }}
                 defaultValue={field.value}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Sort by" />
+                    <SelectValue placeholder="Status" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

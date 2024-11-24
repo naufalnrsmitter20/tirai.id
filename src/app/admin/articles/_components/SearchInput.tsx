@@ -14,12 +14,10 @@ interface SearchInputProps {
 
 export function SearchInput({
   searchTerm,
-  handleSearch,
   setTitle,
   setTags,
 }: {
   searchTerm: SearchInputProps;
-  handleSearch: () => void;
   setTitle: (title: string) => void;
   setTags: (tags: string) => void;
 }) {
@@ -35,7 +33,6 @@ export function SearchInput({
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          handleSearch();
         }}
         className="flex w-full max-w-sm items-center space-x-2"
       >

@@ -9,6 +9,9 @@ export default async function page({
     title: string;
     tags: string;
     sort: "latest" | "popular";
+    status: "all" | "published" | "archived";
+    start: Date;
+    end: Date;
   }>;
 }) {
   const searchParams = await searchParamsPromise;
@@ -16,6 +19,14 @@ export default async function page({
     searchQuery: searchParams.title,
     tags: searchParams.tags,
     order: searchParams.sort,
+    status:
+      searchParams.status === "published"
+        ? true
+        : searchParams.status === "archived"
+          ? false
+          : undefined,
+    startDate: searchParams.start,
+    endDate: searchParams.end,
   });
   const articles: ArticlesWithUser[] = response.data ?? [];
   return (

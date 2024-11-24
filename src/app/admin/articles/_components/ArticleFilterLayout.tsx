@@ -3,13 +3,19 @@ import { SearchInput } from "./SearchInput";
 import { SearchSelector } from "./SearchSelector";
 import { useRouter } from "next/navigation";
 import { DateRangePicker } from "./DateRangePicker";
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { DateRange } from "react-day-picker";
+import { useState, useEffect } from "react";
+
 interface ArticleFilterLayoutProps {
   title: string;
   tags: string;
-  sort: "latest" | "popular";
-  status: "all" | "published" | "archived";
+  sort: "latest" | "popular" | "";
+  status: "all" | "published" | "archived" | "";
+  start: Date;
+  end: Date;
 }
+
 export default function ArticleFilterLayout({
   searchData,
 }: {
@@ -19,10 +25,14 @@ export default function ArticleFilterLayout({
   const [searchTags, setSearchTags] = useState(searchData.tags);
   const [searchSort, setSearchSort] = useState(searchData.sort);
   const [searchStatus, setSearchStatus] = useState(searchData.status);
+  const [date, setDate] = useState<DateRange | undefined>({
+    from: searchData.start,
+    to: searchData.end,
+  });
 
   const router = useRouter();
 
-  function handleSearch() {
+  useEffect(() => {
     const params: URLSearchParams = new URLSearchParams();
     if (searchTitle) {
       const trimmedSearch = searchTitle.trim();
@@ -38,47 +48,39 @@ export default function ArticleFilterLayout({
     if (searchStatus) {
       params.set("status", searchStatus);
     }
+    if (date?.from) {
+      const formattedStartDate = new Date(date.from).toISOString();
+      params.set("start", formattedStartDate);
+    }
+    if (date?.to) {
+      const formattedEndDate = new Date(date.to).toISOString();
+      params.set("end", formattedEndDate);
+    }
     router.push(`?${params.toString()}`);
-  }
+  }, [searchTitle, searchTags, searchSort, searchStatus, router, date]);
 
-  function handleSearchSelector(
-    sort?: ArticleFilterLayoutProps["sort"],
-    status?: ArticleFilterLayoutProps["status"],
-  ) {
-    const params: URLSearchParams = new URLSearchParams();
-    if (searchTitle) {
-      const trimmedSearch = searchTitle.trim();
-      params.set("title", trimmedSearch);
-    }
-    if (searchTags) {
-      const trimmedSearch = searchTags.trim();
-      params.set("tags", trimmedSearch);
-    }
-    if (sort) {
-      const newSort = sort;
-      setSearchSort(newSort);
-      params.set("sort", newSort);
-    }
-    if (status) {
-      const newStatus = status;
-      setSearchStatus(newStatus);
-      params.set("status", newStatus);
-    }
-    router.push(`?${params.toString()}`);
+  function clearFilters() {
+    setSearchTitle("");
+    setSearchTags("");
+    setSearchSort("");
+    setSearchStatus("");
+    setDate(undefined);
+    router.push("?");
   }
 
   return (
-    <div className="flex w-full flex-row space-x-2">
-      <DateRangePicker />
+    <div className="flex w-full flex-row flex-wrap gap-2">
+      <Button variant="outline" onClick={clearFilters}>
+        Clear Filters
+      </Button>
+      <DateRangePicker date={date} setDate={setDate} />
       <SearchSelector
         searchTerm={{ sort: searchSort, status: searchStatus }}
         setSort={setSearchSort}
         setStatus={setSearchStatus}
-        handleSearch={handleSearchSelector}
       />
       <SearchInput
         searchTerm={{ title: searchTitle, tags: searchTags }}
-        handleSearch={handleSearch}
         setTags={setSearchTags}
         setTitle={setSearchTitle}
       />

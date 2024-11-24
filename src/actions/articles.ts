@@ -127,10 +127,16 @@ export const getArticles = async ({
   tags,
   order,
   searchQuery,
+  status,
+  startDate,
+  endDate,
 }: {
   tags?: string;
   order?: "latest" | "popular";
   searchQuery?: string;
+  status?: boolean;
+  startDate?: Date;
+  endDate?: Date;
 }): Promise<ActionResponse<ArticlesWithUser[]>> => {
   try {
     const query: Prisma.ArticleWhereInput = {};
@@ -152,7 +158,13 @@ export const getArticles = async ({
       ];
     }
 
-    const articles = await findArticles(query, order);
+    const articles = await findArticles(
+      query,
+      order,
+      status,
+      startDate,
+      endDate,
+    );
     return (await ActionResponses()).success(articles);
   } catch (error) {
     console.error(error);
