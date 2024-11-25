@@ -1,111 +1,74 @@
+import { Body3, Display } from "@/components/ui/text";
 import Image from "next/image";
-// import prisma from "@/lib/prisma";
 
-/*
-  You can call this `getPosts` function in the page component
-*/
+type NavItem = {
+  title: string;
+  href: string;
+};
 
-// async function getPosts() {
-//   const posts = await prisma.post.findMany({});
-//   return posts;
-// }
+const navItems: NavItem[] = [
+  { title: "Beranda", href: "/" },
+  { title: "Produk", href: "#custom" },
+  { title: "Tentang Kami", href: "/about" },
+  { title: "Kain", href: "#fabric" },
+  { title: "Testimoni", href: "#testimony" },
+];
 
 export default function Home() {
   return (
-    <div className="grid min-h-screen grid-rows-[20px_1fr_20px] items-center justify-items-center gap-16 p-8 pb-20 font-[family-name:var(--font-geist-sans)] sm:p-20">
-      <main className="row-start-2 flex flex-col items-center gap-8 sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-center font-[family-name:var(--font-geist-mono)] text-sm sm:text-left">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="rounded bg-black/[.05] px-1 py-0.5 font-semibold dark:bg-white/[.06]">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <a
-            className="flex h-10 items-center justify-center gap-2 rounded-full border border-solid border-transparent bg-foreground px-4 text-sm text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] sm:h-12 sm:px-5 sm:text-base"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+    <>
+      <nav className="fixed z-[999] w-full bg-white">
+        <div className="mx-auto max-w-screen-xl"></div>
+      </nav>
+      <main className="mx-auto min-h-screen w-full max-w-screen-xl px-6 pt-[5.375rem] md:px-12">
+        <section id="hero" className="mx-auto w-full py-[5.125rem]">
+          <div className="relative h-[582px] overflow-hidden rounded-[1.25rem]">
             <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+              src={"/assets/hero.png"}
+              width={1440}
+              height={582}
+              alt="Hero Image"
+              className="h-full w-full object-cover"
             />
-            Deploy now
-          </a>
-          <a
-            className="flex h-10 items-center justify-center rounded-full border border-solid border-black/[.08] px-4 text-sm transition-colors hover:border-transparent hover:bg-[#f2f2f2] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] sm:h-12 sm:min-w-44 sm:px-5 sm:text-base"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+            <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-[44%]">
+              <div className="flex flex-col items-center px-6 py-[7.375rem] text-center sm:px-12 md:px-[8.625rem]">
+                <div className="flex items-center gap-2">
+                  <svg
+                    width="25"
+                    height="24"
+                    viewBox="0 0 25 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10.75 19.9V4.1C10.75 2.6 10.11 2 8.52 2H4.48C2.89 2 2.25 2.6 2.25 4.1V19.9C2.25 21.4 2.89 22 4.48 22H8.52C10.11 22 10.75 21.4 10.75 19.9Z"
+                      stroke="white"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M22.25 19.9V4.1C22.25 2.6 21.61 2 20.02 2H15.98C14.39 2 13.75 2.6 13.75 4.1V19.9C13.75 21.4 14.39 22 15.98 22H20.02C21.61 22 22.25 21.4 22.25 19.9Z"
+                      stroke="white"
+                      strokeWidth="1.2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <Body3>Tirai Berkualitas Global</Body3>
+                </div>
+                <Display>
+                  Pilihan Tirai Terbaik untuk Rumah, Kantor, dan Bisnis Anda
+                </Display>
+                <Body3>
+                  Hadirkan suasana baru dengan gorden terbaik, dirancang untuk
+                  kenyamanan dan gaya modern Anda.
+                </Body3>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex flex-wrap items-center justify-center gap-6">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    </>
   );
 }
