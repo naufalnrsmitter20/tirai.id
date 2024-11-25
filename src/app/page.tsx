@@ -1,12 +1,16 @@
+"use client";
+
 import { Body3, Display } from "@/components/ui/text";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useState } from "react";
 
 type NavItem = {
   title: string;
   href: string;
 };
 
-const navItems: NavItem[] = [
+const NAV_ITEMS: NavItem[] = [
   { title: "Beranda", href: "/" },
   { title: "Produk", href: "#custom" },
   { title: "Tentang Kami", href: "/about" },
@@ -14,7 +18,15 @@ const navItems: NavItem[] = [
   { title: "Testimoni", href: "#testimony" },
 ];
 
+const CAROUSEL_IMAGES: string[] = [
+  "/assets/hero.png",
+  "/assets/hero.png",
+  "/assets/hero.png",
+];
+
 export default function Home() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
   return (
     <>
       <nav className="fixed z-[999] w-full bg-white">
@@ -23,16 +35,27 @@ export default function Home() {
       <main className="mx-auto min-h-screen w-full max-w-screen-xl px-6 pt-[5.375rem] md:px-12">
         <section id="hero" className="mx-auto w-full py-[5.125rem]">
           <div className="relative h-[582px] overflow-hidden rounded-[1.25rem]">
-            <Image
-              src={"/assets/hero.png"}
-              width={1440}
-              height={582}
-              alt="Hero Image"
-              className="h-full w-full object-cover"
-            />
-            <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-[44%]">
+            <div
+              className="flex h-full w-full transition-transform duration-300"
+              style={{
+                transform: `translateX(-${currentSlide * 100}%)`,
+              }}
+            >
+              {CAROUSEL_IMAGES.map((src, index) => (
+                <Image
+                  key={index}
+                  src={src}
+                  width={1440}
+                  height={582}
+                  alt={`Hero Image ${index + 1}`}
+                  className="h-full w-full flex-shrink-0 object-cover"
+                  unoptimized
+                />
+              ))}
+            </div>
+            <div className="absolute left-0 top-0 flex h-full w-full items-center justify-center bg-black bg-opacity-[48%]">
               <div className="flex flex-col items-center px-6 py-[7.375rem] text-center sm:px-12 md:px-[8.625rem]">
-                <div className="flex items-center gap-2">
+                <div className="mb-3 flex items-center gap-2">
                   <svg
                     width="25"
                     height="24"
@@ -57,13 +80,32 @@ export default function Home() {
                   </svg>
                   <Body3>Tirai Berkualitas Global</Body3>
                 </div>
-                <Display>
+                <Display className="mb-6">
                   Pilihan Tirai Terbaik untuk Rumah, Kantor, dan Bisnis Anda
                 </Display>
-                <Body3>
+                <Body3 className="mb-12">
                   Hadirkan suasana baru dengan gorden terbaik, dirancang untuk
                   kenyamanan dan gaya modern Anda.
                 </Body3>
+                <div className="flex w-fit items-center gap-x-2">
+                  {Array.from({ length: CAROUSEL_IMAGES.length }).map(
+                    (_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setCurrentSlide(index)}
+                      >
+                        <div
+                          className={cn(
+                            "rounded-full bg-white transition-all duration-300",
+                            currentSlide === index
+                              ? "size-[0.625rem] bg-opacity-100"
+                              : "size-2 bg-opacity-[28%]",
+                          )}
+                        ></div>
+                      </button>
+                    ),
+                  )}
+                </div>
               </div>
             </div>
           </div>
