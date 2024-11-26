@@ -29,8 +29,8 @@ export default function Register() {
       <Image
         src={"/assets/login.png"}
         alt="Registration Image"
-        width={402}
-        height={464}
+        width={502}
+        height={648}
         className="pointer-events-none hidden md:block"
       />
     </section>
