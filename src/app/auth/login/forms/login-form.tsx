@@ -67,7 +67,12 @@ export const LoginForm: FC = () => {
 
   return (
     <div className="flex flex-col">
-      <Button variant={"outline"} className="mb-7 w-full" size={"lg"}>
+      <Button
+        variant={"outline"}
+        className="mb-7 w-full"
+        size={"lg"}
+        onClick={() => signIn("google", { callbackUrl: "/" })}
+      >
         <svg
           width="24"
           height="24"
@@ -141,12 +146,7 @@ export const LoginForm: FC = () => {
               </Link>
             </div>
           </div>
-          <Button
-            disabled={loading}
-            type="submit"
-            variant={"default"}
-            className="w-full"
-          >
+          <Button disabled={loading} type="submit" className="w-full">
             Masuk
           </Button>
         </form>
