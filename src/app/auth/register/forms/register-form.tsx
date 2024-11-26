@@ -64,7 +64,7 @@ export const RegisterForm: FC = () => {
 
     toast.success("Berhasil Mendaftar!", { id: loadingToast });
     setLoading(false);
-    return router.push("/");
+    return router.push(`/auth/confirm-email?email=${fields.email}`);
   });
 
   return (
