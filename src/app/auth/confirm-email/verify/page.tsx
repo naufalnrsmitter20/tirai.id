@@ -31,8 +31,8 @@ export default async function VerifyEmail({
       </div>
       <div className="flex flex-col">
         <H2 className="mb-3">Cek Email Anda</H2>
-        <Body3 className="mb-[3.375rem] text-neutral-500">
-          Berhasil memverifikasi akun dengan email
+        <Body3 className="mb-[3.375rem] text-center text-neutral-500">
+          Berhasil memverifikasi akun dengan email <br />
           <span className="font-medium text-black">{userWithToken.email}</span>
         </Body3>
         <Link
