@@ -3,7 +3,7 @@ import {
   getServerSession as nextAuthGetServerSession,
 } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import GoogleProvider from "next-auth/providers/google"
+import GoogleProvider from "next-auth/providers/google";
 
 import { compareHash } from "@/utils/encryption";
 
@@ -89,7 +89,6 @@ export const authOptions: AuthOptions = {
         }
       },
     }),
-    // TODO: Work on Google sign-in provider
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -107,6 +106,7 @@ export const authOptions: AuthOptions = {
         where: { email: user.email },
       });
 
+      // If the user does not exist, then it's a Google sign-in
       if (!existingUser) {
         try {
           await prisma.user.create({

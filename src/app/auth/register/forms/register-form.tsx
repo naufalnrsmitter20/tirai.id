@@ -1,7 +1,7 @@
 "use client";
 
-import { checkVerifiedStatus } from "@/actions/auth/login";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { registerAccount } from "@/actions/auth/register";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,24 +14,25 @@ import { Input } from "@/components/ui/input";
 import { Body3 } from "@/components/ui/text";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { signIn } from "next-auth/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const loginSchema = z.object({
+const registerSchema = z.object({
+  name: z.string().min(1, "Nama harus diisi"),
   email: z
     .string()
-    .min(1, { message: "Email harus diisi!" })
-    .email("Email tidak valid!"),
-  password: z.string().min(1, "Password harus diisi!"),
+    .min(1, { message: "Email harus diisi" })
+    .email("email tidak valid"),
+  password: z.string().min(8, "Password minimal 8 karakter"),
+  confirm_password: z.string(),
 });
 
-export const LoginForm: FC = () => {
+export const RegisterForm: FC = () => {
   const form = useZodForm({
-    schema: loginSchema,
-    defaultValues: { email: "", password: "" },
+    schema: registerSchema,
+    defaultValues: { email: "", password: "", name: "", confirm_password: "" },
   });
   const [loading, setLoading] = useState(false);
 
@@ -44,43 +45,24 @@ export const LoginForm: FC = () => {
 
     const loadingToast = toast.loading("Loading...");
 
-    const verificationStatus = await checkVerifiedStatus(
-      fields.email,
-      fields.password,
-    );
-
-    if (verificationStatus.error) {
+    if (fields.confirm_password !== fields.password) {
       setLoading(false);
-      return toast.error(verificationStatus.error.message, {
+      toast.error("Konfirmasi password dan password harus sama", {
         id: loadingToast,
+      });
+      return form.setError("confirm_password", {
+        message: "Password tidak sama",
       });
     }
 
-    if (verificationStatus.data?.is_verified === false) {
+    const registerResult = await registerAccount(fields);
+
+    if (registerResult.error) {
       setLoading(false);
-      return toast.error("Verifikasi email anda terlebih dahulu", {
-        id: loadingToast,
-      });
+      return toast.error(registerResult.error.message, { id: loadingToast });
     }
 
-    const loginResult = await signIn("credentials", {
-      redirect: false,
-      callbackUrl: "/",
-      email: fields.email,
-      password: fields.password,
-    });
-
-    if (loginResult?.error) {
-      setLoading(false);
-      return toast.error(
-        loginResult.error === "CredentialsSignin"
-          ? "Email/password anda salah!"
-          : "Terjadi kesalahan",
-        { id: loadingToast },
-      );
-    }
-
-    toast.success("Berhasil Masuk!", { id: loadingToast });
+    toast.success("Berhasil Mendaftar!", { id: loadingToast });
     setLoading(false);
     return router.push("/");
   });
@@ -117,7 +99,7 @@ export const LoginForm: FC = () => {
             fill="#1976D2"
           />
         </svg>
-        <Body3>Masuk dengan Google</Body3>
+        <Body3>Daftar dengan Google</Body3>
       </Button>
       <div className="mb-7 flex w-full items-center justify-between">
         <div className="h-[1px] w-[30%] bg-neutral-100"></div>
@@ -127,6 +109,19 @@ export const LoginForm: FC = () => {
       <Form {...form}>
         <form onSubmit={onSubmit}>
           <div className="mb-[3.375rem] flex w-full flex-col gap-y-[1.375rem]">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="flex flex-col space-y-2">
+                  <FormLabel htmlFor="name">Nama</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Masukkan nama asli" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="email"
@@ -145,7 +140,7 @@ export const LoginForm: FC = () => {
               name="password"
               render={({ field }) => (
                 <FormItem className="flex flex-col space-y-2">
-                  <FormLabel htmlFor="password">Password</FormLabel>
+                  <FormLabel htmlFor="password">Kata Sandi</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
@@ -157,17 +152,26 @@ export const LoginForm: FC = () => {
                 </FormItem>
               )}
             />
-            <div className="flex justify-end">
-              <Link
-                href="#"
-                className={buttonVariants({ variant: "link", size: "link" })}
-              >
-                Lupa kata sandi?
-              </Link>
-            </div>
+            <FormField
+              control={form.control}
+              name="confirm_password"
+              render={({ field }) => (
+                <FormItem className="flex flex-col space-y-2">
+                  <FormLabel htmlFor="password"></FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="password"
+                      placeholder="Konfirmasi kata sandi"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           <Button disabled={loading} type="submit" className="w-full">
-            Masuk
+            Daftar
           </Button>
         </form>
       </Form>

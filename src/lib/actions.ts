@@ -1,12 +1,9 @@
-"use server";
-
 export const ErrorCode = {
   BAD_REQUEST: "BAD_REQUEST",
   UNAUTHORIZED: "UNAUTHORIZED",
   FORBIDDEN: "FORBIDDEN",
   NOT_FOUND: "NOT_FOUND",
   CONFLICT: "CONFLICT",
-
   SERVER_ERROR: "SERVER_ERROR",
 } as const;
 

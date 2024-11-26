@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function Login() {
   return (
-    <section className="py- flex w-full max-w-[1104px] items-center justify-between p-6 sm:p-12">
+    <section className="flex w-full max-w-[1104px] items-center justify-between p-6 sm:p-12">
       <div className="block w-full max-w-full text-black md:max-w-[440px]">
         <H2 className="mb-3">Masuk ke Akun Anda</H2>
         <Body3 className="mb-[3.375rem] text-neutral-500">
@@ -31,7 +31,7 @@ export default function Login() {
         alt="Login Image"
         width={402}
         height={464}
-        className="pointer-events-none hidden lg:block"
+        className="pointer-events-none hidden md:block"
       />
     </section>
   );

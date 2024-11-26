@@ -8,15 +8,16 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
-  name         String
-  email        String   @unique
-  phone_number String?  @unique
-  is_verified  Boolean
-  password     String?
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
-  role         Role     @default(CUSTOMER)
+  id                 String   @id @default(uuid())
+  name               String
+  email              String   @unique
+  phone_number       String?  @unique
+  is_verified        Boolean
+  verification_token String?  @unique
+  password           String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+  role               Role     @default(CUSTOMER)
 
   articles            Article[]
   orders              Order[]
