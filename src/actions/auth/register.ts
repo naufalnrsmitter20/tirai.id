@@ -32,24 +32,26 @@ export const registerAccount = async (
 
     const hashedPassword = encrypt(password);
 
-    const createdUser = await prisma.user.create({
+    const generatedVerificationToken = generateVerificationToken();
+
+    const mailService = new EmailService();
+    await mailService.sendEmail({
+      subject: "Verifikasi email anda untuk Tirai.id",
+      to: email,
+      html: verifyTemplate(
+        name,
+        `${process.env.APP_URL}/auth/verify?token=${generatedVerificationToken}`,
+      ),
+    });
+
+    await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
         is_verified: false,
-        verification_token: generateVerificationToken(),
+        verification_token: generatedVerificationToken,
       },
-    });
-
-    const mailService = new EmailService();
-    await mailService.sendEmail({
-      subject: "Verifikasi email anda untuk Tirai.id",
-      to: createdUser.email,
-      html: verifyTemplate(
-        createdUser.name,
-        `${process.env.APP_URL}/auth/verify?token=${createdUser.verification_token}`,
-      ),
     });
 
     return ActionResponses.success({ name, email });
