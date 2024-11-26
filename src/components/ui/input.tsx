@@ -30,7 +30,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         />
         {type === "password" && (
           <button
-            className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center px-2 text-neutral-400 transition-all hover:text-neutral-500"
+            className="absolute right-3 top-1/2 z-[998] flex -translate-y-1/2 items-center px-2 text-neutral-400 transition-all hover:text-neutral-500"
             type="button"
             onClick={() => setShowPassword(!showPassword)}
           >

@@ -16,5 +16,5 @@ export default withAuth(function middleware(_) {}, {
 });
 
 export const config = {
-  matcher: ["/*"],
+  matcher: ["/"],
 };

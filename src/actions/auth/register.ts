@@ -1,11 +1,9 @@
 "use server";
 
 import { ActionResponse, ActionResponses } from "@/lib/actions";
-import { EmailService } from "@/lib/nodemailer";
 import prisma from "@/lib/prisma";
 import { encrypt } from "@/utils/encryption";
-import { verifyTemplate } from "@/utils/mail-template";
-import { generateVerificationToken } from "@/utils/random-string";
+import { requestVerificationMail } from "../mail";
 
 interface RegisterAccountPayload {
   name: string;
@@ -32,27 +30,20 @@ export const registerAccount = async (
 
     const hashedPassword = encrypt(password);
 
-    const generatedVerificationToken = generateVerificationToken();
-
-    const mailService = new EmailService();
-    await mailService.sendEmail({
-      subject: "Verifikasi email anda untuk Tirai.id",
-      to: email,
-      html: verifyTemplate(
-        name,
-        `${process.env.APP_URL}/auth/verify?token=${generatedVerificationToken}`,
-      ),
-    });
-
-    await prisma.user.create({
+    const createdUser = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
         is_verified: false,
-        verification_token: generatedVerificationToken,
       },
     });
+
+    const sentMail = await requestVerificationMail({ userId: createdUser.id });
+
+    if (!sentMail) {
+      return ActionResponses.serverError("Terjadi kesalahan");
+    }
 
     return ActionResponses.success({ name, email });
   } catch (error) {

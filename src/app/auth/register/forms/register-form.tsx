@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Body3 } from "@/components/ui/text";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next-nprogress-bar";
 import { FC, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";

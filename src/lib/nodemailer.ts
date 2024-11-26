@@ -50,7 +50,7 @@ export class EmailService implements EmailServiceInterface {
     });
   }
 
-  public async sendEmail(options: EmailOptions): Promise<void> {
+  public async sendEmail(options: EmailOptions) {
     const mailOptions = {
       from: options.from || emailConfig.defaultFrom,
       to: options.to,
@@ -61,7 +61,8 @@ export class EmailService implements EmailServiceInterface {
     };
 
     try {
-      await this.transporter.sendMail(mailOptions);
+      const sentMail = await this.transporter.sendMail(mailOptions);
+      return sentMail;
     } catch (error) {
       console.error(`Error sending email to ${options.to}:`, error);
       throw new Error("Failed to send email");

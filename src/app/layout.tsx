@@ -4,6 +4,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata, Viewport } from "next";
 import generalSansFont from "./fonts";
 import "./globals.css";
+import ProgressBarProvider from "@/components/providers/ProgressBarProvider";
 
 const robots =
   process.env.APP_ENV != "production" ? "noindex, nofollow" : "index, follow";
@@ -96,6 +97,7 @@ export default function RootLayout({
           className={`${generalSansFont.className} overflow-x-hidden bg-white antialiased`}
         >
           {children}
+          <ProgressBarProvider />
           <Toaster />
         </body>
       </html>

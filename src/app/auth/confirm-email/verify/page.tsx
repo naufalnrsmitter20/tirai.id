@@ -11,16 +11,17 @@ export default async function VerifyEmail({
 }: {
   searchParams: Promise<{ token?: string }>;
 }) {
-  const { token } = await searchParams;
+  const { token: tokenParam } = await searchParams;
 
-  const userWithToken = await prisma.user.findUnique({
-    where: { verification_token: token },
+  const token = await prisma.token.findUnique({
+    where: { token: tokenParam },
+    select: { user: true },
   });
 
-  if (!userWithToken) return notFound();
+  if (!token || !token.user) return notFound();
 
   await prisma.user.update({
-    where: { id: userWithToken.id },
+    where: { id: token.user.id },
     data: { is_verified: true },
   });
 
@@ -33,7 +34,7 @@ export default async function VerifyEmail({
         <H2 className="mb-3">Cek Email Anda</H2>
         <Body3 className="mb-[3.375rem] text-center text-neutral-500">
           Berhasil memverifikasi akun dengan email <br />
-          <span className="font-medium text-black">{userWithToken.email}</span>
+          <span className="font-medium text-black">{token.user.email}</span>
         </Body3>
         <Link
           href={"/auth/login"}

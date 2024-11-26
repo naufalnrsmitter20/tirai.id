@@ -8,21 +8,34 @@ datasource db {
 }
 
 model User {
-  id                 String   @id @default(uuid())
-  name               String
-  email              String   @unique
-  phone_number       String?  @unique
-  is_verified        Boolean
-  verification_token String?  @unique
-  password           String?
-  created_at         DateTime @default(now())
-  updated_at         DateTime @updatedAt
-  role               Role     @default(CUSTOMER)
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  phone_number String?  @unique
+  is_verified  Boolean
+  password     String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  role         Role     @default(CUSTOMER)
 
-  articles            Article[]
-  orders              Order[]
-  cart                Cart?
-  forgot_password_otp String?
+  articles Article[]
+  orders   Order[]
+  cart     Cart?
+
+  tokens Token[]
+}
+
+model Token {
+  id         String       @id @default(uuid())
+  token      String       @unique
+  last_sent  DateTime?
+  sent_count Int          @default(0)
+  purpose    TokenPurpose
+
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id String @unique
+
+  @@unique([user_id, purpose])
 }
 
 model Product {
@@ -50,7 +63,7 @@ model CustomOption {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  product    Product     @relation(fields: [product_id], references: [id])
+  product    Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
   product_id String
   items      OrderItem[]
 
@@ -65,7 +78,7 @@ model Order {
   total_price Float
   status      OrderStatus
 
-  user     User        @relation(fields: [user_id], references: [id])
+  user     User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id  String
   products OrderItem[]
   payment  Payment?
@@ -76,11 +89,11 @@ model OrderItem {
   id       String @id @default(uuid())
   quantity Int
 
-  product          Product       @relation(fields: [product_id], references: [id])
+  product          Product       @relation(fields: [product_id], references: [id], onDelete: Cascade)
   product_id       String
-  order            Order         @relation(fields: [order_id], references: [id])
+  order            Order         @relation(fields: [order_id], references: [id], onDelete: Cascade)
   order_id         String
-  custom_option    CustomOption? @relation(fields: [custom_option_id], references: [id]) // Jika user menginginkan custom option yang baru
+  custom_option    CustomOption? @relation(fields: [custom_option_id], references: [id], onDelete: Cascade) // Jika user menginginkan custom option yang baru
   custom_option_id String?
 }
 
@@ -96,7 +109,7 @@ model Article {
   is_published Boolean  @default(false)
   views        Int      @default(0)
 
-  author    User   @relation(fields: [author_id], references: [id])
+  author    User   @relation(fields: [author_id], references: [id], onDelete: Cascade)
   author_id String
 }
 
@@ -107,7 +120,7 @@ model Payment {
   created_at     DateTime      @default(now())
   transaction_id String? // ID Transaksi dari payment gateway
 
-  order    Order  @relation(fields: [order_id], references: [id])
+  order    Order  @relation(fields: [order_id], references: [id], onDelete: Cascade)
   order_id String @unique
 }
 
@@ -119,13 +132,13 @@ model Shipment {
   created_at  DateTime       @default(now())
   updated_at  DateTime       @updatedAt
 
-  order    Order  @relation(fields: [order_id], references: [id])
+  order    Order  @relation(fields: [order_id], references: [id], onDelete: Cascade)
   order_id String @unique
 }
 
 model Cart {
   id           String @id @default(uuid())
-  user         User   @relation(fields: [user_id], references: [id])
+  user         User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id      String @unique
   json_content Json
 }
@@ -199,4 +212,9 @@ enum ShipmentStatus {
   SHIPPED
   DELIVERED
   CANCELED
+}
+
+enum TokenPurpose {
+  RESET_PASSWORD
+  EMAIL_VERIFICATION
 }
