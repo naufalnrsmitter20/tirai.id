@@ -4,8 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import Editor from "@/components/editor/advanced-editor";
 import Image from "next/image";
 import {
   Form,
@@ -70,6 +70,8 @@ export default function ArticleForm({
     },
   });
 
+  console.log(form.watch("content"));
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData();
     formData.append("title", values.title);
@@ -89,7 +91,10 @@ export default function ArticleForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="max-w-screen-lg space-y-8"
+      >
         <FormField
           control={form.control}
           name="title"
@@ -146,11 +151,7 @@ export default function ArticleForm({
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Write your article content here"
-                  className="min-h-[200px]"
-                  {...field}
-                />
+                <Editor {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
