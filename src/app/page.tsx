@@ -1,31 +1,28 @@
 "use client";
 
+import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Body3, Display } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { useState } from "react";
-
-type NavItem = {
-  title: string;
-  href: string;
-};
-
-const NAV_ITEMS: NavItem[] = [
-  { title: "Beranda", href: "/" },
-  { title: "Produk", href: "#custom" },
-  { title: "Tentang Kami", href: "/about" },
-  { title: "Kain", href: "#fabric" },
-  { title: "Testimoni", href: "#testimony" },
-];
+import { useEffect, useState } from "react";
 
 const CAROUSEL_IMAGES: string[] = [
-  "/assets/hero.png",
-  "/assets/hero.png",
-  "/assets/hero.png",
-];
+  "/assets/hero/image-3.jpg",
+  "/assets/hero/image-1.jpg",
+  "/assets/hero/image-2.jpg",
+] as const;
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Change current slide every 5 seconds
+  useEffect(() => {
+    const changeSlideInterval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % CAROUSEL_IMAGES.length);
+    }, 5000);
+
+    return () => clearInterval(changeSlideInterval);
+  }, [currentSlide]);
 
   return (
     <>
@@ -33,7 +30,7 @@ export default function Home() {
         <div className="mx-auto max-w-screen-xl"></div>
       </nav>
       <main className="mx-auto min-h-screen w-full max-w-screen-xl px-6 pt-[5.375rem] md:px-12">
-        <section id="hero" className="mx-auto w-full py-[5.125rem]">
+        <SectionContainer id="hero">
           <div className="relative h-[582px] overflow-hidden rounded-[1.25rem]">
             <div
               className="flex h-full w-full transition-transform duration-300"
@@ -49,7 +46,7 @@ export default function Home() {
                   height={582}
                   alt={`Hero Image ${index + 1}`}
                   className="h-full w-full flex-shrink-0 object-cover"
-                  unoptimized
+                  priority
                 />
               ))}
             </div>
@@ -109,7 +106,8 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </SectionContainer>
+        <SectionContainer id="fabrics"></SectionContainer>
       </main>
     </>
   );
