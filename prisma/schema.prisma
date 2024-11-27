@@ -8,19 +8,46 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
+  id           String   @id @default(uuid())
   name         String
+  email        String   @unique
+  phone_number String?  @unique
+  is_verified  Boolean
+  password     String?
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  role         Role     @default(CUSTOMER)
+
+  articles Article[]
+  orders   Order[]
+  cart     Cart?
+
+  tokens Token[]
+}
+
+model Token {
+  id          String       @id @default(uuid())
+  token       String       @unique
+  last_sent   DateTime?
+  sent_count  Int          @default(0)
+  purpose     TokenPurpose
+  expiry_date DateTime
+
+  user         User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id      String    @unique
   email        String    @unique
   phone_number String    @unique
   password     String
   created_at   DateTime  @default(now())
   updated_at   DateTime? @updatedAt
 
-  role                Role      @default(CUSTOMER)
-  articles            Article[]
-  orders              Order[]
-  cart                Cart?
+  role                Role    @default(CUSTOMER)
+  // articles            Article[]
+  // orders              Order[]
+  // cart                Cart?
   forgot_password_otp String?
+
+  @@unique([user_id, purpose])
 }
 
 model Product {
@@ -33,9 +60,8 @@ model Product {
   is_custom   Boolean
   slug        String          @unique
   is_public   Boolean         @default(false)
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  created_at  DateTime        @default(now())
+  updated_at  DateTime        @updatedAt
 
   custom_options CustomOption[]
   order_products OrderItem[]
@@ -43,12 +69,13 @@ model Product {
 
 model CustomOption {
   id         String   @id @default(uuid())
-  size       String?
-  color      String?
+  size       String
+  color      String
+  photo      String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  product    Product     @relation(fields: [product_id], references: [id])
+  product    Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
   product_id String
   items      OrderItem[]
 
@@ -60,41 +87,41 @@ model Order {
   created_at  DateTime    @default(now())
   updated_at  DateTime    @updatedAt
   finished_at DateTime?
+  total_price Float
   status      OrderStatus
 
-  user        User        @relation(fields: [user_id], references: [id])
-  user_id     String
-  products    OrderItem[]
-  total_price Float
-  payment     Payment?
-  shipment    Shipment?
+  user     User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id  String
+  products OrderItem[]
+  payment  Payment?
+  shipment Shipment?
 }
 
 model OrderItem {
   id       String @id @default(uuid())
   quantity Int
 
-  product          Product       @relation(fields: [product_id], references: [id])
+  product          Product       @relation(fields: [product_id], references: [id], onDelete: Cascade)
   product_id       String
-  order            Order         @relation(fields: [order_id], references: [id])
+  order            Order         @relation(fields: [order_id], references: [id], onDelete: Cascade)
   order_id         String
-  custom_option    CustomOption? @relation(fields: [custom_option_id], references: [id]) // Jika user menginginkan custom option yang baru
+  custom_option    CustomOption? @relation(fields: [custom_option_id], references: [id], onDelete: Cascade) // Jika user menginginkan custom option yang baru
   custom_option_id String?
 }
 
 model Article {
-  id           String    @id @default(uuid())
+  id           String   @id @default(uuid())
   title        String
-  slug         String    @unique
+  slug         String   @unique
   tags         String[]
   content      String
   cover_url    String
-  created_at   DateTime  @default(now())
-  updated_at   DateTime?
-  is_published Boolean   @default(false)
-  views        Int       @default(0)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+  is_published Boolean  @default(false)
+  views        Int      @default(0)
 
-  author    User   @relation(fields: [author_id], references: [id])
+  author    User   @relation(fields: [author_id], references: [id], onDelete: Cascade)
   author_id String
 }
 
@@ -105,25 +132,25 @@ model Payment {
   created_at     DateTime      @default(now())
   transaction_id String? // ID Transaksi dari payment gateway
 
-  order    Order  @relation(fields: [order_id], references: [id])
+  order    Order  @relation(fields: [order_id], references: [id], onDelete: Cascade)
   order_id String @unique
 }
 
 model Shipment {
   id          String         @id @default(uuid())
-  carrier     String // Nama pengiri (i.e: JNE, J&T)
+  carrier     String // Nama pengirim (i.e: JNE, J&T)
   tracking_id String? // ID Tracking dari third party
   status      ShipmentStatus
   created_at  DateTime       @default(now())
   updated_at  DateTime       @updatedAt
 
-  order    Order  @relation(fields: [order_id], references: [id])
+  order    Order  @relation(fields: [order_id], references: [id], onDelete: Cascade)
   order_id String @unique
 }
 
 model Cart {
   id           String @id @default(uuid())
-  user         User   @relation(fields: [user_id], references: [id])
+  user         User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id      String @unique
   json_content Json
 }
@@ -136,6 +163,24 @@ model Cart {
 //  productOptionsId: string
 // }
 // ],
+
+model SEO {
+  id                 Int      @id @default(autoincrement())
+  page               String   @unique
+  title              String
+  description        String
+  keywords           String[]
+  canonicalURL       String?
+  ogTitle            String?
+  ogDescription      String?
+  ogImage            String?
+  twitterCard        String? // Summary, Summary_large_image, etc.
+  twitterTitle       String?
+  twitterDescription String?
+  twitterImage       String?
+  updatedAt          DateTime @updatedAt
+  createdAt          DateTime @default(now())
+}
 
 enum Role {
   CUSTOMER
@@ -179,4 +224,9 @@ enum ShipmentStatus {
   SHIPPED
   DELIVERED
   CANCELED
+}
+
+enum TokenPurpose {
+  RESET_PASSWORD
+  EMAIL_VERIFICATION
 }

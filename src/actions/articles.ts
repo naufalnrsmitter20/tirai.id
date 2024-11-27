@@ -18,7 +18,7 @@ export const upsertArticle = async ({
 }: {
   data: FormData;
   id?: string;
-}): Promise<ActionResponse<{ message: string }>> => {
+}): Promise<ActionResponse<string>> => {
   try {
     const title = data.get("title") as string;
     const slug = data.get("slug") as string;
@@ -61,7 +61,7 @@ export const upsertArticle = async ({
     if (!id) {
       await createArticle({
         ...articleInput,
-        cover_url: uploadedImage!.data!.url,
+        cover_url: uploadedImage?.data?.url || null,
         author: { connect: { id: author_id } },
       });
     } else {
@@ -74,10 +74,10 @@ export const upsertArticle = async ({
       );
     }
     revalidatePath("/");
-    return ActionResponses.success({ message: "Article upserted" });
+    return ActionResponses.success("Article upserted");
   } catch (error) {
     console.log(error);
-    return await ActionResponses.serverError("Failed to update article");
+    return ActionResponses.serverError("Failed to update article");
   }
 };
 
@@ -87,7 +87,7 @@ export const updateArticleStatus = async (
 ): Promise<ActionResponse<{ id: string }>> => {
   try {
     await updateArticle({ id }, { is_published });
-    return await ActionResponses.success({ id });
+    return ActionResponses.success({ id });
   } catch (error) {
     console.log(error);
     return ActionResponses.serverError("Failed to update article");
