@@ -74,10 +74,10 @@ export const upsertArticle = async ({
       );
     }
     revalidatePath("/");
-    return (await ActionResponses()).success({ message: "Article upserted" });
+    return ActionResponses.success({ message: "Article upserted" });
   } catch (error) {
     console.log(error);
-    return (await ActionResponses()).serverError("Failed to update article");
+    return await ActionResponses.serverError("Failed to update article");
   }
 };
 
@@ -87,10 +87,10 @@ export const updateArticleStatus = async (
 ): Promise<ActionResponse<{ id: string }>> => {
   try {
     await updateArticle({ id }, { is_published });
-    return (await ActionResponses()).success({ id });
+    return await ActionResponses.success({ id });
   } catch (error) {
     console.log(error);
-    return (await ActionResponses()).serverError("Failed to update article");
+    return ActionResponses.serverError("Failed to update article");
   }
 };
 
@@ -101,16 +101,16 @@ export const getArticleById = async (
   try {
     const articleData = await findArticle({ id });
     if (!articleData) {
-      return (await ActionResponses()).notFound("Article not found");
+      return ActionResponses.notFound("Article not found");
     }
     if (action === "view") {
       await updateArticle({ id }, { views: articleData.views + 1 });
     }
 
-    return (await ActionResponses()).success(articleData as ArticlesWithUser);
+    return ActionResponses.success(articleData as ArticlesWithUser);
   } catch (error) {
     console.log(error);
-    return (await ActionResponses()).serverError("Failed to get article");
+    return ActionResponses.serverError("Failed to get article");
   }
 };
 
@@ -122,18 +122,16 @@ export const deleteArticle = async (
     if (article) {
       const deleteResult = await deleteImageCloudinary(article.cover_url);
       if (deleteResult.error) {
-        return (await ActionResponses()).serverError(
-          "Failed to delete article",
-        );
+        return ActionResponses.serverError("Failed to delete article");
       }
     }
 
     await hardDeleteArticle({ id });
     revalidatePath("/admin/articles");
-    return (await ActionResponses()).success({ id });
+    return ActionResponses.success({ id });
   } catch (error) {
     console.log(error);
-    return (await ActionResponses()).serverError("Failed to delete article");
+    return ActionResponses.serverError("Failed to delete article");
   }
 };
 
@@ -179,9 +177,9 @@ export const getArticles = async ({
       startDate,
       endDate,
     );
-    return (await ActionResponses()).success(articles);
+    return ActionResponses.success(articles);
   } catch (error) {
     console.error(error);
-    return (await ActionResponses()).serverError("Failed to get articles");
+    return ActionResponses.serverError("Failed to get articles");
   }
 };
