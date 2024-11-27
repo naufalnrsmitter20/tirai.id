@@ -25,7 +25,7 @@ const registerSchema = z.object({
     .string()
     .min(1, { message: "Email harus diisi" })
     .email("email tidak valid"),
-  password: z.string().min(8, "Password minimal 8 karakter"),
+  password: z.string().min(8, "Kata sandi minimal 8 karakter"),
   confirm_password: z.string(),
 });
 

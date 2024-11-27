@@ -3,7 +3,7 @@ import { Body3, H2 } from "@/components/ui/text";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { RegisterForm } from "./forms/register-form";
+import { RegisterForm } from "./components/forms/register-form";
 
 export const metadata: Metadata = {
   title: "Buat akun anda",

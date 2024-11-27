@@ -3,7 +3,7 @@ import { Body3, H2 } from "@/components/ui/text";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { LoginForm } from "./forms/login-form";
+import { LoginForm } from "./components/forms/login-form";
 
 export const metadata: Metadata = {
   title: "Login ke Akun Tirai.id",
