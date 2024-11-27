@@ -13,11 +13,11 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <main className="flex min-h-screen w-full items-center justify-center">
-      <section className="flex flex-col items-center">
+      <section className="flex w-full max-w-[380px] flex-col items-center">
         <div className="justify center mb-8 flex w-fit items-center rounded-full bg-primary-50 p-6">
           <ShieldClose color={COLORS.primary[900]} size={52} />
         </div>
-        <div className="flex flex-col items-center text-center text-black">
+        <div className="flex w-full flex-col items-center text-center text-black">
           <Display className="mb-3">404</Display>
           <Body3 className="mb-[3.375rem] text-neutral-500">
             Halaman yang anda cari tidak dapat ditemukan
