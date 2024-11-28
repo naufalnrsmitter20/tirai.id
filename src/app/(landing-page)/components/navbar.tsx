@@ -21,7 +21,7 @@ export const Navbar: FC = () => {
   return (
     <>
       <nav className="fixed z-[1000] w-full bg-white">
-        <div className="mx-auto flex w-full max-w-screen-xl items-center justify-between px-6 py-4 md:px-12">
+        <div className="mx-auto flex w-full max-w-screen-lg items-center justify-between px-6 py-4 md:px-12">
           <Link href={"/"} className="max-w-[100.37px]">
             <span className="block h-[48px] w-[100.37px] bg-[url(/assets/logo-trimmed.png)] bg-contain bg-no-repeat text-transparent">
               Tirai.id

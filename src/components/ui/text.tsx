@@ -41,7 +41,7 @@ export const H3: FC<HTMLAttributes<HTMLParagraphElement>> = (props) => {
   return (
     <h3
       {...props}
-      className={cn("text-[32px] font-medium leading-[43px]", props.className)}
+      className={cn("text-[26px] font-medium leading-[35px]", props.className)}
     />
   );
 };
@@ -50,7 +50,7 @@ export const H4: FC<HTMLAttributes<HTMLParagraphElement>> = (props) => {
   return (
     <h3
       {...props}
-      className={cn("text-[26px] font-medium leading-[35px]", props.className)}
+      className={cn("text-[20px] font-medium leading-[27px]", props.className)}
     />
   );
 };
@@ -59,7 +59,7 @@ export const H5: FC<HTMLAttributes<HTMLParagraphElement>> = (props) => {
   return (
     <h3
       {...props}
-      className={cn("text-[24px] font-medium leading-[32px]", props.className)}
+      className={cn("text-[18px] font-medium leading-[24px]", props.className)}
     />
   );
 };
@@ -95,7 +95,7 @@ export const Body3: FC<HTMLAttributes<HTMLParagraphElement>> = (props) => {
   return (
     <p
       {...props}
-      className={cn("font-regular text-[16px] leading-[22px]", props.className)}
+      className={cn("font-regular text-base leading-[22px]", props.className)}
     />
   );
 };

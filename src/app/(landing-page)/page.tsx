@@ -5,13 +5,13 @@ import { SectionContainer } from "@/components/layout/SectionContainer";
 import { buttonVariants } from "@/components/ui/button";
 import { Body1, Body3, Display, H1, H2, H3, H5 } from "@/components/ui/text";
 import { SectionTitle } from "@/components/widgets/SectionTitle";
+import { COLORS } from "@/constants/color";
 import { cn, formatRupiah } from "@/lib/utils";
 import { ArrowRight, Quote } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
 import { Navbar } from "./components/navbar";
-import { COLORS } from "@/constants/color";
 
 interface ProductType {
   icon: ReactNode;
@@ -318,7 +318,7 @@ export default function Home() {
   const [currentFabricHighlight, setCurrentFabricHighlight] = useState(0);
   const [currentTestimony, setCurrentTestimony] = useState(0);
 
-  // Change current slide and fabric every 5 seconds
+  // Change current slide and fabric highlight every 5 seconds
   useEffect(() => {
     const changeSlideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % CAROUSEL_IMAGES.length);
@@ -328,7 +328,7 @@ export default function Home() {
     }, 5000);
 
     return () => clearInterval(changeSlideInterval);
-  }, [currentSlide]);
+  }, [currentSlide, currentFabricHighlight]);
 
   return (
     <>
@@ -442,7 +442,7 @@ export default function Home() {
         </SectionContainer>
         <SectionContainer id="products">
           <div className="mb-[3.375rem] flex w-full flex-col items-start justify-between gap-y-4 md:items-end lg:flex-row lg:gap-0">
-            <div className="w-full lg:max-w-[75%]">
+            <div className="w-full lg:max-w-[70%]">
               <SectionTitle>Produk</SectionTitle>
               <H1 className="mb-[1.375rem] text-black">
                 Temukan Keindahan, Kenyamanan dan Kualitas Tirai Disini
@@ -583,9 +583,10 @@ export default function Home() {
           <div className="flex flex-col-reverse justify-between lg:flex-row lg:items-center">
             <div className="flex w-full flex-col gap-y-6 lg:w-[60%]">
               {FABRIC_HIGHLIGHTS.map((highlight, index) => (
-                <div
+                <button
+                  onClick={() => setCurrentFabricHighlight(index)}
                   key={highlight.title}
-                  className="flex items-center gap-x-7"
+                  className="flex items-center gap-x-7 text-left"
                 >
                   <div
                     className={cn(
@@ -608,7 +609,7 @@ export default function Home() {
                       {highlight.description}
                     </Body3>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
             <Image
