@@ -1,0 +1,71 @@
+import nodemailer, { Transporter } from "nodemailer";
+
+export interface EmailOptions {
+  from?: string;
+  to: string;
+  subject: string;
+  text?: string;
+  replyTo?: string;
+  html?: string;
+}
+
+export interface EmailServiceInterface {
+  sendEmail(options: EmailOptions): Promise<void>;
+}
+
+export interface EmailConfig {
+  host: string;
+  port: number;
+  secure: boolean;
+  auth: {
+    user: string;
+    pass: string;
+  };
+  defaultFrom: string;
+}
+
+export const emailConfig: EmailConfig = {
+  host: process.env.SMTP_HOST!,
+  port: Number(process.env.SMTP_PORT) || 587, // Use 465 for SSL
+  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER!,
+    pass: process.env.SMTP_PASS!,
+  },
+  defaultFrom: process.env.EMAIL_FROM!,
+};
+
+export class EmailService implements EmailServiceInterface {
+  private transporter: Transporter;
+
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      host: emailConfig.host,
+      port: emailConfig.port,
+      secure: emailConfig.secure,
+      auth: {
+        user: emailConfig.auth.user,
+        pass: emailConfig.auth.pass,
+      },
+    });
+  }
+
+  public async sendEmail(options: EmailOptions) {
+    const mailOptions = {
+      from: options.from || emailConfig.defaultFrom,
+      to: options.to,
+      subject: options.subject,
+      replyTo: options.replyTo,
+      text: options.text,
+      html: options.html,
+    };
+
+    try {
+      const sentMail = await this.transporter.sendMail(mailOptions);
+      return sentMail;
+    } catch (error) {
+      console.error(`Error sending email to ${options.to}:`, error);
+      throw new Error("Failed to send email");
+    }
+  }
+}

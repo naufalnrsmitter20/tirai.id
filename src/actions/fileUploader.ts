@@ -17,7 +17,7 @@ export async function uploadImageCloudinary(file: Buffer | any) {
               return resolve(uploadResult);
             },
           )
-          .end(file?.data ? file.data : file);
+          .end(Buffer.isBuffer(file) ? file : Buffer.from(file));
       },
     );
 

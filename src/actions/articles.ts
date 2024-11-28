@@ -7,6 +7,7 @@ import {
   hardDeleteArticle,
   updateArticle,
 } from "@/utils/database/article.query";
+import { ArticlesWithUser } from "@/types/entityRelations";
 import { uploadImageCloudinary, deleteImageCloudinary } from "./fileUploader";
 import { Article, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
@@ -17,7 +18,7 @@ export const upsertArticle = async ({
 }: {
   data: FormData;
   id?: string;
-}): Promise<ActionResponse<{ message: string }>> => {
+}): Promise<ActionResponse<string>> => {
   try {
     const title = data.get("title") as string;
     const slug = data.get("slug") as string;
@@ -60,7 +61,7 @@ export const upsertArticle = async ({
     if (!id) {
       await createArticle({
         ...articleInput,
-        cover_url: uploadedImage!.data!.url,
+        cover_url: uploadedImage?.data?.url || null,
         author: { connect: { id: author_id } },
       });
 
@@ -77,10 +78,10 @@ export const upsertArticle = async ({
     );
 
     revalidatePath("/");
-    return (await ActionResponses()).success({ message: "Article upserted" });
+    return ActionResponses.success("Article upserted");
   } catch (error) {
     console.log(error);
-    return (await ActionResponses()).serverError("Failed to update article");
+    return ActionResponses.serverError("Failed to update article");
   }
 };
 
@@ -90,27 +91,30 @@ export const updateArticleStatus = async (
 ): Promise<ActionResponse<{ id: string }>> => {
   try {
     await updateArticle({ id }, { is_published });
-    return (await ActionResponses()).success({ id });
+    return ActionResponses.success({ id });
   } catch (error) {
     console.log(error);
-    return (await ActionResponses()).serverError("Failed to update article");
+    return ActionResponses.serverError("Failed to update article");
   }
 };
 
 export const getArticleById = async (
   id: string,
-): Promise<ActionResponse<Article>> => {
+  action: "view" | "edit",
+): Promise<ActionResponse<ArticlesWithUser>> => {
   try {
     const articleData = await findArticle({ id });
     if (!articleData) {
-      return (await ActionResponses()).notFound("Article not found");
+      return ActionResponses.notFound("Article not found");
     }
-    await updateArticle({ id }, { views: articleData.views + 1 });
+    if (action === "view") {
+      await updateArticle({ id }, { views: articleData.views + 1 });
+    }
 
-    return (await ActionResponses()).success(articleData);
+    return ActionResponses.success(articleData as ArticlesWithUser);
   } catch (error) {
     console.log(error);
-    return (await ActionResponses()).serverError("Failed to get article");
+    return ActionResponses.serverError("Failed to get article");
   }
 };
 
@@ -118,13 +122,13 @@ export const getArticleBySlug = async (slug: string) => {
   try {
     const article = await findArticle({ slug });
     if (!article) {
-      return (await ActionResponses()).notFound(`Article ${slug} is not found`);
+      return ActionResponses.notFound(`Article ${slug} is not found`);
     }
 
-    return (await ActionResponses()).success(article);
+    return ActionResponses.success(article);
   } catch (error) {
     console.log(error);
-    return (await ActionResponses()).serverError("Failed to get article");
+    return ActionResponses.serverError("Failed to get article");
   }
 };
 
@@ -133,17 +137,19 @@ export const deleteArticle = async (
 ): Promise<ActionResponse<{ id: string }>> => {
   try {
     const article = await findArticle({ id });
-    if (!article) {
-      return (await ActionResponses()).notFound(
-        `Article with ${id} is not found`,
-      );
+    if (article) {
+      const deleteResult = await deleteImageCloudinary(article.cover_url);
+      if (deleteResult.error) {
+        return ActionResponses.serverError("Failed to delete article");
+      }
     }
 
     await hardDeleteArticle({ id });
-    return (await ActionResponses()).success({ id });
+    revalidatePath("/admin/articles");
+    return ActionResponses.success({ id });
   } catch (error) {
     console.log(error);
-    return (await ActionResponses()).serverError("Failed to delete article");
+    return ActionResponses.serverError("Failed to delete article");
   }
 };
 
@@ -151,15 +157,24 @@ export const getArticles = async ({
   tags,
   order,
   searchQuery,
+  status,
+  startDate,
+  endDate,
 }: {
-  tags?: string[];
+  tags?: string;
   order?: "latest" | "popular";
   searchQuery?: string;
-}): Promise<ActionResponse<Article[]>> => {
+  status?: boolean;
+  startDate?: Date;
+  endDate?: Date;
+}): Promise<ActionResponse<ArticlesWithUser[]>> => {
   try {
     const query: Prisma.ArticleWhereInput = {};
-    if (tags && tags.length > 0) {
-      query.tags = { hasSome: tags };
+    if (tags) {
+      const tagsArray = tags.split(" ").filter((tag) => tag.trim() !== "");
+      if (tagsArray.length > 0) {
+        query.tags = { hasSome: tagsArray };
+      }
     }
 
     if (searchQuery && searchQuery.trim() !== "") {
@@ -173,10 +188,16 @@ export const getArticles = async ({
       ];
     }
 
-    const articles = await findArticles(query, order);
-    return (await ActionResponses()).success(articles);
+    const articles = await findArticles(
+      query,
+      order,
+      status,
+      startDate,
+      endDate,
+    );
+    return ActionResponses.success(articles);
   } catch (error) {
     console.error(error);
-    return (await ActionResponses()).serverError("Failed to get articles");
+    return ActionResponses.serverError("Failed to get articles");
   }
 };

@@ -8,6 +8,7 @@ import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
+// TODO: Adjust according to the design system
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -15,21 +16,21 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     const [showPassword, setShowPassword] = React.useState(false);
 
     return (
-      <div className="relative">
+      <div className="relative h-[3.25rem]">
         <input
           type={
             type === "password" ? (showPassword ? "text" : "password") : type
           }
           className={cn(
-            "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
-            className
+            "flex w-full rounded-xl border border-input bg-transparent px-[1.375rem] py-4 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+            className,
           )}
           ref={ref}
           {...props}
         />
         {type === "password" && (
           <button
-            className="absolute bottom-2 right-3 flex items-center px-2 text-neutral-400 transition-all hover:text-neutral-500"
+            className="absolute right-3 top-1/2 z-[998] flex -translate-y-1/2 items-center px-2 text-neutral-400 transition-all hover:text-neutral-500"
             type="button"
             onClick={() => setShowPassword(!showPassword)}
           >
@@ -38,7 +39,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
       </div>
     );
-  }
+  },
 );
 Input.displayName = "Input";
 
@@ -96,7 +97,7 @@ const FileField = React.forwardRef<HTMLInputElement, FileInputProps>(
           htmlFor={name}
           className={cn(
             "relative w-full cursor-pointer rounded-lg border-2 border-dashed px-6 py-4 transition-all duration-300 hover:cursor-pointer hover:border-solid focus:outline-none",
-            errorMessage ? "border-primary-400" : "border-neutral-400"
+            errorMessage ? "border-primary-400" : "border-neutral-400",
           )}
           onDrop={handleDrop}
           onDragOver={handleDragOver}
@@ -124,14 +125,14 @@ const FileField = React.forwardRef<HTMLInputElement, FileInputProps>(
         )}
         {errorMessage && (
           <div className="mt-4 text-center">
-            <p className="text-primary-400 mt-[6px] text-sm text-red-500">
+            <p className="mt-[6px] text-sm text-primary-400 text-red-500">
               {errorMessage}
             </p>
           </div>
         )}
       </div>
     );
-  }
+  },
 );
 FileField.displayName = "FileField";
 
@@ -148,7 +149,7 @@ const DateField = ({
         variant={"outline"}
         className={cn(
           "w-full justify-start text-left font-normal",
-          !date && "text-muted-foreground"
+          !date && "text-muted-foreground",
         )}
       >
         <CalendarIcon className="mr-2 h-4 w-4" />
