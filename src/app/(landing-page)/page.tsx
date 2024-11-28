@@ -18,6 +18,11 @@ interface ProductType {
   description: string;
 }
 
+interface Motto {
+  title: string;
+  description: string;
+}
+
 interface Product {
   id: string;
   photo: string;
@@ -205,6 +210,24 @@ const PRODUCT_TYPES: ProductType[] = [
   },
 ] as const;
 
+const MOTTOS: Motto[] = [
+  {
+    title: "Tepat Waktu",
+    description:
+      "Produksi molor dan tidak tepat waktu? Itu tidak terjadi pada Tirai.id. Kami sangat berkomitmen pada waktu.",
+  },
+  {
+    title: "Tepat Ukuran",
+    description:
+      "Kami membuat tirai dengan ukuran yang tepat, tidak terlalu tinggi atau terlalu rendah. Tidak kurang ataupun tidak terlalu banyak.",
+  },
+  {
+    title: "Tepat Selera",
+    description:
+      "Menyediakan berbagai pilihan model dan jenis bahan dengan kualitas terbaik untuk memenuhi kebutuhan anda.",
+  },
+];
+
 // TODO: Remove these dummy products and replace it with an actual list of products using server action
 const PRODUCTS: Product[] = [
   {
@@ -247,8 +270,9 @@ const PRODUCTS: Product[] = [
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [currentFabricHighlight, setCurrentFabricHighlight] = useState(0);
 
-  // Change current slide every 5 seconds
+  // Change current slide and fabric every 5 seconds
   useEffect(() => {
     const changeSlideInterval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % CAROUSEL_IMAGES.length);
@@ -486,37 +510,18 @@ export default function Home() {
             </div>
           </div>
           <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
-            <div key={1} className="w-full rounded-xl bg-neutral-50 p-6">
-              <div className="mb-8 flex w-full items-center justify-between text-black">
-                <H5>Tepat Waktu</H5>
-                <H5>01</H5>
+            {MOTTOS.map((motto, index) => (
+              <div
+                key={motto.title}
+                className="w-full rounded-xl bg-neutral-50 p-6"
+              >
+                <div className="mb-8 flex w-full items-center justify-between text-black">
+                  <H5>{motto.title}</H5>
+                  <H5>0{index + 1}</H5>
+                </div>
+                <Body3 className="text-neutral-500">{motto.description}</Body3>
               </div>
-              <Body3 className="text-neutral-500">
-                Produksi molor dan tidak tepat waktu? Itu tidak terjadi pada
-                Tirai.id. Kami sangat berkomitmen pada waktu.
-              </Body3>
-            </div>
-            <div key={2} className="w-full rounded-xl bg-neutral-50 p-6">
-              <div className="mb-8 flex w-full items-center justify-between text-black">
-                <H5>Tepat Ukuran</H5>
-                <H5>02</H5>
-              </div>
-              <Body3 className="text-neutral-500">
-                Kami membuat tirai dengan ukuran yang tepat, tidak terlalu
-                tinggi atau terlalu rendah. Tidak kurang ataupun tidak terlalu
-                banyak.
-              </Body3>
-            </div>
-            <div key={3} className="w-full rounded-xl bg-neutral-50 p-6">
-              <div className="mb-8 flex w-full items-center justify-between text-black">
-                <H5>Tepat Selera</H5>
-                <H5>03</H5>
-              </div>
-              <Body3 className="text-neutral-500">
-                Menyediakan berbagai pilihan model dan jenis bahan dengan
-                kualitas terbaik untuk memenuhi kebutuhan anda.
-              </Body3>
-            </div>
+            ))}
           </div>
         </SectionContainer>
       </PageContainer>
