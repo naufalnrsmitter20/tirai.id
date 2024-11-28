@@ -9,7 +9,10 @@ export const SectionContainer: FC<{
   return (
     <section
       {...props}
-      className={cn("mx-auto w-full py-[5.125rem]", props.className)}
+      className={cn(
+        "mx-auto w-full max-w-screen-xl px-6 py-[5.125rem] md:px-12",
+        props.className,
+      )}
     />
   );
 };
