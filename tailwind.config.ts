@@ -9,6 +9,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        sm: "390px",
+        md: "810px",
+        lg: "1200px",
+        xl: "1440px",
+      },
       colors: {
         background: "#0D0D0D",
         foreground: "#FFFFFF",
@@ -21,16 +27,17 @@ const config: Config = {
           foreground: "hsl(var(--popover-foreground))",
         },
         primary: {
+          950: "#122A59",
           900: "#133E87",
-          800: "#133E87",
-          700: "#0D2C60",
-          600: "#113B7B",
-          500: "#1A5E87",
-          400: "#42659F",
-          300: "#617EAF",
-          200: "#92A6C8",
-          100: "#B6C3DA",
-          50: "#E7ECF3",
+          800: "#124CBB",
+          700: "#0D5EE8",
+          600: "#1477FC",
+          500: "#2B96FF",
+          400: "#53B7FF",
+          300: "#8AD1FF",
+          200: "#BAE2FF",
+          100: "#D8EEFF",
+          50: "#EEF8FF",
         },
         secondary: {
           700: "#AD8D19",

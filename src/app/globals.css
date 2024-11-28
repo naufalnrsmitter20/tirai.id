@@ -76,3 +76,56 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .icon-hamburger,
+  .icon-hamburger::before,
+  .icon-hamburger::after {
+    @apply relative inline-block h-[2px] w-6 bg-neutral-500;
+  }
+
+  .icon-hamburger::before,
+  .icon-hamburger::after {
+    @apply absolute left-0 transition-all content-[''];
+  }
+
+  .icon-hamburger::before {
+    @apply -top-2;
+  }
+
+  .icon-hamburger::after {
+    @apply top-2;
+  }
+
+  .checkbox-sidebar:checked + .sidebar-btn .icon-hamburger {
+    @apply bg-transparent;
+  }
+
+  .checkbox-sidebar:checked + .sidebar-btn .icon-hamburger::before {
+    @apply top-0 rotate-[135deg];
+  }
+
+  .checkbox-sidebar:checked + .sidebar-btn .icon-hamburger::after {
+    @apply top-0 -rotate-[135deg];
+  }
+}
+
+nav:has(.checkbox-sidebar:checked) ~ .mobile-sidebar {
+  @apply right-0;
+}
+
+.mobile-sidebar {
+  @apply -right-[100%];
+}
+
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+}
