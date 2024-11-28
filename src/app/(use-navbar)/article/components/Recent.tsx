@@ -2,6 +2,7 @@ import { SectionContainer } from "@/components/layout/SectionContainer";
 import { buttonVariants } from "@/components/ui/button";
 import { Body3, H1, H3, H5 } from "@/components/ui/text";
 import { SectionTitle } from "@/components/widget/SectionTitle";
+import { formatDate } from "@/lib/utils";
 import { format } from "date-fns";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -22,16 +23,16 @@ export const Recent = (data: {
       <div className="flex flex-col">
         <SectionTitle>Artikel</SectionTitle>
         <H1 className="mb-16 text-black">Artikel Terbaru</H1>
-        <div className="flex flex-col justify-between lg:flex-row">
+        <div className="grid grid-cols-1 gap-11 md:grid-cols-2">
           <Image
             src={cover}
             alt="Postingan Artikel Terbaru"
             width={560}
             height={345}
             unoptimized
-            className="w-full object-cover lg:w-[560px]"
+            className="w-full rounded-[12px] object-cover"
           />
-          <div className="mt-11 flex max-w-full flex-col lg:mt-0 lg:max-w-[48%] lg:justify-between">
+          <div className="mt-11 flex max-w-full flex-col lg:mt-0 lg:justify-between">
             <div className="mb-10 block lg:mb-0">
               <H3 className="mb-3 text-black">{title}</H3>
               <Body3 className="line-clamp-4 text-neutral-500">{content}</Body3>
@@ -40,7 +41,7 @@ export const Recent = (data: {
               <div className="flex flex-col justify-between gap-y-0.5">
                 <H5 className="text-black">{authorName}</H5>
                 <Body3 className="text-neutral-500">
-                  {format(published_at, "MMMM do, yyyy")}
+                  {formatDate(published_at)}
                 </Body3>
               </div>
               <Link

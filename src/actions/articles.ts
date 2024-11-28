@@ -18,7 +18,7 @@ export const upsertArticle = async ({
 }: {
   data: FormData;
   id?: string;
-}): Promise<ActionResponse<string>> => {
+}): Promise<ActionResponse<{ message: string }>> => {
   try {
     const title = data.get("title") as string;
     const slug = data.get("slug") as string;
@@ -66,7 +66,7 @@ export const upsertArticle = async ({
       });
 
       revalidatePath("/");
-      return (await ActionResponses()).success({ message: "Article updated" });
+      return ActionResponses.success({ message: "Article updated" });
     }
 
     await updateArticle(
@@ -78,7 +78,7 @@ export const upsertArticle = async ({
     );
 
     revalidatePath("/");
-    return ActionResponses.success("Article upserted");
+    return ActionResponses.success({ message: "Article upserted" });
   } catch (error) {
     console.log(error);
     return ActionResponses.serverError("Failed to update article");
