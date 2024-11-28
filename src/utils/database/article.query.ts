@@ -40,6 +40,25 @@ export const findArticles = async (
   });
 };
 
+export const findLatestArticle = async () => {
+  return (
+    (
+      await prisma.article.findMany({
+        where: {
+          is_published: true,
+        },
+        include: {
+          author: true,
+        },
+        orderBy: {
+          published_at: "desc",
+        },
+        take: 1,
+      })
+    )?.[0] ?? null
+  );
+};
+
 export const findArticle = async (where: Prisma.ArticleWhereUniqueInput) => {
   return await prisma.article.findUnique({
     where,
