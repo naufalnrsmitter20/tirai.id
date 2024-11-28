@@ -1,16 +1,16 @@
 "use client";
 
+import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { buttonVariants } from "@/components/ui/button";
 import { Body3, Display, H1, H3, H5 } from "@/components/ui/text";
+import { SectionTitle } from "@/components/widgets/SectionTitle";
 import { cn, formatRupiah } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { ReactNode, useEffect, useState } from "react";
 import { Navbar } from "./components/navbar";
-import { PageContainer } from "@/components/layout/PageContainer";
-import { SectionTitle } from "@/components/widgets/SectionTitle";
 
 interface ProductType {
   icon: ReactNode;
@@ -448,6 +448,75 @@ export default function Home() {
               height={457}
               className="pointer-events-none h-auto w-full object-cover lg:w-[45%]"
             />
+          </div>
+        </SectionContainer>
+        <SectionContainer id="about">
+          <div className="mb-16 flex w-full flex-col items-end justify-between gap-y-24 lg:flex-row lg:gap-0">
+            <Image
+              src={"/assets/about-us.png"}
+              alt="Tentang Kami"
+              width={525}
+              height={457}
+              className="pointer-events-none h-auto w-full object-cover lg:w-[34%]"
+            />
+            <div className="w-full lg:max-w-[57%]">
+              <SectionTitle>Tentang Kami</SectionTitle>
+              <H1 className="mb-[1.375rem] text-black">
+                Kami Selalu Siap Memberikan Pelayanan Terbaik untuk Kebutuhan
+                Anda
+              </H1>
+              <Body3 className="mb-12 text-neutral-500">
+                Tirai.id adalah perusahaan yang bergerak dalam bidang dekorasi
+                ruangan interior melalui Tirai.id yang siap melayani seluruh
+                wilayah jawa timur bertujuan untuk meningkatkan keindahan
+                ruangan Anda demi terciptanya ruangan yang nyaman untuk di
+                tempati. Dengan bertumpu pada 3 nilai pokok yaitu tepat waktu,
+                tepat ukuran dan tepat selera.
+              </Body3>
+              {/* TODO: Change this to the custom product route */}
+              <Link
+                href={"#"}
+                className={buttonVariants({
+                  variant: "default",
+                  className: "w-full sm:w-fit",
+                })}
+              >
+                Baca selengkapnya tentang kami <ArrowRight />
+              </Link>
+            </div>
+          </div>
+          <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
+            <div key={1} className="w-full rounded-xl bg-neutral-50 p-6">
+              <div className="mb-8 flex w-full items-center justify-between text-black">
+                <H5>Tepat Waktu</H5>
+                <H5>01</H5>
+              </div>
+              <Body3 className="text-neutral-500">
+                Produksi molor dan tidak tepat waktu? Itu tidak terjadi pada
+                Tirai.id. Kami sangat berkomitmen pada waktu.
+              </Body3>
+            </div>
+            <div key={2} className="w-full rounded-xl bg-neutral-50 p-6">
+              <div className="mb-8 flex w-full items-center justify-between text-black">
+                <H5>Tepat Ukuran</H5>
+                <H5>02</H5>
+              </div>
+              <Body3 className="text-neutral-500">
+                Kami membuat tirai dengan ukuran yang tepat, tidak terlalu
+                tinggi atau terlalu rendah. Tidak kurang ataupun tidak terlalu
+                banyak.
+              </Body3>
+            </div>
+            <div key={3} className="w-full rounded-xl bg-neutral-50 p-6">
+              <div className="mb-8 flex w-full items-center justify-between text-black">
+                <H5>Tepat Selera</H5>
+                <H5>03</H5>
+              </div>
+              <Body3 className="text-neutral-500">
+                Menyediakan berbagai pilihan model dan jenis bahan dengan
+                kualitas terbaik untuk memenuhi kebutuhan anda.
+              </Body3>
+            </div>
           </div>
         </SectionContainer>
       </PageContainer>
