@@ -6,7 +6,7 @@ export const PageContainer: FC<{
   className?: string;
 }> = ({ children, className }) => {
   return (
-    <main className={cn("mx-auto min-h-screen w-full bg-white", className)}>
+    <main className={cn("mx-auto min-h-screen w-full", className)}>
       {children}
     </main>
   );

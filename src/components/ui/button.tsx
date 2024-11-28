@@ -5,17 +5,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none duration-300",
   {
     variants: {
       variant: {
         default:
-          "bg-primary-900 text-white hover:bg-primary-700 disabled:bg-neutral-400 disabled:text-white disabled:border-neutral-400",
+          "bg-primary-900 text-white hover:bg-primary-950 rounded-lg disabled:bg-neutral-400 disabled:text-white disabled:border-neutral-400",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90 disabled:bg-neutral-400 disabled:text-white disabled:border-neutral-400",
+          "bg-destructive text-destructive-foreground shadow-sm rounded-lg hover:bg-destructive/90 disabled:bg-neutral-400 disabled:text-white disabled:border-neutral-400",
         outline:
-          "border border-primary-900 bg-white hover:bg-primary-100 hover:border-primary-900 hover:text-primary-900 disabled:bg-neutral-400 disabled:text-white disabled:border-neutral-400",
-        link: "text-black hover:text-primary-400 disabled:text-neutral-400",
+          "border border-primary-900 text-primary-900 bg-white rounded-lg hover:bg-primary-50 disabled:bg-neutral-400 disabled:text-white disabled:border-neutral-400",
+        link: "text-black hover:text-primary-900 disabled:text-neutral-400",
       },
       size: {
         default: "h-12 px-4 py-2",

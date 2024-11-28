@@ -57,7 +57,6 @@ model Product {
   price       Float
   stock       Int
   category    ProductCategory
-  is_custom   Boolean
   slug        String          @unique
   is_public   Boolean         @default(false)
   created_at  DateTime        @default(now())
