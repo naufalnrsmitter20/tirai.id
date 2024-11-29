@@ -1,8 +1,10 @@
+import { getArticles } from "@/actions/articles";
+import { Body3 } from "@/components/ui/text";
+import { ArticlesWithUser } from "@/types/entityRelations";
 import ArticleCard from "./_components/ArticleCard";
 import ArticleFilterLayout from "./_components/ArticleFilterLayout";
-import { getArticles } from "@/actions/articles";
-import { ArticlesWithUser } from "@/types/entityRelations";
-export default async function page({
+
+export default async function Articles({
   searchParams: searchParamsPromise,
 }: {
   searchParams: Promise<{
@@ -29,13 +31,14 @@ export default async function page({
     endDate: searchParams.end,
   });
   const articles: ArticlesWithUser[] = response.data ?? [];
+
   return (
     <div className="w-full space-y-8">
       <div className="flex w-full justify-end">
         <ArticleFilterLayout searchData={searchParams} />
       </div>
       <div className="flex w-full flex-wrap gap-8 pb-16">
-        {articles &&
+        {articles.length > 0 &&
           articles.map((article: ArticlesWithUser) => (
             <ArticleCard
               key={article.id}
@@ -50,6 +53,7 @@ export default async function page({
               views={article.views}
             />
           ))}
+        {articles.length === 0 && <Body3>Belum ada artikel apa-apa...</Body3>}
       </div>
     </div>
   );

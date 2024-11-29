@@ -2,18 +2,18 @@ import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Body3, H1, H5, H6 } from "@/components/ui/text";
 import { PaginationMetadata } from "@/lib/paginator";
 import { formatDate } from "@/lib/utils";
-import { Article, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
-import { PageSelector } from "./MostRead/PageSelector";
+import { PageSelector } from "./PageSelector";
 
-type articleWithAuthor = Prisma.ArticleGetPayload<{
+type ArticleWithAuthor = Prisma.ArticleGetPayload<{
   include: {
     author: true;
   };
 }>;
 
-const ArticleCard = ({ article }: { article: articleWithAuthor }) => {
+const ArticleCard = ({ article }: { article: ArticleWithAuthor }) => {
   return (
     <Link
       href={`/article/${article.slug}`}
@@ -47,16 +47,16 @@ const ArticleCard = ({ article }: { article: articleWithAuthor }) => {
   );
 };
 
-export const MostRead = ({
+export const Articles = ({
   articles,
   meta,
 }: {
-  articles: articleWithAuthor[];
+  articles: ArticleWithAuthor[];
   meta: PaginationMetadata;
 }) => {
   return (
     <SectionContainer className="">
-      <H1 className="mb-[62px] text-black">Paling Banyak Dibaca</H1>
+      <H1 className="mb-[62px] text-black">Artikel Lainnya</H1>
       <div className="grid w-full grid-cols-1 gap-x-6 gap-y-[62px] sm:grid-cols-2 md:grid-cols-3">
         {articles.map((item) => (
           <ArticleCard article={item} key={item.id} />

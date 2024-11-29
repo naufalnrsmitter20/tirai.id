@@ -50,7 +50,7 @@ export const Navbar: FC = () => {
                   ? ADMIN_ROLES.includes(session.user.role)
                     ? "/admin"
                     : "#"
-                  : "#"
+                  : "/auth/login"
               }
               className={buttonVariants({
                 variant: "default",
@@ -112,7 +112,7 @@ export const Navbar: FC = () => {
                   ? ADMIN_ROLES.includes(session.user.role)
                     ? "/admin"
                     : "#"
-                  : "#"
+                  : "/auth/login"
               }
               className={buttonVariants({
                 variant: "default",

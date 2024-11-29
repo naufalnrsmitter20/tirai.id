@@ -48,7 +48,8 @@ export default function ArticleCard({
           alt={title}
           width={400}
           height={200}
-          className="object-fit h-[150px] w-full rounded-md sm:h-[200px]"
+          className="h-[150px] w-full rounded-md object-cover sm:h-[200px]"
+          unoptimized
         />
         <div className="flex flex-wrap gap-2">
           {tags &&

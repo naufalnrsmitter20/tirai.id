@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { PaginationMetadata } from "@/lib/paginator";
 import { MoveLeft, MoveRight } from "lucide-react";
@@ -25,7 +26,7 @@ const PageButton = ({
 };
 
 export const PageSelector = ({
-  meta: { currentPage, lastPage, next, perPage, prev, total },
+  meta: { currentPage, lastPage, next, prev },
 }: {
   meta: PaginationMetadata;
 }) => {

@@ -3,7 +3,6 @@ import { buttonVariants } from "@/components/ui/button";
 import { Body3, H1, H3, H5 } from "@/components/ui/text";
 import { SectionTitle } from "@/components/widget/SectionTitle";
 import { formatDate } from "@/lib/utils";
-import { format } from "date-fns";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
