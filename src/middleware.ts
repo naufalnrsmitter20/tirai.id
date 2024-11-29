@@ -10,6 +10,9 @@ export default withAuth(function middleware(_) {}, {
         return false;
       }
 
+      if (pathname.startsWith("/admin") && token?.role === "CUSTOMER")
+        return false;
+
       return true;
     },
   },

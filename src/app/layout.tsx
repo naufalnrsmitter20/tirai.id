@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import generalSansFont from "./fonts";
 import "./globals.css";
+import "./prosemirror.css";
 
 const robots =
   process.env.APP_ENV != "production" ? "noindex, nofollow" : "index, follow";
