@@ -58,9 +58,13 @@ export const Articles = ({
     <SectionContainer className="">
       <H1 className="mb-[62px] text-black">Artikel Lainnya</H1>
       <div className="grid w-full grid-cols-1 gap-x-6 gap-y-[62px] sm:grid-cols-2 md:grid-cols-3">
-        {articles.map((item) => (
-          <ArticleCard article={item} key={item.id} />
-        ))}
+        {articles.length > 0 ? (
+          articles.map((item) => <ArticleCard article={item} key={item.id} />)
+        ) : (
+          <Body3 className="text-neutral-500">
+            Belum ada artikel untuk saat ini...
+          </Body3>
+        )}
       </div>
       <PageSelector meta={meta} />
     </SectionContainer>
