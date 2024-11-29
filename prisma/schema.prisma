@@ -55,6 +55,12 @@ model Product {
   order_products OrderItem[]
 }
 
+model Material {
+  id      String    @id @default(uuid())
+  name    String
+  price   Float
+}
+
 model CustomOption {
   id         String   @id @default(uuid())
   size       String
@@ -68,6 +74,23 @@ model CustomOption {
   items      OrderItem[]
 
   @@unique([product_id, color, size])
+}
+
+model Model {
+  id          String    @id @default(uuid())
+  model       String
+  description String
+}
+
+model CustomRequest {
+  id       String @id @default(uuid())
+  material String
+  model    String
+  color    String
+  width    String
+  height   String
+  price    Float
+  size     String
 }
 
 model Order {
