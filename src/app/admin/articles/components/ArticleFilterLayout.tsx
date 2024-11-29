@@ -14,6 +14,7 @@ interface ArticleFilterLayoutProps {
   status: "all" | "published" | "archived" | "";
   start: Date;
   end: Date;
+  page?: string;
 }
 
 export default function ArticleFilterLayout({
@@ -56,8 +57,19 @@ export default function ArticleFilterLayout({
       const formattedEndDate = new Date(date.to).toISOString();
       params.set("end", formattedEndDate);
     }
+    if (searchData.page) {
+      params.set("page", searchData.page);
+    }
     router.push(`?${params.toString()}`);
-  }, [searchTitle, searchTags, searchSort, searchStatus, router, date]);
+  }, [
+    searchTitle,
+    searchTags,
+    searchSort,
+    searchStatus,
+    router,
+    date,
+    searchData.page,
+  ]);
 
   function clearFilters() {
     setSearchTitle("");

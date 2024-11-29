@@ -30,7 +30,7 @@ export default function EditorMenu({
           editor?.chain().unsetHighlight().run();
         },
       }}
-      className="flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-muted bg-background shadow-xl"
+      className="flex w-fit max-w-[90vw] overflow-hidden rounded-md border border-muted shadow-xl"
     >
       {!open && children}
     </EditorBubble>
