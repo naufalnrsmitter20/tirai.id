@@ -16,6 +16,8 @@ export async function generateMetadata(
 
   const previousImages = (await parent).openGraph?.images || [];
 
+  if (!article) return {};
+
   return {
     title: `${article?.title} - ${article?.author.name}`,
     openGraph: {
@@ -26,11 +28,23 @@ export async function generateMetadata(
         name: article?.author.name,
       },
     ],
+    creator: article?.author.name,
     description: article?.description,
     keywords: article?.tags,
     robots: {
       index: true,
       nocache: false,
+      follow: true,
+      "max-image-preview": "large",
+
+      googleBot: {
+        index: true,
+        follow: true,
+      },
+    },
+    other: {
+      news_keywords: `${article?.published_at.toLocaleDateString("ID-ID", { day: "numeric", month: "long", year: "numeric" })} ${article?.description!} ${article?.tags.join(", ")}`,
+      "googlebot-news": "index,follow",
     },
   };
 }
