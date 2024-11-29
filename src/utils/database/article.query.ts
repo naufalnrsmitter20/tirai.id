@@ -66,11 +66,15 @@ export const findArticle = async (where: Prisma.ArticleWhereUniqueInput) => {
       author: {
         select: {
           name: true,
-          role: true,
         },
       },
     },
   });
+};
+
+export const findTags = async () => {
+  const articles = await prisma.article.findMany({ select: { tags: true } });
+  return articles.map(({ tags }) => tags).flat();
 };
 
 export const updateArticle = async (

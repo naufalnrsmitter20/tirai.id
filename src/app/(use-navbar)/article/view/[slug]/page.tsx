@@ -31,7 +31,7 @@ export async function generateMetadata(
       images: [article?.cover_url, ...previousImages],
       publishedTime: article.published_at.toISOString(),
       description: article.description || undefined,
-      url: `${process.env.APP_URL}/article/${article.slug}`,
+      url: `${process.env.APP_URL}/article/view/${article.slug}`,
     },
     authors: {
       name: article.author.name,
@@ -40,7 +40,7 @@ export async function generateMetadata(
     description: article.description,
     keywords: article.tags,
     alternates: {
-      canonical: `${process.env.APP_URL}/article/${article.slug}`,
+      canonical: `${process.env.APP_URL}/article/view/${article.slug}`,
     },
     robots: {
       index: true,

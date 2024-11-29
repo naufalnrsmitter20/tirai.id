@@ -1,10 +1,11 @@
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Body3, H1, H5, H6 } from "@/components/ui/text";
+import { Body3, H1, H4 } from "@/components/ui/text";
 import { PaginationMetadata } from "@/lib/paginator";
 import { formatDate } from "@/lib/utils";
 import { Prisma } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
+import { FC } from "react";
 import { PageSelector } from "./PageSelector";
 
 type ArticleWithAuthor = Prisma.ArticleGetPayload<{
@@ -13,11 +14,11 @@ type ArticleWithAuthor = Prisma.ArticleGetPayload<{
   };
 }>;
 
-const ArticleCard = ({ article }: { article: ArticleWithAuthor }) => {
+const ArticleCard: FC<{ article: ArticleWithAuthor }> = ({ article }) => {
   return (
     <Link
-      href={`/article/${article.slug}`}
-      className="flex scale-100 flex-col gap-11 bg-none transition-all duration-300 hover:scale-105"
+      href={`/article/view/${article.slug}`}
+      className="group flex flex-col gap-11 bg-none transition-all duration-300 hover:scale-105"
     >
       <Image
         src={article.cover_url}
@@ -28,17 +29,24 @@ const ArticleCard = ({ article }: { article: ArticleWithAuthor }) => {
         height={150}
       />
       <div className="text-wrap pe-5">
-        <H5 className="mb-[12px] text-wrap break-words text-black">
+        <H4 className="mb-3 text-wrap break-words text-black transition-colors duration-300 group-hover:text-primary-900">
           {article.title}
-        </H5>
-        <H6 className="h-auto max-w-full text-wrap break-words text-[16px] text-neutral-500">
+        </H4>
+        <div className="mb-4 flex flex-wrap items-center gap-x-2">
+          {article.tags.map((tag) => (
+            <Body3 key={tag} className="text-primary-800">
+              {tag}
+            </Body3>
+          ))}
+        </div>
+        <Body3 className="line-clamp-3 text-neutral-500">
           {article.description}
-        </H6>
+        </Body3>
       </div>
       <div className="flex flex-col gap-[2px]">
-        <H5 className="text-wrap break-words font-medium text-black">
+        <Body3 className="text-wrap break-words font-medium text-black">
           {article.author.name}
-        </H5>
+        </Body3>
         <Body3 className="text-neutral-500">
           {formatDate(article.published_at)}
         </Body3>
@@ -47,17 +55,14 @@ const ArticleCard = ({ article }: { article: ArticleWithAuthor }) => {
   );
 };
 
-export const Articles = ({
-  articles,
-  meta,
-}: {
+export const ArticlesDisplay: FC<{
   articles: ArticleWithAuthor[];
   meta: PaginationMetadata;
-}) => {
+}> = ({ articles, meta }) => {
   return (
     <SectionContainer className="">
       <H1 className="mb-[62px] text-black">Artikel Lainnya</H1>
-      <div className="grid w-full grid-cols-1 gap-x-6 gap-y-[62px] sm:grid-cols-2 md:grid-cols-3">
+      <div className="grid w-full grid-cols-1 gap-x-6 gap-y-[62px] md:grid-cols-2 lg:grid-cols-3">
         {articles.length > 0 ? (
           articles.map((item) => <ArticleCard article={item} key={item.id} />)
         ) : (

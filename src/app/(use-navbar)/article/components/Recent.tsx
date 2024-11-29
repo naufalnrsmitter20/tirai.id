@@ -1,6 +1,6 @@
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { buttonVariants } from "@/components/ui/button";
-import { Body3, H1, H3, H5 } from "@/components/ui/text";
+import { Body1, Body2, Body3, H1, H3, H5 } from "@/components/ui/text";
 import { SectionTitle } from "@/components/widget/SectionTitle";
 import { formatDate } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
@@ -14,11 +14,12 @@ export const Recent = (data: {
   authorName: string;
   content: string;
   published_at: Date;
+  tags: string[];
 }) => {
-  const { cover, title, slug, authorName, content, published_at } = data;
+  const { cover, tags, title, slug, authorName, content, published_at } = data;
 
   return (
-    <SectionContainer>
+    <SectionContainer id="recent-article">
       <div className="flex flex-col">
         <SectionTitle>Artikel</SectionTitle>
         <H1 className="mb-16 text-black">Artikel Terbaru</H1>
@@ -34,6 +35,15 @@ export const Recent = (data: {
           <div className="mt-11 flex max-w-full flex-col lg:mt-0 lg:justify-between">
             <div className="mb-10 block lg:mb-0">
               <H3 className="mb-3 text-black">{title}</H3>
+              <div className="mb-6 flex flex-wrap items-center gap-x-2">
+                {tags.map((tag) => (
+                  <Link href={`/`}>
+                    <Body1 key={tag} className="text-primary-800">
+                      {tag}
+                    </Body1>
+                  </Link>
+                ))}
+              </div>
               <Body3 className="line-clamp-4 text-neutral-500">{content}</Body3>
             </div>
             <div className="flex flex-col items-start justify-between gap-y-8 md:flex-row lg:items-center lg:gap-0">
@@ -44,7 +54,7 @@ export const Recent = (data: {
                 </Body3>
               </div>
               <Link
-                href={`/article/${slug}`}
+                href={`/article/view/${slug}`}
                 className={buttonVariants({
                   variant: "default",
                   className: "w-full md:w-fit md:flex-grow-0",

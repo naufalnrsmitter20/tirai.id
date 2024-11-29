@@ -1,8 +1,19 @@
+"use client";
+
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Body3, Display, H6 } from "@/components/ui/text";
-import { FC } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Body3, Display } from "@/components/ui/text";
+import { sanitizeSearchTerm } from "@/lib/utils";
+import { Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { FC, useState } from "react";
 
 export const Hero: FC = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const router = useRouter();
+
   return (
     <SectionContainer className="text-center">
       <div className="flex flex-row justify-center gap-x-2">
@@ -22,16 +33,37 @@ export const Hero: FC = () => {
             stroke="black"
           />
         </svg>
-
-        <H6 className="mb-3 text-black">Tips & Inspirasi</H6>
+        <Body3 className="mb-3 text-black">Tips & Inspirasi</Body3>
       </div>
       <Display className="mb-6 text-black">
         Temukan Tips dan Inspirasi Seputar Tirai dan Desain Interior
       </Display>
-      <Body3 className="text-neutral-500">
+      <Body3 className="mb-16 text-neutral-500">
         Dapatkan tips, panduan, dan tren terbaru untuk memilih tirai dan
         mendesain ruang yang indah dan fungsional
       </Body3>
+      <form
+        className="mx-auto flex w-full max-w-xl items-center justify-between gap-x-2"
+        onSubmit={() => {
+          if (searchTerm !== "") {
+            const sanitizedSearchTerm = sanitizeSearchTerm(searchTerm);
+            router.push(`/article/search?term=${sanitizedSearchTerm}`);
+          }
+        }}
+      >
+        <div className="w-[90%]">
+          <Input
+            placeholder="Cari artikel dari Tirai.id..."
+            className="w-full"
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+            }}
+          />
+        </div>
+        <Button disabled={searchTerm === ""} type="submit">
+          <Search />
+        </Button>
+      </form>
     </SectionContainer>
   );
 };

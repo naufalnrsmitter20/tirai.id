@@ -1,12 +1,15 @@
 import { paginator } from "@/lib/paginator";
 import prisma from "@/lib/prisma";
-import { findLatestArticle } from "@/utils/database/article.query";
+import { findLatestArticle, findTags } from "@/utils/database/article.query";
 import { Prisma } from "@prisma/client";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { ArticlesDisplay } from "./components/Articles";
 import { Hero } from "./components/Hero";
-import { Articles } from "./components/Articles";
 import { Recent } from "./components/Recent";
+import { Tags } from "./components/Tags";
+
+const paginate = paginator({ perPage: 6 });
 
 export async function generateMetadata({
   searchParams,
@@ -63,9 +66,7 @@ export async function generateMetadata({
   };
 }
 
-const paginate = paginator({ perPage: 6 });
-
-export default async function Article({
+export default async function Articles({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string }>;
@@ -99,10 +100,12 @@ export default async function Article({
   if (page > paginatedArticles.meta.lastPage) return notFound();
 
   const latestArticle = await findLatestArticle();
+  const tags = await findTags();
 
   return (
     <>
       <Hero />
+      <Tags tags={tags} />
       <Recent
         cover={latestArticle.cover_url}
         title={latestArticle.title}
@@ -110,8 +113,9 @@ export default async function Article({
         slug={latestArticle.slug}
         authorName={latestArticle.author.name}
         published_at={latestArticle.published_at}
+        tags={latestArticle.tags}
       />
-      <Articles
+      <ArticlesDisplay
         articles={paginatedArticles.data}
         meta={paginatedArticles.meta}
       />
