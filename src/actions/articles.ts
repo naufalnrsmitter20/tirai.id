@@ -11,6 +11,7 @@ import { ArticleWithUser } from "@/types/entityRelations";
 import { uploadImageCloudinary, deleteImageCloudinary } from "./fileUploader";
 import { Article, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import { PaginatedResult } from "@/lib/paginator";
 
 export const upsertArticle = async ({
   data,
@@ -167,6 +168,8 @@ export const getArticles = async ({
   status,
   startDate,
   endDate,
+  page = 1,
+  perPage = 6,
 }: {
   tags?: string;
   order?: "latest" | "popular";
@@ -174,7 +177,9 @@ export const getArticles = async ({
   status?: boolean;
   startDate?: Date;
   endDate?: Date;
-}): Promise<ActionResponse<ArticleWithUser[]>> => {
+  perPage?: number;
+  page?: number;
+}): Promise<ActionResponse<PaginatedResult<ArticleWithUser>>> => {
   try {
     const query: Prisma.ArticleWhereInput = {};
     if (tags) {
@@ -201,6 +206,8 @@ export const getArticles = async ({
       status,
       startDate,
       endDate,
+      perPage,
+      page,
     );
     return ActionResponses.success(articles);
   } catch (error) {
