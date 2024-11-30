@@ -7,13 +7,15 @@ import { Calendar, Eye, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { FC } from "react";
+import { ShareButton } from "./ShareButton";
 
-export const ArticleContent: FC<{ article: ArticleWithUser }> = ({
-  article,
-}) => {
+export const ArticleContent: FC<{
+  article: ArticleWithUser;
+  shareData: ShareData;
+}> = ({ article, shareData }) => {
   return (
-    <article className="mx-auto block w-full">
-      <header>
+    <article className="mx-auto block w-full max-w-screen-md">
+      <header className="mb-14">
         <Image
           src={article.cover_url}
           alt={article.title}
@@ -36,22 +38,25 @@ export const ArticleContent: FC<{ article: ArticleWithUser }> = ({
         <H1 className="mb-4 text-4xl font-bold text-black" id="headline">
           {article.title}
         </H1>
-        <div className="mb-4 flex items-center space-x-4 text-gray-600">
-          <span className="flex items-center">
-            <User className="mr-2 h-4 w-4" />
-            {article.author.name}
-          </span>
-          <span className="flex items-center">
-            <Calendar className="mr-2 h-4 w-4" />
-            {format(new Date(article.published_at), "MMMM d, yyyy")}
-          </span>
-          <span className="flex items-center">
-            <Eye className="mr-2 h-4 w-4" />
-            {article.views}
-          </span>
+        <div className="mb-6 flex flex-col items-start justify-between gap-y-4 text-gray-600 md:flex-row md:items-center">
+          <div className="flex items-center gap-x-4">
+            <span className="flex items-center">
+              <User className="mr-2 h-4 w-4" />
+              {article.author.name}
+            </span>
+            <span className="flex items-center">
+              <Calendar className="mr-2 h-4 w-4" />
+              {format(new Date(article.published_at), "MMMM d, yyyy")}
+            </span>
+            <span className="flex items-center">
+              <Eye className="mr-2 h-4 w-4" />
+              {article.views}
+            </span>
+          </div>
+          <ShareButton shareData={shareData} />
         </div>
         {article.description && (
-          <Body3 className="mb-6 text-xl text-gray-600" id="summary">
+          <Body3 className="text-xl text-gray-600" id="summary">
             {article.description}
           </Body3>
         )}

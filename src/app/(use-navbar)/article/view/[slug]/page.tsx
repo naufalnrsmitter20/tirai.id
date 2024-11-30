@@ -124,12 +124,18 @@ export default async function ArticlePage({
       "@type": "Thing",
       name: "Interior Design",
     },
+    thumbnailUrl: article.cover_url,
   };
 
   return (
     <PageContainer>
       <SectionContainer id="article">
-        <ArticleContent article={article} />
+        <ArticleContent
+          article={article}
+          shareData={{
+            url: `${process.env.APP_URL}/article/view/${article.slug}`,
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
