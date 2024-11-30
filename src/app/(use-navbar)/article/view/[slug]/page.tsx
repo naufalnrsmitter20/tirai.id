@@ -1,11 +1,9 @@
 import { getArticleBySlug } from "@/actions/articles";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { buttonVariants } from "@/components/ui/button";
+import { CTA } from "@/components/widget/CTA";
 import { findArticle } from "@/utils/database/article.query";
-import { ChevronLeft } from "lucide-react";
 import type { Metadata, ResolvingMetadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleContent } from "./components/ArticleContent";
 
@@ -141,6 +139,7 @@ export default async function ArticlePage({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </SectionContainer>
+      <CTA />
     </PageContainer>
   );
 }

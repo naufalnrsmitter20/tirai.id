@@ -1,3 +1,4 @@
+import { CTA } from "@/components/widget/CTA";
 import { About } from "./components/About";
 import { Custom } from "./components/Custom";
 import { Fabric } from "./components/Fabric";
@@ -16,6 +17,7 @@ export default function Home() {
       <About />
       <Fabric />
       <Testimonies />
+      <CTA />
     </>
   );
 }
