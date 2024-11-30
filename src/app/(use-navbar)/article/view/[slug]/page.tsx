@@ -1,11 +1,13 @@
-import { PageContainer } from "@/components/layout/PageContainer";
-import { findArticle } from "@/utils/database/article.query";
-import type { Metadata, ResolvingMetadata } from "next";
-import ArticleContent from "./components/ArticleContent";
-import { ArticleWithUser } from "@/types/entityRelations";
 import { getArticleBySlug } from "@/actions/articles";
+import { PageContainer } from "@/components/layout/PageContainer";
+import { SectionContainer } from "@/components/layout/SectionContainer";
 import { buttonVariants } from "@/components/ui/button";
+import { findArticle } from "@/utils/database/article.query";
+import { ChevronLeft } from "lucide-react";
+import type { Metadata, ResolvingMetadata } from "next";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ArticleContent } from "./components/ArticleContent";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -43,7 +45,13 @@ export async function generateMetadata(
     },
     creator: article.author.name,
     description: article.description,
-    keywords: article.tags,
+    keywords: [
+      "Tirai.id",
+      "Gorden Murah",
+      "Tirai Indonesia",
+      ...article.tags,
+      ...article.title.split(" "),
+    ],
     alternates: {
       canonical: `${process.env.APP_URL}/article/view/${article.slug}`,
     },
@@ -57,6 +65,7 @@ export async function generateMetadata(
         follow: true,
       },
     },
+    publisher: "Tirai.id",
     other: {
       news_keywords: `${article.published_at.toLocaleDateString("ID-ID", { day: "numeric", month: "long", year: "numeric" })} ${article?.description} ${article?.tags.join(", ")}`,
       "googlebot-news": "index,follow",
@@ -71,37 +80,61 @@ export default async function ArticlePage({
 }) {
   const { slug } = await params;
   const response = await getArticleBySlug(slug, "view");
-  const article: ArticleWithUser | null = response.data ?? null;
+  const data = response.data;
 
-  console.log(article);
+  if (!data || !data.article) return notFound();
+
+  const { article } = data;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `${process.env.APP_URL}/article/view/${article.slug}`,
+    },
+    headline: article.title,
+    description: article.description,
+    image: [article.cover_url],
+    author: {
+      "@type": "Person",
+      name: article.author.name,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Tirai.id",
+      logo: {
+        "@type": "ImageObject",
+        url: `${process.env.APP_URL}/assets/logo.png`,
+      },
+    },
+    datePublished: article.published_at.toISOString(),
+    dateModified: article.updated_at.toISOString(),
+    articleSection: "Interior Design",
+    keywords: article.tags.join(", "),
+    wordCount: article.content.split(" ").length,
+    url: `${process.env.APP_URL}/article/view/${article.slug}`,
+    isAccessibleForFree: true,
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: ["#headline", "#summary"],
+    },
+    inLanguage: "id",
+    about: {
+      "@type": "Thing",
+      name: "Interior Design",
+    },
+  };
 
   return (
     <PageContainer>
-      <div>
-        {article && article.author_id ? (
-          <ArticleContent article={article} />
-        ) : (
-          <div className="flex min-h-screen items-center justify-center text-black">
-            <div className="text-center">
-              <h1 className="mb-4 text-4xl font-bold">
-                404 - Article Not Found
-              </h1>
-              <p className="mb-8 text-xl">
-                Sorry, the article {`"${slug}" doesn't exist.`}
-              </p>
-              <Link
-                href={"/"}
-                className={buttonVariants({
-                  variant: "default",
-                  className: "w-full",
-                })}
-              >
-                Kembali ke beranda
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
+      <SectionContainer id="article">
+        <ArticleContent article={article} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </SectionContainer>
     </PageContainer>
   );
 }

@@ -121,7 +121,7 @@ export const getArticleById = async (
 export const getArticleBySlug = async (
   slug: string,
   action: "view" | "edit",
-) => {
+): Promise<ActionResponse<{ article: ArticleWithUser }>> => {
   try {
     const article = await findArticle({ slug });
     if (!article) {
@@ -132,7 +132,7 @@ export const getArticleBySlug = async (
       await updateArticle({ slug }, { views: article.views + 1 });
     }
 
-    return ActionResponses.success(article);
+    return ActionResponses.success({ article });
   } catch (error) {
     console.log(error);
     return ActionResponses.serverError("Failed to get article");

@@ -1,3 +1,4 @@
+import { PageContainer } from "@/components/layout/PageContainer";
 import { paginator } from "@/lib/paginator";
 import prisma from "@/lib/prisma";
 import { findLatestArticle, findTags } from "@/utils/database/article.query";
@@ -44,8 +45,8 @@ export async function generateMetadata({
   );
   if (page > paginatedArticles.meta.lastPage)
     return {
-      title: "No Articles Found",
-      description: "Articles you're looking for is not found in our website.",
+      title: "Tidak ada artikel yang ditemukan",
+      description: "Artikel yang anda cari tidak ditemukan di situs kami.",
     };
 
   const articles = paginatedArticles.data;
@@ -53,15 +54,15 @@ export async function generateMetadata({
   const titles = articles.map((article) => article.title).join(", ");
 
   return {
-    title: "Articles from Tirai.id",
-    description: `Explore our articles collection: ${titles}`,
+    title: "Kumpulan artikel dari Tirai.id",
+    description: `Jelajahi koleksi artikel kami: ${titles}`,
     alternates: {
       canonical: `${process.env.APP_URL}/article`,
     },
     keywords: titles,
     openGraph: {
       type: "article",
-      description: `Explore our articles collection: ${titles}`,
+      description: `Jelajahi koleksi artikel kami: ${titles}`,
     },
   };
 }
@@ -103,7 +104,7 @@ export default async function Articles({
   const tags = await findTags();
 
   return (
-    <>
+    <PageContainer>
       <Hero />
       <Tags tags={tags} />
       <Recent
@@ -119,6 +120,6 @@ export default async function Articles({
         articles={paginatedArticles.data}
         meta={paginatedArticles.meta}
       />
-    </>
+    </PageContainer>
   );
 }

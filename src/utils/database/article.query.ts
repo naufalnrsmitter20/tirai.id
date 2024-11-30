@@ -66,6 +66,7 @@ export const findArticle = async (where: Prisma.ArticleWhereUniqueInput) => {
       author: {
         select: {
           name: true,
+          role: true,
         },
       },
     },

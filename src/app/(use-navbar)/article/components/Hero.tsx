@@ -1,12 +1,13 @@
 "use client";
 
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Body3, Display } from "@/components/ui/text";
 import { sanitizeSearchTerm } from "@/lib/utils";
 import { Search } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next-nprogress-bar";
+import Link from "next/link";
 import { FC, useState } from "react";
 
 export const Hero: FC = () => {
@@ -42,15 +43,7 @@ export const Hero: FC = () => {
         Dapatkan tips, panduan, dan tren terbaru untuk memilih tirai dan
         mendesain ruang yang indah dan fungsional
       </Body3>
-      <form
-        className="mx-auto flex w-full max-w-xl items-center justify-between gap-x-2"
-        onSubmit={() => {
-          if (searchTerm !== "") {
-            const sanitizedSearchTerm = sanitizeSearchTerm(searchTerm);
-            router.push(`/article/search?term=${sanitizedSearchTerm}`);
-          }
-        }}
-      >
+      <div className="mx-auto flex w-full max-w-xl items-center justify-between gap-x-2">
         <div className="w-[90%]">
           <Input
             placeholder="Cari artikel dari Tirai.id..."
@@ -60,10 +53,13 @@ export const Hero: FC = () => {
             }}
           />
         </div>
-        <Button disabled={searchTerm === ""} type="submit">
+        <Link
+          href={`/article/search?term=${sanitizeSearchTerm(searchTerm)}`}
+          className={buttonVariants({ variant: "default" })}
+        >
           <Search />
-        </Button>
-      </form>
+        </Link>
+      </div>
     </SectionContainer>
   );
 };
