@@ -15,7 +15,7 @@ export const ArticleContent: FC<{
 }> = ({ article, shareData }) => {
   return (
     <article className="mx-auto block w-full max-w-screen-md">
-      <header className="mb-14">
+      <header className="mb-7 border-b border-neutral-400 pb-7">
         <Image
           src={article.cover_url}
           alt={article.title}
@@ -38,8 +38,8 @@ export const ArticleContent: FC<{
         <H1 className="mb-4 text-4xl font-bold text-black" id="headline">
           {article.title}
         </H1>
-        <div className="mb-6 flex flex-col items-start justify-between gap-y-4 text-gray-600 md:flex-row md:items-center">
-          <div className="flex items-center gap-x-4">
+        <div className="mb-6 flex flex-row items-start justify-between gap-y-4 text-gray-600 md:items-center">
+          <div className="flex flex-col items-start gap-x-4 md:flex-row md:items-center">
             <span className="flex items-center">
               <User className="mr-2 h-4 w-4" />
               {article.author.name}
