@@ -14,9 +14,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { H2 } from "@/components/ui/text";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { ArticleWithUser } from "@/types/entityRelations";
+import { ArrowLeft } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -29,6 +33,7 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
 }: {
   updateData?: ArticleWithUser;
 }) => {
+  const router = useRouter();
   const createArticleSchema = useMemo(
     () =>
       z.object({
@@ -36,7 +41,8 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
         slug: z.string().min(1, "Slug wajib diisi."),
         tags: z
           .string()
-          .transform((val) => val.split(", ").map((tag) => tag.trim())),
+          .transform((val) => val.split(", ").map((tag) => tag.trim()))
+          .optional(),
         description: z.string().min(10, "Deskripsi minimal 10 karakter"),
         content: z.string().min(1, "Konten wajib diisi"),
         image: updateData
@@ -81,7 +87,7 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
     schema: createArticleSchema,
   });
 
-  async function onSubmit(values: z.infer<typeof createArticleSchema>) {
+  const onSubmit = form.handleSubmit(async (values) => {
     setLoading(true);
 
     const formData = new FormData();
@@ -93,7 +99,9 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
       formData.append("title", values.title);
       formData.append("slug", values.slug);
       formData.append("description", values.description);
-      formData.append("tags", values.tags.join(","));
+      if (values.tags && values.tags.length > 0) {
+        formData.append("tags", values.tags?.join(","));
+      }
       formData.append("content", values.content);
       if (values.image) formData.append("image", values.image);
       formData.append("is_published", values.is_published.toString());
@@ -127,14 +135,23 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
         { id: loading },
       );
     }
-  }
+  });
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="max-w-screen-lg space-y-8"
-      >
+      {updateData && (
+        <div className="mb-5 flex items-center gap-4">
+          <Button
+            onClick={() => router.back()}
+            className="inline-flex aspect-square items-center justify-center rounded-full p-3"
+            type="button"
+          >
+            <ArrowLeft className="text-white" />
+          </Button>
+          <H2 className="text-black">Update artikel {updateData.slug}</H2>
+        </div>
+      )}
+      <form onSubmit={onSubmit} className="max-w-screen-lg space-y-8">
         <FormField
           control={form.control}
           name="title"
@@ -249,6 +266,7 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  color="#000000"
                 />
               </FormControl>
               <div className="space-y-1 leading-none">
