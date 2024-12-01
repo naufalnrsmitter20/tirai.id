@@ -18,6 +18,7 @@ import { useZodForm } from "@/hooks/use-zod-form";
 import { ArticleWithUser } from "@/types/entityRelations";
 import Image from "next/image";
 import { FC } from "react";
+import { toast } from "sonner";
 import * as z from "zod";
 
 const MAX_FILE_SIZE = 5_000_000;
@@ -73,16 +74,41 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
 
   async function onSubmit(values: z.infer<typeof createArticleSchema>) {
     const formData = new FormData();
-    formData.append("title", values.title);
-    formData.append("slug", values.slug);
-    formData.append("tags", values.tags.join(","));
-    formData.append("content", values.content);
-    if (values.image) formData.append("image", values.image);
+    const loading = toast.loading(
+      updateData ? "Memperbarui artikel..." : "Menambahkan artikel...",
+    );
+    try {
+      formData.append("title", values.title);
+      formData.append("slug", values.slug);
+      formData.append("tags", values.tags.join(","));
+      formData.append("content", values.content);
+      if (values.image) formData.append("image", values.image);
+      formData.append("is_published", values.is_published.toString());
+      formData.append("author_id", "1");
 
-    formData.append("is_published", values.is_published.toString());
-    formData.append("author_id", "1");
+      const res = await upsertArticle({ data: formData, id: updateData?.id });
 
-    const res = await upsertArticle({ data: formData, id: updateData?.id });
+      if (!res.success)
+        return toast.error(
+          updateData
+            ? "Gagal Memperbarui artikel!"
+            : "Gagal menambahkan artikel!",
+          { id: loading },
+        );
+
+      return toast.success(
+        updateData
+          ? "Berhasil Memperbarui artikel!"
+          : "Berhasil menambahkan artikel!",
+      );
+    } catch (e) {
+      return toast.error(
+        updateData
+          ? "Gagal Memperbarui artikel!"
+          : "Gagal menambahkan artikel!",
+        { id: loading },
+      );
+    }
     // TODO: Handle response (toast, loading, etc)
   }
 
