@@ -1,5 +1,7 @@
 "use server";
 import { ActionResponse, ActionResponses } from "@/lib/actions";
+import { PaginatedResult } from "@/lib/paginator";
+import { ArticleWithUser } from "@/types/entityRelations";
 import {
   createArticle,
   findArticle,
@@ -7,11 +9,9 @@ import {
   hardDeleteArticle,
   updateArticle,
 } from "@/utils/database/article.query";
-import { ArticleWithUser } from "@/types/entityRelations";
-import { uploadImageCloudinary, deleteImageCloudinary } from "./fileUploader";
-import { Article, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { PaginatedResult } from "@/lib/paginator";
+import { deleteImageCloudinary, uploadImageCloudinary } from "./fileUploader";
 
 export const upsertArticle = async ({
   data,
@@ -78,7 +78,7 @@ export const upsertArticle = async ({
       },
     );
 
-    revalidatePath("/");
+    revalidatePath("/article", "layout");
     return ActionResponses.success({ message: "Article upserted" });
   } catch (error) {
     console.log(error);
@@ -92,6 +92,8 @@ export const updateArticleStatus = async (
 ): Promise<ActionResponse<{ id: string }>> => {
   try {
     await updateArticle({ id }, { is_published });
+
+    revalidatePath("/article", "layout");
     return ActionResponses.success({ id });
   } catch (error) {
     console.log(error);
@@ -109,6 +111,7 @@ export const getArticleById = async (
       return ActionResponses.notFound("Article not found");
     }
     if (action === "view") {
+      revalidatePath("/article", "layout");
       await updateArticle({ id }, { views: articleData.views + 1 });
     }
 
@@ -153,7 +156,9 @@ export const deleteArticle = async (
     }
 
     await hardDeleteArticle({ id });
+
     revalidatePath("/admin/articles");
+    revalidatePath("/article", "layout");
     return ActionResponses.success({ id });
   } catch (error) {
     console.log(error);
