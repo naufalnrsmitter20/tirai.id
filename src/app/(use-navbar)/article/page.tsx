@@ -43,11 +43,6 @@ export async function generateMetadata({
       },
     },
   );
-  if (page > paginatedArticles.meta.lastPage)
-    return {
-      title: "Tidak ada artikel yang ditemukan",
-      description: "Artikel yang anda cari tidak ditemukan di situs kami.",
-    };
 
   const articles = paginatedArticles.data;
 
@@ -112,15 +107,17 @@ export default async function Articles({
     <PageContainer>
       <Hero />
       <Tags tags={tags} />
-      <Recent
-        cover={latestArticle.cover_url}
-        title={latestArticle.title}
-        description={latestArticle.description}
-        slug={latestArticle.slug}
-        authorName={latestArticle.author.name}
-        published_at={latestArticle.published_at}
-        tags={latestArticle.tags}
-      />
+      {latestArticle && (
+        <Recent
+          cover={latestArticle.cover_url}
+          title={latestArticle.title}
+          description={latestArticle.description}
+          slug={latestArticle.slug}
+          authorName={latestArticle.author.name}
+          published_at={latestArticle.published_at}
+          tags={latestArticle.tags}
+        />
+      )}
       <ArticlesDisplay
         articles={paginatedArticles.data}
         meta={paginatedArticles.meta}
