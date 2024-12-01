@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { ArticleWithUser } from "@/types/entityRelations";
 import Image from "next/image";
-import { FC } from "react";
+import { FC, useMemo, useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
 
@@ -29,35 +29,42 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
 }: {
   updateData?: ArticleWithUser;
 }) => {
-  const createArticleSchema = z.object({
-    title: z.string().min(1, "Title is required"),
-    slug: z.string().min(1, "Slug is required"),
-    tags: z
-      .string()
-      .transform((val) => val.split(",").map((tag) => tag.trim())),
-    content: z.string().min(1, "Content is required"),
-    image: updateData
-      ? z
-          .instanceof(File)
-          .optional()
-          .refine((file: File | undefined) => {
-            return (
-              file === undefined || ACCEPTED_IMAGE_TYPES.includes(file?.type)
-            );
-          }, "only .jpeg, .png. is valid")
-          .refine((file: File | undefined) => {
-            return file === undefined || file?.size <= MAX_FILE_SIZE;
-          }, `Ukuran maksimal file adalah 5MB`)
-      : z
-          .instanceof(File)
-          .refine((file: File) => {
-            return ACCEPTED_IMAGE_TYPES.includes(file?.type);
-          }, "only .jpeg, .png. is valid")
-          .refine((file: File) => {
-            return file?.size <= MAX_FILE_SIZE;
-          }, `Ukuran maksimal file adalah 5MB`),
-    is_published: z.boolean().default(false),
-  });
+  const createArticleSchema = useMemo(
+    () =>
+      z.object({
+        title: z.string().min(1, "Title is required"),
+        slug: z.string().min(1, "Slug is required"),
+        tags: z
+          .string()
+          .transform((val) => val.split(",").map((tag) => tag.trim())),
+        content: z.string().min(1, "Content is required"),
+        image: updateData
+          ? z
+              .instanceof(File)
+              .optional()
+              .refine((file: File | undefined) => {
+                return (
+                  file === undefined ||
+                  ACCEPTED_IMAGE_TYPES.includes(file?.type)
+                );
+              }, "only .jpeg, .png. is valid")
+              .refine((file: File | undefined) => {
+                return file === undefined || file?.size <= MAX_FILE_SIZE;
+              }, `Ukuran maksimal file adalah 5MB`)
+          : z
+              .instanceof(File)
+              .refine((file: File) => {
+                return ACCEPTED_IMAGE_TYPES.includes(file?.type);
+              }, "only .jpeg, .png. is valid")
+              .refine((file: File) => {
+                return file?.size <= MAX_FILE_SIZE;
+              }, `Ukuran maksimal file adalah 5MB`),
+        is_published: z.boolean().default(false),
+      }),
+    [],
+  );
+
+  const [loading, setLoading] = useState(false);
 
   const form = useZodForm({
     defaultValues: {
@@ -73,10 +80,13 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
   });
 
   async function onSubmit(values: z.infer<typeof createArticleSchema>) {
+    setLoading(true);
+
     const formData = new FormData();
     const loading = toast.loading(
       updateData ? "Memperbarui artikel..." : "Menambahkan artikel...",
     );
+
     try {
       formData.append("title", values.title);
       formData.append("slug", values.slug);
@@ -88,20 +98,25 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
 
       const res = await upsertArticle({ data: formData, id: updateData?.id });
 
-      if (!res.success)
+      if (!res.success) {
+        setLoading(false);
         return toast.error(
           updateData
             ? "Gagal Memperbarui artikel!"
             : "Gagal menambahkan artikel!",
           { id: loading },
         );
+      }
 
+      setLoading(false);
       return toast.success(
         updateData
           ? "Berhasil Memperbarui artikel!"
           : "Berhasil menambahkan artikel!",
+        { id: loading },
       );
     } catch (e) {
+      setLoading(false);
       return toast.error(
         updateData
           ? "Gagal Memperbarui artikel!"
@@ -109,7 +124,6 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
         { id: loading },
       );
     }
-    // TODO: Handle response (toast, loading, etc)
   }
 
   return (
@@ -242,8 +256,8 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" size={"lg"}>
-          Submit
+        <Button type="submit" className="w-full" size={"lg"} disabled={loading}>
+          Konfirmasi
         </Button>
       </form>
     </Form>
