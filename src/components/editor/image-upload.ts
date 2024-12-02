@@ -1,40 +1,25 @@
 "use client";
 
 import { createImageUpload } from "novel/plugins";
+import { uploadImageCloudinary } from "@/actions/fileUploader";
 
-const onUpload = (file: File) => {
-  const promise = fetch("/api/upload", {
-    method: "POST",
-    headers: {
-      "Content-Type": file?.type || "application/octet-stream",
-      "x-vercel-filename": file?.name || "image.png",
-    },
-    body: file,
-  });
+const onUpload = async (file: File) => {
+  const cloudinaryResponse = await uploadImageCloudinary(
+    await file.arrayBuffer(),
+  );
+  if (cloudinaryResponse.error) {
+    throw new Error(cloudinaryResponse.error.message);
+  }
 
   return new Promise((resolve) => {
-    promise.then(async (res) => {
-      // Successfully uploaded image
-      if (res.status === 200) {
-        const { url } = (await res.json()) as { url: string };
-        // preload the image
-        const image = new Image();
-        image.src = url;
-        image.onload = () => {
-          resolve(url);
-        };
-        // No blob store configured
-      } else if (res.status === 401) {
-        resolve(file);
-        throw new Error(
-          "`BLOB_READ_WRITE_TOKEN` environment variable not found, reading image locally instead.",
-        );
-        // Unknown error
-      } else {
-        const response = await res.json();
-        throw new Error(`Error uploading image. Please try again.`, response);
-      }
-    });
+    // preload the image
+    const image = new Image();
+    if (cloudinaryResponse.data?.url) {
+      image.src = cloudinaryResponse.data.url;
+    }
+    image.onload = () => {
+      resolve(cloudinaryResponse.data?.url);
+    };
   });
 };
 
