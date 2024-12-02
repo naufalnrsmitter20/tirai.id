@@ -1,3 +1,4 @@
+import { paginator } from "@/lib/paginator";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
@@ -11,8 +12,18 @@ export const findUser = async (where: Prisma.UserWhereUniqueInput) => {
   return await prisma.user.findUnique({ where });
 };
 
-export const findUsers = async () => {
-  return await prisma.user.findMany({});
+export const findUsers = async (
+  args?: Prisma.UserFindManyArgs,
+  perPage = 6,
+  page = 1,
+) => {
+  const paginate = paginator({ perPage });
+
+  return await paginate<Prisma.UserGetPayload<{}>, Prisma.UserFindManyArgs>(
+    prisma.user,
+    { page },
+    args,
+  );
 };
 
 export const updateUser = async (

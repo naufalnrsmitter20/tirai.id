@@ -1,4 +1,4 @@
-import { Newspaper, UserCog } from "lucide-react";
+import { Newspaper, User2, UserCog } from "lucide-react";
 import { SidebarMainContent } from "./SidebarMainContent";
 
 import {
@@ -12,6 +12,22 @@ import {
 
 const data = {
   navMain: [
+    {
+      title: "User",
+      url: "/admin/user",
+      icon: User2,
+      isActive: true,
+      items: [
+        {
+          title: "All Users",
+          url: "/admin/user",
+        },
+        {
+          title: "Add User",
+          url: "/admin/user/add",
+        },
+      ],
+    },
     {
       title: "Articles",
       url: "/admin/article",

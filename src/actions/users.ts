@@ -1,8 +1,13 @@
 "use server";
 import { ActionResponse, ActionResponses } from "@/lib/actions";
-import { createUser, findUser, updateUser } from "@/utils/database/user.query";
+import {
+  createUser,
+  deleteUser,
+  findUser,
+  updateUser,
+} from "@/utils/database/user.query";
 import { encrypt } from "@/utils/encryption";
-import { Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export const upsertUser = async ({
@@ -13,10 +18,11 @@ export const upsertUser = async ({
     phone_number?: string;
     name: string;
     email: string;
-    password: string;
+    password?: string;
+    role?: Role;
   };
 }): Promise<ActionResponse<{ message: string }>> => {
-  const { id, name, email, password, phone_number } = data;
+  const { id, name, email, password, phone_number, role = "CUSTOMER" } = data;
 
   try {
     if (!id) {
@@ -39,8 +45,9 @@ export const upsertUser = async ({
       name,
       email,
       phone_number,
-      password: encrypt(password),
+      password: password ? encrypt(password) : undefined,
       is_verified: false,
+      role,
     };
 
     if (!id) {
@@ -59,10 +66,30 @@ export const upsertUser = async ({
       },
     );
 
-    revalidatePath("/");
+    revalidatePath("/admin/user");
     return ActionResponses.success({ message: "User updated successfully" });
   } catch (error) {
     console.error(error);
     return ActionResponses.serverError("Failed to upsert user");
+  }
+};
+
+export const deleteUserAction = async ({
+  data,
+}: {
+  data: {
+    id: string;
+  };
+}): Promise<ActionResponse<{ message: string }>> => {
+  const { id } = data;
+
+  try {
+    const res = await deleteUser({ id });
+
+    revalidatePath("/admin/user");
+    return ActionResponses.success({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    return ActionResponses.serverError("Failed to delete user");
   }
 };
