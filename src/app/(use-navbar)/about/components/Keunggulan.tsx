@@ -30,7 +30,7 @@ export const Keunggulan: FC = () => {
       <div className="flex flex-col">
         <SectionTitle>Keunggulan</SectionTitle>
         <H2 className="mb-[3rem] text-black">
-          Kualitas, Layanan, dan Kepuasan Terjamin
+          Kualitas, Layanan, dan Kepuasan Pelanggan Kami Terjamin
         </H2>
         <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
           {MOTTOS.map((motto, index) => (
