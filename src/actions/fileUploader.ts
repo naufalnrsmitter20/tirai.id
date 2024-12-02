@@ -3,41 +3,40 @@
 import { UploadApiResponse } from "cloudinary";
 
 import cloudinary from "@/lib/cloudinary";
+import { ActionResponse, ActionResponses } from "@/lib/actions";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function uploadImageCloudinary(file: Buffer | any) {
+export async function uploadImageCloudinary(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  file: Buffer | any,
+): Promise<ActionResponse<{ format: string; url: string }>> {
   try {
     const upload: UploadApiResponse | undefined = await new Promise(
       (resolve, reject) => {
         cloudinary.uploader
-          .upload_stream(
-            { upload_preset: "tirai_asset" },
-            (error, uploadResult) => {
-              if (error) reject(error);
-              return resolve(uploadResult);
-            },
-          )
+          .upload_stream((error, uploadResult) => {
+            if (error) reject(error);
+            return resolve(uploadResult);
+          })
           .end(Buffer.isBuffer(file) ? file : Buffer.from(file));
       },
     );
 
-    if (!upload) return { error: true, message: "Terjadi kesalahan" };
+    if (!upload) return ActionResponses.serverError("Gagal mengupload!");
 
     const data = {
       format: upload.format,
       url: upload.secure_url,
     };
 
-    return { error: false, message: "Upload sukses", data };
+    return ActionResponses.success(data);
   } catch (e) {
     console.error(e);
     const error = e as Error;
-    return {
-      error: true,
-      message: error.message.includes("not allowed")
+    return ActionResponses.serverError(
+      error.message.includes("not allowed")
         ? error.message
         : "Terjadi kesalahan",
-    };
+    );
   }
 }
 

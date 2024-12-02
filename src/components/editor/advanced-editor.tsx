@@ -15,22 +15,20 @@ import {
 import { ImageResizer, handleCommandNavigation } from "novel/extensions";
 import { handleImageDrop, handleImagePaste } from "novel/plugins";
 
+import EditorMenu from "@/components/editor/editor-menu";
+import { defaultExtensions } from "@/components/editor/extensions";
+import { uploadFn } from "@/components/editor/image-upload";
+import { ColorSelector } from "@/components/editor/selectors/color-selector";
+import { LinkSelector } from "@/components/editor/selectors/link-selector";
+import { MathSelector } from "@/components/editor/selectors/math-selector";
+import { NodeSelector } from "@/components/editor/selectors/node-selector";
+import { TextButtons } from "@/components/editor/selectors/text-buttons";
 import {
   slashCommand,
   suggestionItems,
 } from "@/components/editor/slash-command";
-import EditorMenu from "@/components/editor/editor-menu";
-import { uploadFn } from "@/components/editor/image-upload";
-import { defaultExtensions } from "@/components/editor/extensions";
-import { TextButtons } from "@/components/editor/selectors/text-buttons";
-import { LinkSelector } from "@/components/editor/selectors/link-selector";
-import { NodeSelector } from "@/components/editor/selectors/node-selector";
-import { MathSelector } from "@/components/editor/selectors/math-selector";
-import { ColorSelector } from "@/components/editor/selectors/color-selector";
 
 import { Separator } from "@/components/ui/separator";
-
-const hljs = require("highlight.js");
 
 const extensions = [...defaultExtensions, slashCommand];
 
@@ -54,17 +52,6 @@ export default function Editor({ initialValue, onChange }: EditorProps) {
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
   const [openAI, setOpenAI] = useState(false);
-
-  //Apply Codeblock Highlighting on the HTML from editor.getHTML()
-  const highlightCodeblocks = (content: string) => {
-    const doc = new DOMParser().parseFromString(content, "text/html");
-    doc.querySelectorAll("pre code").forEach((el) => {
-      // @ts-ignore
-      // https://highlightjs.readthedocs.io/en/latest/api.html?highlight=highlightElement#highlightelement
-      hljs.highlightElement(el);
-    });
-    return new XMLSerializer().serializeToString(doc);
-  };
 
   return (
     <div className="relative w-full">

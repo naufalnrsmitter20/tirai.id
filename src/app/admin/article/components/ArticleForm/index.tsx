@@ -23,8 +23,9 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FC, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import * as z from "zod";
+import { z } from "zod";
 import { CoverPreview } from "./CoverPreview";
+import { Textarea } from "@/components/ui/textarea";
 
 const MAX_FILE_SIZE = 5_000_000;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png"];
@@ -185,7 +186,7 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Judul</FormLabel>
+              <FormLabel htmlFor="title">Judul</FormLabel>
               <FormControl>
                 <Input {...field} placeholder="Masukkan judul artikel" />
               </FormControl>
@@ -227,16 +228,33 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
           name="tags"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tagar</FormLabel>
+              <FormLabel htmlFor="tags">Tagar</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Enter tags, separated by commas"
                   {...field}
+                  placeholder="Masukkan tag dengan dipisahkan koma (contoh: Tirai, Tips & Tricks)"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="description">Deskripsi</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  className="min-h-[120px]"
+                  placeholder="Masukkan deskripsi artikel (minimal 10 karakter)"
                 />
               </FormControl>
               <FormDescription>
-                Masukkan tagar dengan dipisahkan oleh koma (,)
-                {`(e.g., "tech, news, programming")`}
+                Deskripsi akan digunakan pada thumbnail artikel serta metadata
+                dalam Search Engine Optimization.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -247,7 +265,7 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Konten</FormLabel>
+              <FormLabel htmlFor="content">Konten</FormLabel>
               <FormControl>
                 <Editor {...field} initialValue={updateData?.content} />
               </FormControl>

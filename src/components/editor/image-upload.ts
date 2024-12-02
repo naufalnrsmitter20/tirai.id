@@ -1,10 +1,12 @@
+"use client";
+
 import { createImageUpload } from "novel/plugins";
 
 const onUpload = (file: File) => {
   const promise = fetch("/api/upload", {
     method: "POST",
     headers: {
-      "content-type": file?.type || "application/octet-stream",
+      "Content-Type": file?.type || "application/octet-stream",
       "x-vercel-filename": file?.name || "image.png",
     },
     body: file,
@@ -14,9 +16,9 @@ const onUpload = (file: File) => {
     promise.then(async (res) => {
       // Successfully uploaded image
       if (res.status === 200) {
-        const { url } = (await res.json()) as any;
+        const { url } = (await res.json()) as { url: string };
         // preload the image
-        let image = new Image();
+        const image = new Image();
         image.src = url;
         image.onload = () => {
           resolve(url);
@@ -29,7 +31,8 @@ const onUpload = (file: File) => {
         );
         // Unknown error
       } else {
-        throw new Error(`Error uploading image. Please try again.`);
+        const response = await res.json();
+        throw new Error(`Error uploading image. Please try again.`, response);
       }
     });
   });
