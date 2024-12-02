@@ -2,8 +2,9 @@ import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Body3, H2, H3 } from "@/components/ui/text";
 import { SectionTitle } from "@/components/widget/SectionTitle";
 import Image from "next/image";
+import { FC } from "react";
 
-export default function VisiMisi() {
+export const VisiMisi: FC = () => {
   return (
     <SectionContainer>
       <SectionTitle>Visi & Misi</SectionTitle>
@@ -47,4 +48,4 @@ export default function VisiMisi() {
       </div>
     </SectionContainer>
   );
-}
+};

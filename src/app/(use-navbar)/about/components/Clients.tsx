@@ -4,14 +4,14 @@ import { SectionTitle } from "@/components/widgets/SectionTitle";
 import Image from "next/image";
 import { FC } from "react";
 
-interface Clients {
+interface Client {
   id: string;
   photo: string;
   name: string;
   description: string;
 }
 
-const CLIENTS: Clients[] = [
+const CLIENTS: Client[] = [
   {
     id: "1",
     photo:
@@ -45,7 +45,8 @@ const CLIENTS: Clients[] = [
       "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras ligula",
   },
 ];
-export const Client: FC = () => {
+
+export const Clients: FC = () => {
   return (
     <SectionContainer>
       <div className="flex flex-col">
