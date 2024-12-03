@@ -16,16 +16,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { H2 } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { ArticleWithUser } from "@/types/entityRelations";
 import { getMonth } from "date-fns";
 import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next-nprogress-bar";
 import { FC, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { CoverPreview } from "./CoverPreview";
-import { Textarea } from "@/components/ui/textarea";
 
 const MAX_FILE_SIZE = 5_000_000;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png"];
@@ -99,8 +99,8 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
     if (!isManualSlug && title !== "") {
       const slug = `${title.split(" ").slice(0, 8).join("-")}-${now.getDate()}-${getMonth(now)}-${now.getFullYear()}`;
       form.setValue("slug", slug);
-    } else form.setValue("slug", "");
-  }, [form, isManualSlug, title]);
+    } else form.setValue("slug", updateData?.slug || "");
+  }, [form, isManualSlug, title, updateData?.slug]);
 
   const onSubmit = form.handleSubmit(async (values) => {
     setLoading(true);
@@ -169,18 +169,29 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
 
   return (
     <Form {...form}>
-      {updateData && (
-        <div className="mb-5 flex items-center gap-4">
-          <Button
-            onClick={() => router.back()}
-            className="inline-flex aspect-square items-center justify-center rounded-full p-3"
-            type="button"
-          >
-            <ArrowLeft className="text-white" />
-          </Button>
-          <H2 className="text-black">Update artikel {updateData.slug}</H2>
-        </div>
-      )}
+      <div className="mb-8 flex flex-col items-start gap-4">
+        <Button
+          variant={"link"}
+          size={"link"}
+          onClick={() => router.back()}
+          type="button"
+        >
+          <ArrowLeft /> Kembali
+        </Button>
+        <H2 className="text-black">
+          {updateData ? (
+            <>
+              Update Artikel dengan Judul{" "}
+              <span className="text-primary-900">
+                &quot;{updateData?.title}&quot;
+              </span>
+            </>
+          ) : (
+            <>Buat Artikel Baru</>
+          )}
+        </H2>
+      </div>
+
       <form onSubmit={onSubmit} className="max-w-screen-lg space-y-8">
         <FormField
           control={form.control}
