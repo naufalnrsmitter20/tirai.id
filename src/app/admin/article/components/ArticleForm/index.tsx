@@ -148,12 +148,13 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
       }
 
       setLoading(false);
-      return toast.success(
+      toast.success(
         updateData
           ? "Berhasil memperbarui artikel!"
           : "Berhasil menambahkan artikel!",
         { id: loading },
       );
+      return router.push("/admin/article");
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       setLoading(false);
