@@ -14,6 +14,7 @@ export function isValidUrl(url: string) {
     new URL(url);
     return true;
   } catch (e) {
+    console.error(e);
     return false;
   }
 }
@@ -24,6 +25,7 @@ export function getUrlFromString(str: string) {
       return new URL(`https://${str}`).toString();
     }
   } catch (e) {
+    console.error(e);
     return null;
   }
 }
@@ -38,7 +40,7 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
 
   // Autofocus on input by default
   useEffect(() => {
-    inputRef.current && inputRef.current?.focus();
+    if (inputRef.current) inputRef.current?.focus();
   });
   if (!editor) return null;
 

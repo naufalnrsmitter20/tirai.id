@@ -1,5 +1,5 @@
 import { buttonVariants } from "@/components/ui/button";
-import { Body3, H2, H3 } from "@/components/ui/text";
+import { Body3, H3 } from "@/components/ui/text";
 import { SectionTitle } from "@/components/widget/SectionTitle";
 import Link from "next/link";
 import { FC } from "react";

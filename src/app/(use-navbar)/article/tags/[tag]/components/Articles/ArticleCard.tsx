@@ -43,7 +43,7 @@ export const ArticleCard: FC<{ article: ArticleWithUser }> = ({ article }) => {
           {article.author.name}
         </Body3>
         <Body3 className="text-neutral-500">
-          {formatDate(article.published_at)}
+          {formatDate(article.published_at!)}
         </Body3>
       </div>
     </Link>

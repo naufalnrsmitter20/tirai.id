@@ -61,11 +61,20 @@ export const ArticleFilter: FC<{
     // Only save filters if there's date.from then there should be date.to, otherwise don't save filters
     if ((date?.from && date.to) || (!date?.from && !date?.to))
       router.push(`?${params.toString()}`);
-  }, [searchTitle, searchTags, status, sortBy, date, searchData.page]);
+  }, [
+    searchTitle,
+    status,
+    searchTags,
+    sortBy,
+    date?.from,
+    date?.to,
+    searchData.page,
+    router,
+  ]);
 
   useEffect(() => {
     saveFilters();
-  }, [sortBy, status, router, date, searchData.page]);
+  }, [sortBy, status, router, date, searchData.page, saveFilters]);
 
   return (
     <div className="flex w-full flex-col items-start gap-4">

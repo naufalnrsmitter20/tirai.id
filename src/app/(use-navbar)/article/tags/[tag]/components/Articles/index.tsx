@@ -1,11 +1,10 @@
+import { buttonVariants } from "@/components/ui/button";
 import { Body3, H2 } from "@/components/ui/text";
-import { SectionTitle } from "@/components/widget/SectionTitle";
 import { PaginationMetadata } from "@/lib/paginator";
 import { ArticleWithUser } from "@/types/entityRelations";
 import { FC } from "react";
 import { ArticleCard } from "./ArticleCard";
 import { PageSelector } from "./PageSelector";
-import { buttonVariants } from "@/components/ui/button";
 
 export const ArticlesResultDisplay: FC<{
   articles: ArticleWithUser[];

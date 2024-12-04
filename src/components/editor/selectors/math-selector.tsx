@@ -14,7 +14,7 @@ export const MathSelector = () => {
       type="button"
       size="sm"
       className="w-12 rounded-none"
-      onClick={(evt) => {
+      onClick={() => {
         if (editor.isActive("math")) {
           editor.chain().focus().unsetLatex().run();
         } else {

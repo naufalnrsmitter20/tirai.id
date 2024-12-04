@@ -84,7 +84,7 @@ export const deleteUserAction = async ({
   const { id } = data;
 
   try {
-    const res = await deleteUser({ id });
+    await deleteUser({ id });
 
     revalidatePath("/admin/user");
     return ActionResponses.success({ message: "User deleted successfully" });

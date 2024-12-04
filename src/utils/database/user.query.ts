@@ -1,6 +1,6 @@
 import { paginator } from "@/lib/paginator";
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 
 export const createUser = async (data: Prisma.UserCreateInput) => {
   return await prisma.user.create({
@@ -19,7 +19,7 @@ export const findUsers = async (
 ) => {
   const paginate = paginator({ perPage });
 
-  return await paginate<Prisma.UserGetPayload<{}>, Prisma.UserFindManyArgs>(
+  return await paginate<User, Prisma.UserFindManyArgs>(
     prisma.user,
     { page },
     args,

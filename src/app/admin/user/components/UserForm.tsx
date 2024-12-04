@@ -3,6 +3,7 @@
 import { upsertUser } from "@/actions/users";
 import { Button } from "@/components/ui/button";
 import {
+  Form,
   FormControl,
   FormField,
   FormItem,
@@ -16,10 +17,8 @@ import { User } from "@prisma/client";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Select } from "@/components/ui/select";
 
 export default function UserForm({ updateData }: { updateData?: User }) {
   const router = useRouter();

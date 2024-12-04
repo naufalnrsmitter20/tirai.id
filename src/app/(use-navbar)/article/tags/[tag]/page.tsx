@@ -3,7 +3,6 @@ import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Body3, H1 } from "@/components/ui/text";
 import { paginator } from "@/lib/paginator";
 import prisma from "@/lib/prisma";
-import { sanitizeInput } from "@/lib/utils";
 import { Prisma } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { ArticlesResultDisplay } from "./components/Articles";
@@ -23,8 +22,6 @@ export default async function ArticlesByTag({
   if (!paramTag) return notFound();
 
   const tag = decodeURIComponent(paramTag);
-
-  const sanitizedTag = sanitizeInput(tag);
 
   let page = paramPage ? Number(paramPage) : 1;
   if (page < 0) page = 1;
