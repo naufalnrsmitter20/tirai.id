@@ -2,6 +2,7 @@ import { PageSelector } from "@/components/ui/PageSelector";
 import { Body3 } from "@/components/ui/text";
 import { findUsers } from "@/utils/database/user.query";
 import { UserCard } from "./components/UserCard";
+import { UserTable } from "./components/UserTable";
 
 export default async function UserPage({
   searchParams,
@@ -16,13 +17,7 @@ export default async function UserPage({
   return (
     <div>
       <div>
-        {users.length > 0 && (
-          <div className="grid w-full grid-cols-3 gap-4">
-            {users.map((i) => (
-              <UserCard data={i} key={i.id} />
-            ))}
-          </div>
-        )}
+        {users.length > 0 && <UserTable meta={response.meta} users={users} />}
         {users.length === 0 && (
           <Body3 className="text-neutral-500">
             Tidak ada user yang ditemukan...
