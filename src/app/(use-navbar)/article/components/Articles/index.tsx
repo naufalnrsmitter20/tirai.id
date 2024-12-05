@@ -5,6 +5,7 @@ import { ArticleWithUser } from "@/types/entityRelations";
 import { FC } from "react";
 import { ArticleCard } from "./ArticleCard";
 import { PageSelector } from "@/components/ui/PageSelector";
+import { SectionTitle } from "@/components/widget/SectionTitle";
 
 export const ArticlesDisplay: FC<{
   articles: ArticleWithUser[];
@@ -12,7 +13,8 @@ export const ArticlesDisplay: FC<{
 }> = ({ articles, meta }) => {
   return (
     <SectionContainer id="articles">
-      <H1 className="mb-[62px] text-black">Artikel Lainnya</H1>
+      <SectionTitle>Artikel</SectionTitle>
+      <H1 className="mb-[62px] text-black">Artikel Dari Kami</H1>
       <div className="grid w-full grid-cols-1 gap-x-6 gap-y-[62px] md:grid-cols-2 lg:grid-cols-3">
         {articles.length > 0 ? (
           articles.map((item) => <ArticleCard article={item} key={item.id} />)

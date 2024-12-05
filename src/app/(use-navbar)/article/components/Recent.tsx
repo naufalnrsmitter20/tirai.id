@@ -22,7 +22,7 @@ export const Recent = (data: {
   return (
     <SectionContainer id="recent-article">
       <div className="flex flex-col">
-        <SectionTitle>Artikel</SectionTitle>
+        <SectionTitle>Terbaru</SectionTitle>
         <H1 className="mb-16 text-black">Artikel Terbaru</H1>
         <div className="grid grid-cols-1 gap-11 md:grid-cols-2">
           <Image
