@@ -22,16 +22,6 @@ const SIDEBAR_ITEMS = [
     url: "/admin/user",
     icon: User2,
     isActive: true,
-    children: [
-      {
-        title: "All Users",
-        url: "/admin/user",
-      },
-      {
-        title: "Add User",
-        url: "/admin/user/add",
-      },
-    ],
   },
   {
     title: "Articles",

@@ -13,9 +13,9 @@ export const findUser = async (where: Prisma.UserWhereUniqueInput) => {
 };
 
 export const findUsers = async (
-  args?: Prisma.UserFindManyArgs,
   perPage = 6,
   page = 1,
+  args?: Prisma.UserFindManyArgs,
 ) => {
   const paginate = paginator({ perPage });
 
