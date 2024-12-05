@@ -184,40 +184,14 @@ export const updateArticleStatus = async (
 
 export const getArticleById = async (
   id: string,
-  action: "view" | "edit",
 ): Promise<ActionResponse<ArticleWithUser>> => {
   try {
     const articleData = await findArticle({ id });
     if (!articleData) {
       return ActionResponses.notFound("Article not found");
     }
-    if (action === "view") {
-      revalidatePath("/article", "layout");
-      await updateArticle({ id }, { views: articleData.views + 1 });
-    }
 
     return ActionResponses.success(articleData as ArticleWithUser);
-  } catch (error) {
-    console.log(error);
-    return ActionResponses.serverError("Failed to get article");
-  }
-};
-
-export const getArticleBySlug = async (
-  slug: string,
-  action: "view" | "edit",
-): Promise<ActionResponse<{ article: ArticleWithUser }>> => {
-  try {
-    const article = await findArticle({ slug });
-    if (!article) {
-      return ActionResponses.notFound(`Article ${slug} is not found`);
-    }
-
-    if (action === "view") {
-      await updateArticle({ slug }, { views: article.views + 1 });
-    }
-
-    return ActionResponses.success({ article });
   } catch (error) {
     console.log(error);
     return ActionResponses.serverError("Failed to get article");
