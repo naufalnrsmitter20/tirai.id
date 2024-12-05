@@ -1,5 +1,5 @@
 import { PageSelector } from "@/components/ui/PageSelector";
-import { Body3 } from "@/components/ui/text";
+import { Body3, H1 } from "@/components/ui/text";
 import { findUsers } from "@/utils/database/user.query";
 import { UserTable } from "./components/UserTable";
 
@@ -15,6 +15,7 @@ export default async function UserPage({
 
   return (
     <div className="flex flex-col">
+      <H1 className="mb-8 text-black">Manajemen Admin Tirai.id</H1>
       <div className="mb-2">
         {users.length > 0 && <UserTable meta={response.meta} users={users} />}
         {users.length === 0 && (
