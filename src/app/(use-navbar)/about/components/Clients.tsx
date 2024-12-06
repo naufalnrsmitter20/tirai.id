@@ -1,6 +1,6 @@
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Body3, H2, H5 } from "@/components/ui/text";
-import { SectionTitle } from "@/components/widgets/SectionTitle";
+import { SectionTitle } from "@/components/widget/SectionTitle";
 import Image from "next/image";
 import { FC } from "react";
 
