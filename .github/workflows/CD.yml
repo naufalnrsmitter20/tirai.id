@@ -1,0 +1,29 @@
+name: Auto Deploy to Server
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.STAGING_VPS_IP }}
+          username: ${{ secrets.STAGING_VPS_USERNAME }}
+          password: ${{ secrets.STAGING_VPS_PASSWORD }}
+          script: |
+            cd /var/www/tirai-staging
+
+            git pull origin staging
+
+            npm install
+            npm run build
+            pm2 restart tirai-staging
