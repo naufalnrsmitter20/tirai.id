@@ -20,6 +20,9 @@ jobs:
           username: ${{ secrets.STAGING_VPS_USERNAME }}
           password: ${{ secrets.STAGING_VPS_PASSWORD }}
           script: |
+            export NVM_DIR=~/.nvm
+            source ~/.nvm/nvm.sh
+
             cd /var/www/tirai-staging
 
             git pull origin staging
