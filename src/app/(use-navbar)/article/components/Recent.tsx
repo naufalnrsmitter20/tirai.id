@@ -35,18 +35,23 @@ export const Recent = (data: {
           />
           <div className="mt-11 flex max-w-full flex-col lg:mt-0 lg:justify-between">
             <div className="mb-10 block lg:mb-0">
-              <H3 className="mb-3 text-black">{title}</H3>
-              <div className="mb-6 flex flex-wrap items-center gap-x-2">
-                {tags.map((tag) => (
-                  <Link
-                    key={tag}
-                    href={`/article/tags/${tag}`}
-                    className={buttonVariants({ variant: "tag", size: "link" })}
-                  >
-                    {tag}
-                  </Link>
-                ))}
-              </div>
+              {tags.length > 0 && (
+                <div className="mb-10 flex flex-wrap items-center gap-x-2">
+                  {tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={`/article/tags/${tag}`}
+                      className={buttonVariants({
+                        variant: "tag",
+                        size: "link",
+                      })}
+                    >
+                      {tag}
+                    </Link>
+                  ))}
+                </div>
+              )}
+              <H3 className="mb-6 text-black">{title}</H3>
               <Body3 className="line-clamp-4 text-neutral-500">
                 {description}
               </Body3>

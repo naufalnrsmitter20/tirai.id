@@ -1,37 +1,30 @@
-import { createImageUpload } from "novel/plugins";
+"use client";
 
-const onUpload = (file: File) => {
-  const promise = fetch("/api/upload", {
-    method: "POST",
-    headers: {
-      "content-type": file?.type || "application/octet-stream",
-      "x-vercel-filename": file?.name || "image.png",
-    },
-    body: file,
-  });
+import { uploadImageCloudinary } from "@/actions/fileUploader";
+import { createImageUpload } from "novel/plugins";
+import { toast } from "sonner";
+
+const onUpload = async (file: File) => {
+  const loadingToast = toast.loading("Mengupload gambar...");
+
+  const cloudinaryResponse = await uploadImageCloudinary(
+    await file.arrayBuffer(),
+  );
+  if (cloudinaryResponse.error) {
+    toast.error("Gagal mengupload gambar", { id: loadingToast });
+    throw new Error(cloudinaryResponse.error.message);
+  }
 
   return new Promise((resolve) => {
-    promise.then(async (res) => {
-      // Successfully uploaded image
-      if (res.status === 200) {
-        const { url } = (await res.json()) as any;
-        // preload the image
-        let image = new Image();
-        image.src = url;
-        image.onload = () => {
-          resolve(url);
-        };
-        // No blob store configured
-      } else if (res.status === 401) {
-        resolve(file);
-        throw new Error(
-          "`BLOB_READ_WRITE_TOKEN` environment variable not found, reading image locally instead.",
-        );
-        // Unknown error
-      } else {
-        throw new Error(`Error uploading image. Please try again.`);
-      }
-    });
+    // preload the image
+    const image = new Image();
+    if (cloudinaryResponse.data?.url) {
+      toast.success("Sukses mengupload gambar", { id: loadingToast });
+      image.src = cloudinaryResponse.data.url;
+    }
+    image.onload = () => {
+      resolve(cloudinaryResponse.data?.url);
+    };
   });
 };
 
@@ -40,7 +33,8 @@ export const uploadFn = createImageUpload({
   validateFn: (file) => {
     if (!file.type.includes("image/")) {
       return false;
-    } else if (file.size / 1024 / 1024 > 20) {
+    } else if (file.size / 1024 / 1024 > 10) {
+      // Check if the file size is bigger than 10mb
       return false;
     }
     return true;

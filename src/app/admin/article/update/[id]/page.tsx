@@ -8,7 +8,7 @@ export default async function UpdateArticle({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const response = await getArticleById(id, "edit");
+  const response = await getArticleById(id);
   const articleData = response.data;
 
   if (!articleData) return notFound();

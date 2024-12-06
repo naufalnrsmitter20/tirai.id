@@ -59,7 +59,7 @@ export function DateRangeFilter({
           />
           <div className="border-t border-border p-3">
             <Button
-              variant="outline"
+              variant="default"
               className="w-full"
               onClick={() => setDate(undefined)}
             >

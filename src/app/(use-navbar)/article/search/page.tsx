@@ -6,11 +6,11 @@ import prisma from "@/lib/prisma";
 import { cn, sanitizeInput } from "@/lib/utils";
 import { findTags } from "@/utils/database/article.query";
 import { Prisma } from "@prisma/client";
+import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { ArticlesResultDisplay } from "./components/Articles";
 import { SearchBar } from "./components/SearchBar";
 import { Tags } from "./components/Tags";
-import { Metadata } from "next";
 
 const paginate = paginator({ perPage: 6 });
 
@@ -72,7 +72,7 @@ export default async function SearchArticles({
         <div className="block w-full">
           <H1 className="mb-6 text-black">
             Hasil Pencarian untuk{" "}
-            <span className="text-primary-900">"{searchTerm}"</span>
+            <span className="text-primary-900">&quot;{searchTerm}&quot;</span>
           </H1>
           <SearchBar defaultValue={searchTerm} />
 

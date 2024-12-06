@@ -4,7 +4,7 @@ import { PaginationMetadata } from "@/lib/paginator";
 import { ArticleWithUser } from "@/types/entityRelations";
 import { FC } from "react";
 import { ArticleCard } from "./ArticleCard";
-import { PageSelector } from "./PageSelector";
+import { PageSelector } from "@/components/ui/PageSelector";
 import { SectionTitle } from "@/components/widget/SectionTitle";
 
 export const ArticlesDisplay: FC<{

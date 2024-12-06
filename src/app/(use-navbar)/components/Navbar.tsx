@@ -60,8 +60,8 @@ export const Navbar: FC = () => {
               {session?.user?.role && status === "authenticated"
                 ? ADMIN_ROLES.includes(session.user.role)
                   ? "Dashboard"
-                  : "Belanja sekarang"
-                : "Belanja sekarang"}
+                  : "Belanja"
+                : "Belanja"}
             </Link>
           </ul>
           <div className="flex items-center gap-2 lg:hidden">
@@ -122,8 +122,8 @@ export const Navbar: FC = () => {
               {session?.user?.role && status === "authenticated"
                 ? ADMIN_ROLES.includes(session.user.role)
                   ? "Dashboard"
-                  : "Belanja sekarang"
-                : "Belanja sekarang"}
+                  : "Belanja"
+                : "Belanja"}
             </Link>
           </div>
         </div>

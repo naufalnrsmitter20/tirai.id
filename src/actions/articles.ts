@@ -1,5 +1,7 @@
 "use server";
+
 import { ActionResponse, ActionResponses } from "@/lib/actions";
+import { getServerSession } from "@/lib/next-auth";
 import { PaginatedResult } from "@/lib/paginator";
 import { ArticleWithUser } from "@/types/entityRelations";
 import {
@@ -13,6 +15,82 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { deleteImageCloudinary, uploadImageCloudinary } from "./fileUploader";
 
+const parseFormData = (data: FormData) => {
+  const title = data.get("title") as string;
+  const slug = data.get("slug") as string;
+  const description = data.get("description") as string;
+  const content = data.get("content") as string;
+  const rawTags = data.get("tags") as string | null;
+  const tags = rawTags
+    ? rawTags
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    : [];
+  const image = data.get("image") as File | null;
+  const isPublished = data.get("is_published") === "true";
+  const publishedAt = data.get("published_at") as string | null;
+
+  return {
+    title,
+    slug,
+    description,
+    content,
+    tags,
+    image,
+    isPublished,
+    publishedAt,
+  };
+};
+
+const handleImageUpload = async (image: File | null, articleId?: string) => {
+  if (!image) return null;
+
+  if (articleId) {
+    const existingArticle = await findArticle({ id: articleId });
+    if (existingArticle?.cover_url) {
+      await deleteImageCloudinary(existingArticle.cover_url);
+    }
+  }
+
+  const imageBuffer = await image.arrayBuffer();
+  const uploadedImage = await uploadImageCloudinary(Buffer.from(imageBuffer));
+  return uploadedImage?.data?.url || null;
+};
+
+const buildArticleInput = ({
+  title,
+  slug,
+  description,
+  content,
+  tags,
+  isPublished,
+  publishedAt,
+  coverUrl,
+}: {
+  title: string;
+  slug: string;
+  description: string;
+  content: string;
+  tags: string[];
+  isPublished: boolean;
+  publishedAt: string | null;
+  coverUrl: string | null;
+}) => ({
+  title,
+  slug,
+  description,
+  content,
+  tags,
+  is_published: isPublished,
+  published_at: publishedAt
+    ? new Date(publishedAt)
+    : isPublished
+      ? new Date()
+      : null,
+  cover_url: coverUrl,
+});
+
 export const upsertArticle = async ({
   data,
   id,
@@ -21,65 +99,71 @@ export const upsertArticle = async ({
   id?: string;
 }): Promise<ActionResponse<{ message: string }>> => {
   try {
-    const title = data.get("title") as string;
-    const slug = data.get("slug") as string;
-    const rawTags = data.get("tags") as string | null;
-    const tags = rawTags
-      ? rawTags
-          .split(",")
-          .map((tag) => tag.trim())
-          .filter((tag) => tag !== "")
-      : [];
-    const content = data.get("content") as string;
-    const author_id = data.get("author_id") as string;
-    const image = data.get("image") as File;
-    const is_published = data.get("is_published") === "true";
+    const session = await getServerSession();
 
-    let uploadedImage;
-    if (image) {
-      if (id) {
-        const article = await findArticle({ id });
-        if (article?.cover_url) {
-          await deleteImageCloudinary(article.cover_url);
-        }
-      }
-      const imageBuffer = await image.arrayBuffer();
-      uploadedImage = await uploadImageCloudinary(Buffer.from(imageBuffer));
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const articleInput: any = {
+    const {
       title,
       slug,
-      content,
-      is_published,
+      description,
       tags,
-    };
+      content,
+      image,
+      isPublished,
+      publishedAt,
+    } = parseFormData(data);
 
-    if (!id) {
-      await createArticle({
-        ...articleInput,
-        cover_url: uploadedImage?.data?.url || null,
-        author: { connect: { id: author_id } },
-      });
-
-      revalidatePath("/");
-      return ActionResponses.success({ message: "Article updated" });
+    // Check if slug is already in use by another article
+    const existingArticle = await findArticle({ slug });
+    if (existingArticle && existingArticle.id !== id) {
+      return ActionResponses.badRequest("Slug is already in use.");
     }
 
-    await updateArticle(
-      { id },
-      {
-        ...articleInput,
-        cover_url: uploadedImage?.data?.url,
-      },
-    );
+    // Ensure a cover image is provided for new articles
+    if (!image && !id) {
+      return ActionResponses.badRequest("Cover image is required!");
+    }
 
-    revalidatePath("/article", "layout");
-    return ActionResponses.success({ message: "Article upserted" });
+    // Handle image upload and deletion if necessary
+    const coverUrl = await handleImageUpload(image, id);
+
+    // Build the input data for the article
+    const articleInput = buildArticleInput({
+      title,
+      slug,
+      description,
+      content,
+      tags,
+      isPublished,
+      publishedAt,
+      coverUrl,
+    });
+
+    // Create or update the article
+    if (id) {
+      await updateArticle(
+        { id },
+        { ...articleInput, cover_url: articleInput.cover_url || undefined },
+      );
+
+      revalidatePath("/", "layout");
+      return ActionResponses.success({
+        message: "Article updated successfully!",
+      });
+    }
+
+    await createArticle({
+      ...articleInput,
+      cover_url: articleInput.cover_url!,
+      author: { connect: { id: session?.user?.id } },
+    });
+
+    revalidatePath("/", "layout");
+    return ActionResponses.success({
+      message: "Article created successfully!",
+    });
   } catch (error) {
-    console.log(error);
-    return ActionResponses.serverError("Failed to update article");
+    console.error("Error upserting article:", error);
+    return ActionResponses.serverError("Failed to upsert article");
   }
 };
 
@@ -88,7 +172,7 @@ export const updateArticleStatus = async (
   is_published: boolean,
 ): Promise<ActionResponse<{ id: string }>> => {
   try {
-    await updateArticle({ id }, { is_published });
+    await updateArticle({ id }, { is_published, published_at: new Date() });
 
     revalidatePath("/article", "layout");
     return ActionResponses.success({ id });
@@ -100,40 +184,14 @@ export const updateArticleStatus = async (
 
 export const getArticleById = async (
   id: string,
-  action: "view" | "edit",
 ): Promise<ActionResponse<ArticleWithUser>> => {
   try {
     const articleData = await findArticle({ id });
     if (!articleData) {
       return ActionResponses.notFound("Article not found");
     }
-    if (action === "view") {
-      revalidatePath("/article", "layout");
-      await updateArticle({ id }, { views: articleData.views + 1 });
-    }
 
     return ActionResponses.success(articleData as ArticleWithUser);
-  } catch (error) {
-    console.log(error);
-    return ActionResponses.serverError("Failed to get article");
-  }
-};
-
-export const getArticleBySlug = async (
-  slug: string,
-  action: "view" | "edit",
-): Promise<ActionResponse<{ article: ArticleWithUser }>> => {
-  try {
-    const article = await findArticle({ slug });
-    if (!article) {
-      return ActionResponses.notFound(`Article ${slug} is not found`);
-    }
-
-    if (action === "view") {
-      await updateArticle({ slug }, { views: article.views + 1 });
-    }
-
-    return ActionResponses.success({ article });
   } catch (error) {
     console.log(error);
     return ActionResponses.serverError("Failed to get article");
@@ -147,7 +205,7 @@ export const deleteArticle = async (
     const article = await findArticle({ id });
     if (article) {
       const deleteResult = await deleteImageCloudinary(article.cover_url);
-      if (deleteResult.error) {
+      if (!deleteResult.success) {
         return ActionResponses.serverError("Failed to delete article");
       }
     }

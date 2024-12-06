@@ -9,27 +9,27 @@ import {
   EditorCommandList,
   EditorContent,
   EditorRoot,
+  JSONContent,
 } from "novel";
 
 import { ImageResizer, handleCommandNavigation } from "novel/extensions";
 import { handleImageDrop, handleImagePaste } from "novel/plugins";
 
+import EditorMenu from "@/components/editor/editor-menu";
+import { defaultExtensions } from "@/components/editor/extensions";
+import { uploadFn } from "@/components/editor/image-upload";
+import { ColorSelector } from "@/components/editor/selectors/color-selector";
+import { LinkSelector } from "@/components/editor/selectors/link-selector";
+import { MathSelector } from "@/components/editor/selectors/math-selector";
+import { NodeSelector } from "@/components/editor/selectors/node-selector";
+import { TextButtons } from "@/components/editor/selectors/text-buttons";
+import { deleteImageCloudinary } from "@/actions/fileUploader";
 import {
   slashCommand,
   suggestionItems,
 } from "@/components/editor/slash-command";
-import EditorMenu from "@/components/editor/editor-menu";
-import { uploadFn } from "@/components/editor/image-upload";
-import { defaultExtensions } from "@/components/editor/extensions";
-import { TextButtons } from "@/components/editor/selectors/text-buttons";
-import { LinkSelector } from "@/components/editor/selectors/link-selector";
-import { NodeSelector } from "@/components/editor/selectors/node-selector";
-import { MathSelector } from "@/components/editor/selectors/math-selector";
-import { ColorSelector } from "@/components/editor/selectors/color-selector";
 
 import { Separator } from "@/components/ui/separator";
-
-const hljs = require("highlight.js");
 
 const extensions = [...defaultExtensions, slashCommand];
 
@@ -53,16 +53,32 @@ export default function Editor({ initialValue, onChange }: EditorProps) {
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
   const [openAI, setOpenAI] = useState(false);
+  const [previousContent, setPreviousContent] = useState<string>("");
 
-  //Apply Codeblock Highlighting on the HTML from editor.getHTML()
-  const highlightCodeblocks = (content: string) => {
-    const doc = new DOMParser().parseFromString(content, "text/html");
-    doc.querySelectorAll("pre code").forEach((el) => {
-      // @ts-ignore
-      // https://highlightjs.readthedocs.io/en/latest/api.html?highlight=highlightElement#highlightelement
-      hljs.highlightElement(el);
-    });
-    return new XMLSerializer().serializeToString(doc);
+  const extractImageSources = (html: string): string[] => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+    const images = Array.from(doc.getElementsByTagName("img"));
+    return images.map((img) => img.src);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onUpdate = ({ editor }: { editor: any }) => {
+    const newContent = editor.getHTML();
+    const previousImages = extractImageSources(previousContent);
+    const newImages = extractImageSources(newContent);
+
+    const deletedImages = previousImages.filter(
+      (src) => !newImages.includes(src),
+    );
+
+    if (deletedImages.length > 0) {
+      deletedImages.forEach((src) => deleteImageCloudinary(src));
+    }
+
+    onChange(newContent);
+    console.log(newContent);
+    setPreviousContent(newContent);
   };
 
   return (
@@ -70,7 +86,7 @@ export default function Editor({ initialValue, onChange }: EditorProps) {
       <EditorRoot>
         <EditorContent
           immediatelyRender={false}
-          initialContent={initialValue}
+          initialContent={initialValue as unknown as JSONContent}
           extensions={extensions}
           className="min-h-96 break-words rounded-xl border p-4"
           editorProps={{
@@ -86,9 +102,7 @@ export default function Editor({ initialValue, onChange }: EditorProps) {
                 "prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full",
             },
           }}
-          onUpdate={({ editor }) => {
-            onChange(editor.getHTML());
-          }}
+          onUpdate={onUpdate}
           slotAfter={<ImageResizer />}
         >
           <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-white px-1 py-2 text-black shadow-md transition-all">

@@ -98,17 +98,17 @@ model OrderItem {
 }
 
 model Article {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   title        String
-  slug         String   @unique
+  slug         String    @unique
   tags         String[]
   content      String
   cover_url    String
-  published_at DateTime
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
-  is_published Boolean  @default(false)
-  views        Int      @default(0)
+  published_at DateTime?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  is_published Boolean   @default(false)
+  views        Int       @default(0)
   description  String
 
   author    User   @relation(fields: [author_id], references: [id], onDelete: Cascade)

@@ -1,8 +1,7 @@
-import { getArticleBySlug } from "@/actions/articles";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { CTA } from "@/components/widget/CTA";
-import { findArticle } from "@/utils/database/article.query";
+import { findArticle, updateArticle } from "@/utils/database/article.query";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleContent } from "./components/ArticleContent";
@@ -21,11 +20,10 @@ export async function generateMetadata(
 
   const previousImages = (await parent).openGraph?.images || [];
 
-  if (!article)
+  if (!article || !article.is_published)
     return {
-      title: "Article Not Found",
-      description:
-        "The article that you're looking for is not found in our website.",
+      title: "Artikel Tidak Ditemukan",
+      description: "Artikel yang Anda cari tidak ditemukan di situs web kami.",
     };
 
   return {
@@ -34,7 +32,7 @@ export async function generateMetadata(
       type: "article",
       title: `${article?.title} - ${article?.author.name}`,
       images: [article?.cover_url, ...previousImages],
-      publishedTime: article.published_at.toISOString(),
+      publishedTime: article.published_at!.toISOString(),
       description: article.description || undefined,
       url: `${process.env.APP_URL}/article/view/${article.slug}`,
     },
@@ -65,7 +63,7 @@ export async function generateMetadata(
     },
     publisher: "Tirai.id",
     other: {
-      news_keywords: `${article.published_at.toLocaleDateString("ID-ID", { day: "numeric", month: "long", year: "numeric" })} ${article?.description} ${article?.tags.join(", ")}`,
+      news_keywords: `${article.published_at!.toLocaleDateString("ID-ID", { day: "numeric", month: "long", year: "numeric" })} ${article?.description} ${article?.tags.join(", ")}`,
       "googlebot-news": "index,follow",
     },
   };
@@ -77,12 +75,11 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const response = await getArticleBySlug(slug, "view");
-  const data = response.data;
+  const article = await findArticle({ slug });
 
-  if (!data || !data.article) return notFound();
+  if (!article || !article.is_published) return notFound();
 
-  const { article } = data;
+  await updateArticle({ slug }, { views: { increment: 1 } });
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -106,7 +103,7 @@ export default async function ArticlePage({
         url: `${process.env.APP_URL}/assets/logo.png`,
       },
     },
-    datePublished: article.published_at.toISOString(),
+    datePublished: article.published_at!.toISOString(),
     dateModified: article.updated_at.toISOString(),
     articleSection: "Interior Design",
     keywords: article.tags.join(", "),

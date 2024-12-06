@@ -114,7 +114,7 @@ export default async function Articles({
           description={latestArticle.description}
           slug={latestArticle.slug}
           authorName={latestArticle.author.name}
-          published_at={latestArticle.published_at}
+          published_at={latestArticle.published_at!}
           tags={latestArticle.tags}
         />
       )}

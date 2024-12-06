@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Verifikasi email anda",
@@ -10,5 +10,5 @@ export default function ConfirmEmailLayout({
 }: {
   children?: ReactNode;
 }) {
-  return <>{children}</>;
+  return <Suspense>{children}</Suspense>;
 }

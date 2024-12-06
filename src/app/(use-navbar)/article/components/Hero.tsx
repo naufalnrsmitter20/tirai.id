@@ -7,7 +7,6 @@ import { Body3, Display } from "@/components/ui/text";
 import { sanitizeInput } from "@/lib/utils";
 import { Search } from "lucide-react";
 import { useRouter } from "next-nprogress-bar";
-import Link from "next/link";
 import { FC, useState } from "react";
 
 export const Hero: FC = () => {

@@ -14,12 +14,18 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { H2 } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { ArticleWithUser } from "@/types/entityRelations";
-import Image from "next/image";
-import { FC, useMemo, useState } from "react";
+import { getMonth } from "date-fns";
+import { ArrowLeft } from "lucide-react";
+import { useRouter } from "next-nprogress-bar";
+import { FC, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import * as z from "zod";
+import { z } from "zod";
+import { CoverPreview } from "./CoverPreview";
 
 const MAX_FILE_SIZE = 5_000_000;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png"];
@@ -29,6 +35,8 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
 }: {
   updateData?: ArticleWithUser;
 }) => {
+  const router = useRouter();
+  const [isManualSlug, setManualSLug] = useState(updateData ? true : false);
   const createArticleSchema = useMemo(
     () =>
       z.object({
@@ -36,7 +44,8 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
         slug: z.string().min(1, "Slug wajib diisi."),
         tags: z
           .string()
-          .transform((val) => val.split(", ").map((tag) => tag.trim())),
+          .transform((val) => val.split(", ").map((tag) => tag.trim()))
+          .optional(),
         description: z.string().min(10, "Deskripsi minimal 10 karakter"),
         content: z.string().min(1, "Konten wajib diisi"),
         image: updateData
@@ -62,7 +71,7 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
               }, `Ukuran maksimal file adalah 5MB`),
         is_published: z.boolean(),
       }),
-    [],
+    [updateData],
   );
 
   const [loading, setLoading] = useState(false);
@@ -81,7 +90,19 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
     schema: createArticleSchema,
   });
 
-  async function onSubmit(values: z.infer<typeof createArticleSchema>) {
+  const title = form.watch("title");
+  const image = form.watch("image");
+
+  useEffect(() => {
+    const now = new Date();
+
+    if (!isManualSlug && title !== "") {
+      const slug = `${title.split(" ").slice(0, 8).join("-")}-${now.getDate()}-${getMonth(now)}-${now.getFullYear()}`;
+      form.setValue("slug", slug);
+    } else form.setValue("slug", updateData?.slug || "");
+  }, [form, isManualSlug, title, updateData?.slug]);
+
+  const onSubmit = form.handleSubmit(async (values) => {
     setLoading(true);
 
     const formData = new FormData();
@@ -90,57 +111,94 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
     );
 
     try {
-      formData.append("title", values.title);
-      formData.append("slug", values.slug);
-      formData.append("description", values.description);
-      formData.append("tags", values.tags.join(","));
-      formData.append("content", values.content);
-      if (values.image) formData.append("image", values.image);
-      formData.append("is_published", values.is_published.toString());
-      formData.append("author_id", "1");
+      const fields = {
+        title: values.title,
+        slug: values.slug,
+        description: values.description,
+        tags:
+          values.tags?.length && values.tags.length > 0
+            ? values.tags.join(",")
+            : null,
+        content: values.content,
+        image: values.image || null,
+        is_published: values.is_published.toString(),
+        published_at: updateData?.published_at?.toISOString() || null,
+      };
 
-      const res = await upsertArticle({ data: formData, id: updateData?.id });
+      // Append only non-null fields to FormData
+      Object.entries(fields).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          formData.append(key, value as string);
+        }
+      });
 
-      if (!res.success) {
+      const upsertArticleResult = await upsertArticle({
+        data: formData,
+        id: updateData?.id,
+      });
+
+      if (!upsertArticleResult.success) {
         setLoading(false);
         return toast.error(
           updateData
-            ? "Gagal Memperbarui artikel!"
+            ? "Gagal memperbarui artikel!"
             : "Gagal menambahkan artikel!",
           { id: loading },
         );
       }
 
       setLoading(false);
-      return toast.success(
+      toast.success(
         updateData
-          ? "Berhasil Memperbarui artikel!"
+          ? "Berhasil memperbarui artikel!"
           : "Berhasil menambahkan artikel!",
         { id: loading },
       );
+      return router.push("/admin/article");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       setLoading(false);
       return toast.error(
         updateData
-          ? "Gagal Memperbarui artikel!"
+          ? "Gagal memperbarui artikel!"
           : "Gagal menambahkan artikel!",
         { id: loading },
       );
     }
-  }
+  });
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="max-w-screen-lg space-y-8"
-      >
+      <div className="mb-8 flex flex-col items-start gap-4">
+        <Button
+          variant={"link"}
+          size={"link"}
+          onClick={() => router.back()}
+          type="button"
+        >
+          <ArrowLeft /> Kembali
+        </Button>
+        <H2 className="text-black">
+          {updateData ? (
+            <>
+              Update Artikel dengan Judul{" "}
+              <span className="text-primary-900">
+                &quot;{updateData?.title}&quot;
+              </span>
+            </>
+          ) : (
+            <>Buat Artikel Baru</>
+          )}
+        </H2>
+      </div>
+
+      <form onSubmit={onSubmit} className="max-w-screen-lg space-y-8">
         <FormField
           control={form.control}
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Judul</FormLabel>
+              <FormLabel htmlFor="title">Judul</FormLabel>
               <FormControl>
                 <Input {...field} placeholder="Masukkan judul artikel" />
               </FormControl>
@@ -153,14 +211,26 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
           name="slug"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Slug</FormLabel>
+              <FormLabel htmlFor="slug">Slug</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Masukkan slug artikel" />
+                <Input
+                  {...field}
+                  disabled={!isManualSlug}
+                  placeholder="Masukkan slug artikel"
+                />
               </FormControl>
               <FormDescription>
                 Slug akan digunakan untuk URL artikel.
                 {"(https://tirai.id/artikel/{slug})"}
               </FormDescription>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={isManualSlug}
+                  onCheckedChange={(e) => setManualSLug(e as boolean)}
+                  color="#000000"
+                />
+                <Label className="text-black">Manual</Label>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -170,16 +240,33 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
           name="tags"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tagar</FormLabel>
+              <FormLabel htmlFor="tags">Tagar</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Enter tags, separated by commas"
                   {...field}
+                  placeholder="Masukkan tag dengan dipisahkan koma (contoh: Tirai, Tips & Tricks)"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="description">Deskripsi</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  className="min-h-[120px]"
+                  placeholder="Masukkan deskripsi artikel (minimal 10 karakter)"
                 />
               </FormControl>
               <FormDescription>
-                Masukkan tagar dengan dipisahkan oleh koma (,)
-                {`(e.g., "tech, news, programming")`}
+                Deskripsi akan digunakan pada thumbnail artikel serta metadata
+                dalam Search Engine Optimization.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -190,7 +277,7 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Konten</FormLabel>
+              <FormLabel htmlFor="content">Konten</FormLabel>
               <FormControl>
                 <Editor {...field} initialValue={updateData?.content} />
               </FormControl>
@@ -217,29 +304,7 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
             </FormItem>
           )}
         />
-        {form.watch("image") ? (
-          <div className="mt-4">
-            <Image
-              src={URL.createObjectURL(form.watch("image") as Blob)}
-              width={300}
-              height={200}
-              alt="Cover Preview"
-              className="max-h-64"
-              unoptimized
-            />
-          </div>
-        ) : updateData && updateData.cover_url ? (
-          <div className="mt-4">
-            <Image
-              src={updateData.cover_url}
-              width={300}
-              height={200}
-              alt="Cover Preview"
-              className="max-h-64"
-              unoptimized
-            />
-          </div>
-        ) : null}
+        <CoverPreview image={image} updateData={updateData} />
         <FormField
           control={form.control}
           name="is_published"
@@ -249,6 +314,7 @@ export const ArticleForm: FC<{ updateData?: ArticleWithUser }> = ({
                 <Checkbox
                   checked={field.value}
                   onCheckedChange={field.onChange}
+                  color="#000000"
                 />
               </FormControl>
               <div className="space-y-1 leading-none">

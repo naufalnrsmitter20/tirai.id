@@ -16,6 +16,7 @@ const buttonVariants = cva(
         outline:
           "border border-primary-900 text-primary-900 bg-white rounded-lg hover:bg-primary-50 disabled:bg-neutral-400 disabled:text-white disabled:border-neutral-400",
         link: "text-black hover:text-primary-900 disabled:text-neutral-400",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
         tag: "text-primary-900 rounded-full bg-primary-50 px-[1.125rem] py-[0.625rem] hover:bg-primary-100",
       },
       size: {
