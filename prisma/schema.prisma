@@ -22,7 +22,8 @@ model User {
   orders   Order[]
   cart     Cart?
 
-  tokens Token[]
+  tokens            Token[]
+  shipping_addreses ShippingAddress[]
 }
 
 model Token {
@@ -39,27 +40,55 @@ model Token {
   @@unique([user_id, purpose])
 }
 
-model Product {
-  id          String          @id @default(uuid())
-  name        String
-  description String
-  price       Float
-  stock       Int
-  category    ProductCategory
-  slug        String          @unique
-  is_public   Boolean         @default(false)
-  created_at  DateTime        @default(now())
-  updated_at  DateTime        @updatedAt
+model ProductCategory {
+  id         String   @id @default(uuid())
+  name       String
+  image      String
+  slug       String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  custom_options CustomOption[]
-  order_products OrderItem[]
+  products Product[]
 }
 
-model CustomOption {
+model Product {
+  id           String   @id @default(uuid())
+  name         String
+  description  String
+  slug         String   @unique
+  is_published Boolean  @default(false)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  category        ProductCategory  @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  category_id     String
+  variants        ProductVariant[]
+  custom_products CustomProduct[]
+  reviews         Review[]
+}
+
+model Review {
+  id      String @id @default(uuid())
+  rating  Float
+  content String
+
+  order_id      String
+  order         Order     @relation(fields: [order_id], references: [id])
+  order_item_id String    @unique
+  order_item    OrderItem @relation(fields: [order_item_id], references: [id], onDelete: Cascade)
+  product_id    String
+  product       Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([order_item_id, order_id])
+}
+
+model ProductVariant {
   id         String   @id @default(uuid())
   size       String
   color      String
   photo      String
+  price      Float
+  stock      Int
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
@@ -70,31 +99,70 @@ model CustomOption {
   @@unique([product_id, color, size])
 }
 
-model Order {
-  id          String      @id @default(uuid())
-  created_at  DateTime    @default(now())
-  updated_at  DateTime    @updatedAt
-  finished_at DateTime?
-  total_price Float
-  status      OrderStatus
+model CustomProduct {
+  id    String @id @default(uuid())
+  size  String
+  color String
 
-  user     User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  user_id  String
-  products OrderItem[]
-  payment  Payment?
-  shipment Shipment?
+  product_id String
+  product    Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  order_id   String      @unique
+  order      Order       @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  items      OrderItem[]
+}
+
+model ShippingAddress {
+  id                     String   @id @default(uuid())
+  recipient_name         String
+  recipient_phone_number String
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+
+  street          String
+  city            String
+  region          String
+  postal_code     String
+  additional_info String?
+  is_primary      Boolean @default(false)
+
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  orders Order[]
+}
+
+model Order {
+  id                    String      @id @default(uuid())
+  estimated_finish_time DateTime
+  finished_at           DateTime?
+  total_price           Float
+  status                OrderStatus
+  created_at            DateTime    @default(now())
+  updated_at            DateTime    @updatedAt
+
+  reviews        Review[]
+  items          OrderItem[]
+  custom_product CustomProduct?
+  payment        Payment?
+  shipment       Shipment?
+
+  user                User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id             String
+  shipping_address    ShippingAddress @relation(fields: [shipping_address_id], references: [id], onDelete: Cascade)
+  shipping_address_id String
 }
 
 model OrderItem {
   id       String @id @default(uuid())
   quantity Int
 
-  product          Product       @relation(fields: [product_id], references: [id], onDelete: Cascade)
-  product_id       String
-  order            Order         @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  order_id         String
-  custom_option    CustomOption? @relation(fields: [custom_option_id], references: [id], onDelete: Cascade) // Jika user menginginkan custom option yang baru
-  custom_option_id String?
+  review            Review?
+  order             Order           @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  order_id          String
+  custom_option     ProductVariant? @relation(fields: [custom_option_id], references: [id], onDelete: Cascade) // Jika user menginginkan custom option yang baru
+  custom_option_id  String?
+  custom_product    CustomProduct?  @relation(fields: [custom_product_id], references: [id], onDelete: Cascade) // Jika user menginginkan custom option yang baru
+  custom_product_id String?
 }
 
 model Article {
@@ -178,11 +246,6 @@ enum Role {
   SUPERADMIN
   SALES
   CONTENTWRITER
-}
-
-enum ProductCategory {
-  READY_STOCK
-  CUSTOM
 }
 
 enum OrderStatus {
