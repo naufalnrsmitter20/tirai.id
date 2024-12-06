@@ -8,7 +8,7 @@ const generalSansFont = localFont({
       style: "normal",
     },
     {
-      path: "./GeneralSans-Extralightitalic.woff2",
+      path: "./GeneralSans-ExtralightItalic.woff2",
       weight: "200",
       style: "italic",
     },
@@ -18,7 +18,7 @@ const generalSansFont = localFont({
       style: "normal",
     },
     {
-      path: "./GeneralSans-Lightitalic.woff2",
+      path: "./GeneralSans-LightItalic.woff2",
       weight: "300",
       style: "italic",
     },
@@ -38,7 +38,7 @@ const generalSansFont = localFont({
       style: "normal",
     },
     {
-      path: "./GeneralSans-Mediumitalic.woff2",
+      path: "./GeneralSans-MediumItalic.woff2",
       weight: "500",
       style: "italic",
     },
@@ -48,7 +48,7 @@ const generalSansFont = localFont({
       style: "normal",
     },
     {
-      path: "./GeneralSans-Semibolditalic.woff2",
+      path: "./GeneralSans-SemiboldItalic.woff2",
       weight: "600",
       style: "italic",
     },
@@ -58,7 +58,7 @@ const generalSansFont = localFont({
       style: "normal",
     },
     {
-      path: "./GeneralSans-Bolditalic.woff2",
+      path: "./GeneralSans-BoldItalic.woff2",
       weight: "700",
       style: "italic",
     },
