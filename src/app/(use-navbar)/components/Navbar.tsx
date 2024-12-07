@@ -15,7 +15,7 @@ const ADMIN_ROLES: Role[] = [
 ] as const;
 
 export const Navbar: FC = () => {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const navbarToggle = useRef<HTMLInputElement>(null);
 
   return (
@@ -46,22 +46,22 @@ export const Navbar: FC = () => {
 
             <Link
               href={
-                session?.user?.role
+                session?.user?.role && status === "authenticated"
                   ? ADMIN_ROLES.includes(session.user.role)
                     ? "/admin"
                     : "#"
-                  : "#"
+                  : "/auth/login"
               }
               className={buttonVariants({
                 variant: "default",
                 className: "ml-6 w-full text-center",
               })}
             >
-              {session?.user?.role
+              {session?.user?.role && status === "authenticated"
                 ? ADMIN_ROLES.includes(session.user.role)
                   ? "Dashboard"
-                  : "Belanja sekarang"
-                : "Belanja sekarang"}
+                  : "Belanja"
+                : "Belanja"}
             </Link>
           </ul>
           <div className="flex items-center gap-2 lg:hidden">
@@ -108,22 +108,22 @@ export const Navbar: FC = () => {
             {/* TODO: Change the href to e-commerce or something */}
             <Link
               href={
-                session?.user?.role
+                session?.user?.role && status === "authenticated"
                   ? ADMIN_ROLES.includes(session.user.role)
                     ? "/admin"
                     : "#"
-                  : "#"
+                  : "/auth/login"
               }
               className={buttonVariants({
                 variant: "default",
                 className: "ml-6 w-full text-center",
               })}
             >
-              {session?.user?.role
+              {session?.user?.role && status === "authenticated"
                 ? ADMIN_ROLES.includes(session.user.role)
                   ? "Dashboard"
-                  : "Belanja sekarang"
-                : "Belanja sekarang"}
+                  : "Belanja"
+                : "Belanja"}
             </Link>
           </div>
         </div>

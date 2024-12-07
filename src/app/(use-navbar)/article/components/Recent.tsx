@@ -12,15 +12,17 @@ export const Recent = (data: {
   title: string;
   slug: string;
   authorName: string;
-  content: string;
+  description: string;
   published_at: Date;
+  tags: string[];
 }) => {
-  const { cover, title, slug, authorName, content, published_at } = data;
+  const { cover, tags, title, slug, authorName, description, published_at } =
+    data;
 
   return (
-    <SectionContainer>
+    <SectionContainer id="recent-article">
       <div className="flex flex-col">
-        <SectionTitle>Artikel</SectionTitle>
+        <SectionTitle>Terbaru</SectionTitle>
         <H1 className="mb-16 text-black">Artikel Terbaru</H1>
         <div className="grid grid-cols-1 gap-11 md:grid-cols-2">
           <Image
@@ -33,8 +35,26 @@ export const Recent = (data: {
           />
           <div className="mt-11 flex max-w-full flex-col lg:mt-0 lg:justify-between">
             <div className="mb-10 block lg:mb-0">
-              <H3 className="mb-3 text-black">{title}</H3>
-              <Body3 className="line-clamp-4 text-neutral-500">{content}</Body3>
+              {tags.length > 0 && (
+                <div className="mb-10 flex flex-wrap items-center gap-x-2">
+                  {tags.map((tag) => (
+                    <Link
+                      key={tag}
+                      href={`/article/tags/${tag}`}
+                      className={buttonVariants({
+                        variant: "tag",
+                        size: "link",
+                      })}
+                    >
+                      {tag}
+                    </Link>
+                  ))}
+                </div>
+              )}
+              <H3 className="mb-6 text-black">{title}</H3>
+              <Body3 className="line-clamp-4 text-neutral-500">
+                {description}
+              </Body3>
             </div>
             <div className="flex flex-col items-start justify-between gap-y-8 md:flex-row lg:items-center lg:gap-0">
               <div className="flex flex-col justify-between gap-y-0.5">
@@ -44,7 +64,7 @@ export const Recent = (data: {
                 </Body3>
               </div>
               <Link
-                href={`/article/${slug}`}
+                href={`/article/view/${slug}`}
                 className={buttonVariants({
                   variant: "default",
                   className: "w-full md:w-fit md:flex-grow-0",

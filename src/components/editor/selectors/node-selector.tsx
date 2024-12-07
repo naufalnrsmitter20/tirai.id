@@ -1,21 +1,21 @@
 import {
   Check,
+  CheckSquare,
   ChevronDown,
+  Code,
   Heading1,
   Heading2,
   Heading3,
-  TextQuote,
   ListOrdered,
   TextIcon,
-  Code,
-  CheckSquare,
+  TextQuote,
   type LucideIcon,
 } from "lucide-react";
 import { EditorBubbleItem, EditorInstance, useEditor } from "novel";
 
-import { Popover } from "@radix-ui/react-popover";
-import { PopoverContent, PopoverTrigger } from "@/components//ui/popover";
 import { Button } from "@/components//ui/button";
+import { PopoverContent, PopoverTrigger } from "@/components//ui/popover";
+import { Popover } from "@radix-ui/react-popover";
 
 export type SelectorItem = {
   name: string;
@@ -111,7 +111,7 @@ export const NodeSelector = ({ open, onOpenChange }: NodeSelectorProps) => {
         asChild
         className="gap-2 rounded-none border-none hover:bg-accent focus:ring-0"
       >
-        <Button size="sm" variant="ghost" className="gap-2">
+        <Button size="sm" type="button" variant="default" className="gap-2">
           <span className="whitespace-nowrap text-sm">{activeItem.name}</span>
           <ChevronDown className="h-4 w-4" />
         </Button>

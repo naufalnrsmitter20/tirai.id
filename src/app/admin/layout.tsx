@@ -1,11 +1,11 @@
 import { Metadata } from "next";
-import AdminLayout from "./_components/AdminLayout";
+import AdminLayout from "./components/AdminLayout";
 
 export const metadata: Metadata = {
-  title: "Admin",
+  title: "Admin Panel",
 };
 
-export default function RootLayout({
+export default function RootAdminLayout({
   children,
 }: {
   children: React.ReactNode;

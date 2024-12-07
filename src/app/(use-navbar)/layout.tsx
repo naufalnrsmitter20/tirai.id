@@ -1,6 +1,7 @@
-import { ReactNode } from "react";
-import { Navbar } from "./components/Navbar";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { ReactNode } from "react";
+import { Footer } from "./components/Footer";
+import { Navbar } from "./components/Navbar";
 
 export default function UseNavbarLayout({
   children,
@@ -11,6 +12,7 @@ export default function UseNavbarLayout({
     <>
       <Navbar />
       <PageContainer className="pt-[5.375rem]">{children}</PageContainer>
+      <Footer />
     </>
   );
 }

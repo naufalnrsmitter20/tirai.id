@@ -6,18 +6,17 @@ export default withAuth(function middleware(_) {}, {
   callbacks: {
     authorized: ({ req, token }) => {
       const pathname = req.nextUrl.pathname;
-      if (pathname.startsWith("/auth") && token) {
+      if (
+        (pathname.startsWith("/auth") && token) ||
+        (pathname.startsWith("/admin") && !token) ||
+        (pathname.startsWith("/admin") && token?.role === "CUSTOMER") ||
+        (pathname.startsWith("/admin/user") && token?.role !== "SUPERADMIN") ||
+        (pathname.startsWith("/shop") && !token)
+      ) {
         return false;
       }
-
-      if (pathname.startsWith("/admin") && token?.role === "CUSTOMER")
-        return false;
 
       return true;
     },
   },
 });
-
-export const config = {
-  matcher: ["/"],
-};

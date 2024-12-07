@@ -1,12 +1,12 @@
 import { Check, ChevronDown } from "lucide-react";
 import { EditorBubbleItem, useEditor } from "novel";
 
+import { Button } from "@/components/ui/button";
 import {
-  PopoverTrigger,
   Popover,
   PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
 
 export interface BubbleColorMenuItem {
   name: string;
@@ -111,7 +111,12 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
   return (
     <Popover modal={true} open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger asChild>
-        <Button size="sm" className="gap-2 rounded-none" variant="ghost">
+        <Button
+          size="sm"
+          className="gap-2 rounded-none"
+          type="button"
+          variant="default"
+        >
           <span
             className="rounded-sm px-1"
             style={{
@@ -127,7 +132,7 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
 
       <PopoverContent
         sideOffset={5}
-        className="my-1 flex max-h-80 w-48 flex-col overflow-hidden overflow-y-auto rounded border p-1 shadow-xl "
+        className="my-1 flex max-h-80 w-48 flex-col overflow-hidden overflow-y-auto rounded border p-1 shadow-xl"
         align="start"
       >
         <div className="flex flex-col">
@@ -139,12 +144,14 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
               key={index}
               onSelect={() => {
                 editor.commands.unsetColor();
-                name !== "Default" &&
+                if (name !== "Default") {
                   editor
                     .chain()
                     .focus()
                     .setColor(color || "")
                     .run();
+                }
+
                 onOpenChange(false);
               }}
               className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"
@@ -170,7 +177,10 @@ export const ColorSelector = ({ open, onOpenChange }: ColorSelectorProps) => {
               key={index}
               onSelect={() => {
                 editor.commands.unsetHighlight();
-                name !== "Default" && editor.chain().focus().setHighlight({ color }).run();
+                if (name !== "Default") {
+                  editor.chain().focus().setHighlight({ color }).run();
+                }
+
                 onOpenChange(false);
               }}
               className="flex cursor-pointer items-center justify-between px-2 py-1 text-sm hover:bg-accent"

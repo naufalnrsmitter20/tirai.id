@@ -71,10 +71,10 @@ export const Hero: FC = () => {
               </svg>
               <Body3>Tirai Berkualitas Global</Body3>
             </div>
-            <Display className="mb-6">
+            <Display className="mb-6 text-balance">
               Pilihan Tirai Terbaik untuk Rumah, Kantor, dan Bisnis Anda
             </Display>
-            <Body3 className="mb-12">
+            <Body3 className="mb-12 text-balance">
               Hadirkan suasana baru dengan gorden terbaik, dirancang untuk
               kenyamanan dan gaya modern Anda.
             </Body3>

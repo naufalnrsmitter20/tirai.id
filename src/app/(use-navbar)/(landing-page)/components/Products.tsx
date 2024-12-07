@@ -111,7 +111,9 @@ export const Products: FC<{ products?: Product[] }> = (
             </li>
           ))
         ) : (
-          <Body3>Belum ada produk yang tersedia...</Body3>
+          <Body3 className="text-neutral-500">
+            Belum ada produk yang tersedia...
+          </Body3>
         )}
       </ul>
     </SectionContainer>

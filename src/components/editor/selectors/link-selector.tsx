@@ -1,25 +1,20 @@
-import { cn } from "@/lib/utils";
-import { useEditor } from "novel";
-import { Check, Trash } from "lucide-react";
-import {
-  type Dispatch,
-  type FC,
-  type SetStateAction,
-  useEffect,
-  useRef,
-} from "react";
 import { Button } from "@/components/ui/button";
 import {
-  PopoverContent,
   Popover,
+  PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { Check, Trash } from "lucide-react";
+import { useEditor } from "novel";
+import { useEffect, useRef } from "react";
 
 export function isValidUrl(url: string) {
   try {
     new URL(url);
     return true;
   } catch (e) {
+    console.error(e);
     return false;
   }
 }
@@ -30,6 +25,7 @@ export function getUrlFromString(str: string) {
       return new URL(`https://${str}`).toString();
     }
   } catch (e) {
+    console.error(e);
     return null;
   }
 }
@@ -44,7 +40,7 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
 
   // Autofocus on input by default
   useEffect(() => {
-    inputRef.current && inputRef.current?.focus();
+    if (inputRef.current) inputRef.current?.focus();
   });
   if (!editor) return null;
 
@@ -53,7 +49,8 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
       <PopoverTrigger asChild>
         <Button
           size="sm"
-          variant="ghost"
+          type="button"
+          variant="default"
           className="gap-2 rounded-none border-none"
         >
           <p className="text-base">↗</p>
@@ -78,13 +75,13 @@ export const LinkSelector = ({ open, onOpenChange }: LinkSelectorProps) => {
               onOpenChange(false);
             }
           }}
-          className="flex  p-1 "
+          className="flex p-1"
         >
           <input
             ref={inputRef}
             type="text"
             placeholder="Paste a link"
-            className="flex-1 bg-background p-1 text-sm outline-none"
+            className="flex-1 p-1 text-sm outline-none"
             defaultValue={editor.getAttributes("link").href || ""}
           />
           {editor.getAttributes("link").href ? (
