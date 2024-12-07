@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, LogOut, type LucideIcon } from "lucide-react";
 
 import {
   Collapsible,
@@ -16,6 +16,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { signOut } from "next-auth/react";
 
 export function SidebarMainContent({
   items,
@@ -79,6 +80,16 @@ export function SidebarMainContent({
             </Collapsible>
           );
         })}
+        <SidebarMenuItem className="mt-3 text-red-500">
+          <SidebarMenuButton
+            onClick={() => {
+              signOut();
+            }}
+          >
+            <LogOut />
+            Logout
+          </SidebarMenuButton>
+        </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>
   );
