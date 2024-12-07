@@ -20,6 +20,6 @@ export const findModel = async (where: Prisma.ModelWhereUniqueInput) => {
   return await prisma.model.findUnique({ where });
 };
 
-export const findModels = async (where: Prisma.ModelWhereInput) => {
+export const findModels = async (where?: Prisma.ModelWhereInput) => {
   return await prisma.model.findMany({ where });
 };

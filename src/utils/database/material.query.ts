@@ -22,6 +22,6 @@ export const findMaterial = async (where: Prisma.MaterialWhereUniqueInput) => {
   return await prisma.material.findUnique({ where });
 };
 
-export const findMaterials = async (where: Prisma.MaterialWhereInput) => {
+export const findMaterials = async (where?: Prisma.MaterialWhereInput) => {
   return await prisma.material.findMany({ where });
 };
