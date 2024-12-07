@@ -138,8 +138,7 @@ model CustomRequest {
   size           String
   supplier_price Float
 
-  item    OrderItem @relation(fields: [item_id], references: [id])
-  item_id String    @unique
+  item OrderItem?
 }
 
 model Order {
@@ -164,12 +163,13 @@ model OrderItem {
   id       String @id @default(uuid())
   quantity Int
 
-  review         Review?
-  order          Order           @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  order_id       String
-  variant        ProductVariant? @relation(fields: [variant_id], references: [id], onDelete: Cascade) // Jika user menginginkan custom option yang baru
-  variant_id     String?
-  custom_request CustomRequest?
+  review            Review?
+  order             Order           @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  order_id          String
+  variant           ProductVariant? @relation(fields: [variant_id], references: [id], onDelete: Cascade) // Jika user menginginkan custom option yang baru
+  variant_id        String?
+  custom_request    CustomRequest?  @relation(fields: [custom_request_id], references: [id])
+  custom_request_id String?         @unique
 }
 
 model Article {
