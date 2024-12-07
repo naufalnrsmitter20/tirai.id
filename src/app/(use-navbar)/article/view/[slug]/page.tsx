@@ -1,8 +1,7 @@
-import { getArticleBySlug } from "@/actions/articles";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { CTA } from "@/components/widget/CTA";
-import { findArticle } from "@/utils/database/article.query";
+import { findArticle, updateArticle } from "@/utils/database/article.query";
 import type { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
 import { ArticleContent } from "./components/ArticleContent";
@@ -76,12 +75,11 @@ export default async function ArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const response = await getArticleBySlug(slug, "view");
-  const data = response.data;
+  const article = await findArticle({ slug });
 
-  if (!data || !data.article || !data.article.is_published) return notFound();
+  if (!article || !article.is_published) return notFound();
 
-  const { article } = data;
+  await updateArticle({ slug }, { views: { increment: 1 } });
 
   const jsonLd = {
     "@context": "https://schema.org",

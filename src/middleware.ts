@@ -10,7 +10,8 @@ export default withAuth(function middleware(_) {}, {
         (pathname.startsWith("/auth") && token) ||
         (pathname.startsWith("/admin") && !token) ||
         (pathname.startsWith("/admin") && token?.role === "CUSTOMER") ||
-        (pathname.startsWith("/shop/cart") && !token)
+        (pathname.startsWith("/shop/cart") && !token) ||
+        (pathname.startsWith("/admin/user") && token?.role !== "SUPERADMIN")
       ) {
         return false;
       }

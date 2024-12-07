@@ -2,13 +2,13 @@
 
 import { UploadApiResponse } from "cloudinary";
 
-import cloudinary from "@/lib/cloudinary";
 import { ActionResponse, ActionResponses } from "@/lib/actions";
+import cloudinary from "@/lib/cloudinary";
 
-export async function uploadImageCloudinary(
+export const uploadImageCloudinary = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   file: Buffer | any,
-): Promise<ActionResponse<{ format: string; url: string }>> {
+): Promise<ActionResponse<{ format: string; url: string }>> => {
   try {
     const upload: UploadApiResponse | undefined = await new Promise(
       (resolve, reject) => {
@@ -38,23 +38,22 @@ export async function uploadImageCloudinary(
         : "Terjadi kesalahan",
     );
   }
-}
+};
 
-export async function deleteImageCloudinary(filename: string) {
+export const deleteImageCloudinary = async (
+  filename: string,
+): Promise<ActionResponse> => {
   try {
     const publicId = filename.split("/").pop()?.split(".")[0] || "";
     const deleteResult = await cloudinary.uploader.destroy(publicId);
 
-    if (deleteResult.result === "ok") {
-      return { error: false, message: "Image deleted successfully" };
-    } else {
-      return { error: true, message: "terjadi kesalahan" };
+    if (deleteResult.result !== "ok") {
+      return ActionResponses.serverError();
     }
+
+    return ActionResponses.success(undefined);
   } catch (error) {
     console.log(error);
-    return {
-      error: true,
-      message: "Terjadi kesalahan saat menghapus gambar",
-    };
+    return ActionResponses.serverError();
   }
-}
+};

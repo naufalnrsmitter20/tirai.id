@@ -96,13 +96,14 @@ export default function UserForm({ updateData }: { updateData?: User }) {
       {updateData && (
         <div className="mb-5 flex items-center gap-4">
           <Button
-            onClick={() => router.push("/admin/user")}
-            className="inline-flex aspect-square items-center justify-center rounded-full p-3"
+            variant={"link"}
+            size={"link"}
+            onClick={() => router.back()}
             type="button"
           >
-            <ArrowLeft className="text-white" />
+            <ArrowLeft /> Kembali
           </Button>
-          <H2 className="text-black">Update User {updateData.email}</H2>
+          <H2 className="text-black">Edit User {updateData.email}</H2>
         </div>
       )}
       <form onSubmit={onSubmit} className="max-w-screen-lg space-y-8">

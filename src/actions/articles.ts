@@ -1,6 +1,7 @@
 "use server";
 
 import { ActionResponse, ActionResponses } from "@/lib/actions";
+import { getServerSession } from "@/lib/next-auth";
 import { PaginatedResult } from "@/lib/paginator";
 import { ArticleWithUser } from "@/types/entityRelations";
 import {
@@ -13,7 +14,6 @@ import {
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { deleteImageCloudinary, uploadImageCloudinary } from "./fileUploader";
-import { getServerSession } from "@/lib/next-auth";
 
 const parseFormData = (data: FormData) => {
   const title = data.get("title") as string;
@@ -184,40 +184,14 @@ export const updateArticleStatus = async (
 
 export const getArticleById = async (
   id: string,
-  action: "view" | "edit",
 ): Promise<ActionResponse<ArticleWithUser>> => {
   try {
     const articleData = await findArticle({ id });
     if (!articleData) {
       return ActionResponses.notFound("Article not found");
     }
-    if (action === "view") {
-      revalidatePath("/article", "layout");
-      await updateArticle({ id }, { views: articleData.views + 1 });
-    }
 
     return ActionResponses.success(articleData as ArticleWithUser);
-  } catch (error) {
-    console.log(error);
-    return ActionResponses.serverError("Failed to get article");
-  }
-};
-
-export const getArticleBySlug = async (
-  slug: string,
-  action: "view" | "edit",
-): Promise<ActionResponse<{ article: ArticleWithUser }>> => {
-  try {
-    const article = await findArticle({ slug });
-    if (!article) {
-      return ActionResponses.notFound(`Article ${slug} is not found`);
-    }
-
-    if (action === "view") {
-      await updateArticle({ slug }, { views: article.views + 1 });
-    }
-
-    return ActionResponses.success({ article });
   } catch (error) {
     console.log(error);
     return ActionResponses.serverError("Failed to get article");
@@ -231,7 +205,7 @@ export const deleteArticle = async (
     const article = await findArticle({ id });
     if (article) {
       const deleteResult = await deleteImageCloudinary(article.cover_url);
-      if (deleteResult.error) {
+      if (!deleteResult.success) {
         return ActionResponses.serverError("Failed to delete article");
       }
     }

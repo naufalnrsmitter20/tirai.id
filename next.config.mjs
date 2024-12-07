@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  bundlePagesRouterDependencies: true,
+  serverExternalPackages: ['cloudinary'],
   experimental: {
     serverActions: {
       bodySizeLimit: "6mb",
