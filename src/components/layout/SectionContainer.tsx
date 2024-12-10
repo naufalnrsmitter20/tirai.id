@@ -10,7 +10,7 @@ export const SectionContainer: FC<{
     <section
       {...props}
       className={cn(
-        "mx-auto w-full max-w-screen-xl px-6 py-[5.125rem] md:px-12",
+        "mx-auto w-full max-w-screen-xl px-6 py-8 md:px-12 md:py-16",
         props.className,
       )}
     />

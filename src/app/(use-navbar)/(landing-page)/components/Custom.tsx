@@ -14,26 +14,24 @@ export const Custom: FC = () => {
     <SectionContainer id="custom">
       <div className="flex w-full flex-col-reverse items-end justify-between gap-y-24 lg:flex-row lg:gap-0">
         <div className="w-full lg:max-w-[46%]">
-          <SectionTitle>Custom</SectionTitle>
+          <SectionTitle>Kustom</SectionTitle>
           <H1 className="mb-[1.375rem] text-black">
-            Buat Tirai Sesuai Keinginan untuk Ruangan Anda
+            Pesan Tirai Sesuai Keinginan untuk Ruangan Anda
           </H1>
           <Body3 className="mb-12 text-neutral-500">
             Kami menyediakan layanan pembuatan tirai kustom yang dapat
             disesuaikan dengan ukuran jendela dan pilihan bahan Anda. Dengan
             pengalaman lebih dari 10 tahun dan kepercayaan dari ratusan klien,
-            kami siap membantu mewujudkan tirai impian Anda. Hubungi kami
-            sekarang untuk mendapatkan layanan terbaik.
+            kami siap membantu mewujudkan tirai impian Anda.
           </Body3>
-          {/* TODO: Change this to the custom product route */}
           <Link
-            href={"#"}
+            href={"/shop"}
             className={buttonVariants({
               variant: "default",
               className: "w-full sm:w-fit",
             })}
           >
-            Buat tirai Anda sekarang <ArrowRight />
+            Pesan tirai kustom sekarang <ArrowRight />
           </Link>
         </div>
         <Image

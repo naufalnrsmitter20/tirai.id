@@ -1,5 +1,5 @@
 import { getProducts } from "@/actions/products";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { PageSelector } from "@/components/ui/PageSelector";
 import { H1 } from "@/components/ui/text";
 import { notFound } from "next/navigation";
@@ -29,7 +29,7 @@ export default async function ProductAdmin({
       <H1 className="mb-8 text-black">Manajemen Produk</H1>
       <div className="mb-3 inline-flex w-full justify-end">
         <Link
-          className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-primary-900 px-2 py-4 text-base font-medium text-white transition-colors duration-300 hover:bg-primary-950 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:border-neutral-400 disabled:bg-neutral-400 disabled:text-white"
+          className={buttonVariants({ variant: "default" })}
           href={"/admin/shop/product/add"}
         >
           <Plus /> Tambah Produk

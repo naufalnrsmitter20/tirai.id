@@ -21,9 +21,9 @@ import {
 import { H2 } from "@/components/ui/text";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { ProductWithCategoryReviewsVariants } from "@/types/entityRelations";
-import { Product, ProductCategory } from "@prisma/client";
+import { ProductCategory } from "@prisma/client";
 import { ArrowLeft, Trash } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next-nprogress-bar";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";

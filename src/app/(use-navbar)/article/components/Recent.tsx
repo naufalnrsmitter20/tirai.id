@@ -31,7 +31,7 @@ export const Recent = (data: {
             width={560}
             height={345}
             unoptimized
-            className="w-full rounded-[12px] object-cover"
+            className="h-[345px] w-full rounded-[12px] object-cover"
           />
           <div className="mt-11 flex max-w-full flex-col lg:mt-0 lg:justify-between">
             <div className="mb-10 block lg:mb-0">

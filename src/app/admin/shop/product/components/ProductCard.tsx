@@ -1,11 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Body1, Body3, Body4 } from "@/components/ui/text";
 import { ProductWithCategoryReviewsVariants } from "@/types/entityRelations";
 import { Eye, EyeClosed } from "lucide-react";
+import { useRouter } from "next-nprogress-bar";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export const ProductCard = ({
   data,
@@ -20,6 +21,7 @@ export const ProductCard = ({
   isLoading: boolean;
 }) => {
   const router = useRouter();
+
   return (
     <div className="rounded-xl border border-neutral-100 px-4 py-3 text-black">
       <Image
@@ -34,7 +36,7 @@ export const ProductCard = ({
         unoptimized
         className="h-[200px] w-full rounded-lg object-cover"
       />
-      <div className="my-3">
+      <div className="mb-6 mt-3">
         <Body1>{data.name}</Body1>
         <Body3>{data.category.name}</Body3>
         <Body4>{data.reviews.length} Review</Body4>
@@ -49,14 +51,15 @@ export const ProductCard = ({
         >
           {data.is_published ? <EyeClosed /> : <Eye />}
         </Button>
-        <Button
-          className="flex-grow"
-          onClick={() => {
-            router.push(`/admin/shop/product/${data.id}`);
-          }}
+        <Link
+          className={buttonVariants({
+            variant: "default",
+            className: "w-full",
+          })}
+          href={`/admin/shop/product/${data.id}`}
         >
           Edit
-        </Button>
+        </Link>
       </div>
     </div>
   );

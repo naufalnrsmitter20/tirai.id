@@ -67,7 +67,7 @@ export const Products: FC<{ products?: Product[] }> = (
         <div className="w-full lg:max-w-[70%]">
           <SectionTitle>Produk</SectionTitle>
           <H1 className="mb-[1.375rem] text-black">
-            Temukan Keindahan, Kenyamanan dan Kualitas Tirai Disini
+            Temukan Keindahan, Kenyamanan dan Tirai Berkualitas Disini
           </H1>
         </div>
         {/* TODO: Change this to the e-commerce route */}
