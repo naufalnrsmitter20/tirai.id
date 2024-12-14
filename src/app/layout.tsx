@@ -7,6 +7,7 @@ import generalSansFont from "./fonts";
 import "./globals.css";
 import "./prosemirror.css";
 import Script from "next/script";
+import { MIDTRANS_CLIENT_KEY, MIDTRANS_SNAP_URL } from "@/lib/midtrans-client";
 
 const robots =
   process.env.APP_ENV != "production" ? "noindex, nofollow" : "index, follow";
@@ -96,8 +97,8 @@ export default function RootLayout({
           <GoogleAnalytics gaId={process.env.GA_ID} />
         )}
         <Script
-          src="https://app.sandbox.midtrans.com/snap/snap.js"
-          data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+          src={MIDTRANS_SNAP_URL}
+          data-client-key={MIDTRANS_CLIENT_KEY}
           async
         ></Script>
         <body
