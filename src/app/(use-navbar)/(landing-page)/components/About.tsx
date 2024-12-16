@@ -4,33 +4,11 @@ import { SectionContainer } from "@/components/layout/SectionContainer";
 import { buttonVariants } from "@/components/ui/button";
 import { Body3, H1, H5 } from "@/components/ui/text";
 import { SectionTitle } from "@/components/widget/SectionTitle";
+import { MOTTOS } from "@/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { FC } from "react";
-
-interface Motto {
-  title: string;
-  description: string;
-}
-
-const MOTTOS: Motto[] = [
-  {
-    title: "Tepat Waktu",
-    description:
-      "Produksi molor dan tidak tepat waktu? Itu tidak terjadi pada Tirai.id. Kami sangat berkomitmen pada waktu.",
-  },
-  {
-    title: "Tepat Ukuran",
-    description:
-      "Kami membuat tirai dengan ukuran yang tepat, tidak terlalu tinggi atau terlalu rendah. Tidak kurang ataupun tidak terlalu banyak.",
-  },
-  {
-    title: "Tepat Selera",
-    description:
-      "Menyediakan berbagai pilihan model dan jenis bahan dengan kualitas terbaik untuk memenuhi kebutuhan anda.",
-  },
-];
 
 export const About: FC = () => {
   return (

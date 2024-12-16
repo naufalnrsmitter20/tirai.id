@@ -53,3 +53,26 @@ export const parseNumberInput = (formattedNumber: string) => {
 };
 
 export const MAX_FILE_SIZE = 5_000_000;
+
+interface Motto {
+  title: string;
+  description: string;
+}
+
+export const MOTTOS: Motto[] = [
+  {
+    title: "Tepat Waktu",
+    description:
+      "Produksi molor dan tidak tepat waktu? Itu tidak terjadi pada Tirai.id. Kami sangat berkomitmen pada waktu.",
+  },
+  {
+    title: "Tepat Ukuran",
+    description:
+      "Kami membuat tirai dengan ukuran yang tepat, tidak terlalu tinggi atau terlalu rendah. Tidak kurang ataupun tidak terlalu banyak.",
+  },
+  {
+    title: "Tepat Selera",
+    description:
+      "Menyediakan berbagai pilihan model dan jenis bahan dengan kualitas terbaik untuk memenuhi kebutuhan anda.",
+  },
+];

@@ -19,8 +19,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { H2 } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { useZodForm } from "@/hooks/use-zod-form";
-import { MAX_FILE_SIZE } from "@/lib/utils";
+import { formatNumber, MAX_FILE_SIZE, parseNumberInput } from "@/lib/utils";
 import { ProductWithCategoryReviewsVariants } from "@/types/entityRelations";
 import { ProductCategory } from "@prisma/client";
 import { ArrowLeft, Trash } from "lucide-react";
@@ -29,7 +30,6 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { PhotosPreview } from "./PhotosPreview";
-import { Textarea } from "@/components/ui/textarea";
 
 export const ProductForm = ({
   updateData,
@@ -46,9 +46,9 @@ export const ProductForm = ({
     const loading = toast.loading("Menghapus produk...");
 
     try {
-      const upsertProductResult = await removeProduct(updateData?.id!);
+      const deleteProductResult = await removeProduct(updateData!.id);
 
-      if (!upsertProductResult.success) {
+      if (!deleteProductResult.success) {
         setLoading(false);
         return toast.error("Gagal menghapus produk!", { id: loading });
       }
@@ -56,6 +56,7 @@ export const ProductForm = ({
       setLoading(false);
       toast.success("Berhasil menghapus produk!", { id: loading });
       return router.push("/admin/shop/product");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       setLoading(false);
       return toast.error("Gagal menghapus produk!", { id: loading });
@@ -69,6 +70,9 @@ export const ProductForm = ({
         description: z.string().min(1, "Deskripsi wajib diisi."),
         slug: z.string().min(1, "Deskripsi wajib diisi."),
         category: z.string().min(1, "Kategori wajib diisi."),
+        price: z.string().min(1, "Harga wajib diisi."),
+        stock: z.string().min(1, "Stok wajib diisi."),
+        weight: z.string().min(1, "Berat wajib diisi."),
         photos: updateData
           ? z
               .union([z.instanceof(FileList), z.undefined()])
@@ -97,10 +101,13 @@ export const ProductForm = ({
   const [loading, setLoading] = useState(false);
   const form = useZodForm({
     defaultValues: {
-      category: updateData ? updateData.category.id : "",
-      description: updateData ? updateData.description : "",
-      name: updateData ? updateData.name : "",
-      slug: updateData ? updateData.slug : "",
+      category: updateData?.category.id || "",
+      description: updateData?.description || "",
+      name: updateData?.name || "",
+      slug: updateData?.slug || "",
+      price: updateData?.price?.toString() || "",
+      stock: updateData?.stock?.toString() || "",
+      weight: updateData?.weight?.toString() || "",
     },
     schema: upsertProductSchema,
   });
@@ -114,7 +121,8 @@ export const ProductForm = ({
       updateData ? "Memperbarui produk..." : "Menambahkan produk...",
     );
 
-    const { category, description, name, slug, photos } = values;
+    const { category, description, name, slug, photos, price, stock, weight } =
+      values;
 
     try {
       const photosData = new FormData();
@@ -131,6 +139,9 @@ export const ProductForm = ({
           description,
           name,
           slug,
+          price: parseNumberInput(price),
+          stock: parseNumberInput(stock),
+          weight: parseNumberInput(weight),
           photos: photos ? photosData : undefined,
         },
       });
@@ -179,7 +190,9 @@ export const ProductForm = ({
             {updateData ? (
               <>
                 Edit Produk{" "}
-                <span className="text-primary-900">"{updateData.name}"</span>
+                <span className="text-primary-900">
+                  &quot;{updateData.name}&quot;
+                </span>
               </>
             ) : (
               <>Buat Produk Baru</>
@@ -268,6 +281,66 @@ export const ProductForm = ({
               <FormLabel htmlFor="title">Slug Produk</FormLabel>
               <FormControl>
                 <Input {...field} placeholder="Masukkan slug produk" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="price"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="price">Harga (Rp.)</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    const formattedValue = formatNumber(e.target.value);
+                    field.onChange(formattedValue);
+                  }}
+                  placeholder="Masukkan harga"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="stock"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="stock">Stok</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    const formattedValue = formatNumber(e.target.value, true);
+                    field.onChange(formattedValue);
+                  }}
+                  placeholder="Masukkan stok varian"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="weight"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="weight">Berat (kg)</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    const formattedValue = formatNumber(e.target.value, false);
+                    field.onChange(formattedValue);
+                  }}
+                  placeholder="Masukkan berat varian"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
