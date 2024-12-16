@@ -19,6 +19,9 @@ interface UpsertProductData {
   category?: string;
   name?: string;
   description?: string;
+  stock?: number;
+  price?: number;
+  weight?: number;
   photos?: FormData;
 }
 
@@ -45,7 +48,7 @@ const handleImagesUpload = async (images: File[], productId?: string) => {
     }
   }
 
-  let photoUrls: string[] = [];
+  const photoUrls: string[] = [];
 
   for (const image of images) {
     const imageBuffer = await image.arrayBuffer();
@@ -77,9 +80,12 @@ export const upsertProduct = async ({
       await createProduct({
         category: { connect: { id: data.category } },
         description: data.description!,
-        name: data.description!,
+        name: data.name!,
         slug: data.slug!,
         photos: photoUrls!,
+        price: data.price,
+        stock: data.stock,
+        weight: data.weight,
       });
 
       return ActionResponses.success("Success Create Product");
@@ -95,6 +101,9 @@ export const upsertProduct = async ({
         name: data.name,
         slug: data.slug,
         photos: photoUrls as string[] | undefined,
+        price: data.price,
+        stock: data.stock,
+        weight: data.weight,
       },
     );
 

@@ -15,6 +15,7 @@ interface UpsertProductData {
   height?: number;
   price?: number;
   stock?: number;
+  weight?: number;
   productId?: string;
 }
 
@@ -24,12 +25,20 @@ export const upsertVariant = async ({
   data: UpsertProductData;
 }): Promise<ActionResponse<string>> => {
   try {
-    const { id, name, width, height, price, stock, productId } = data;
+    const { id, name, width, height, price, stock, weight, productId } = data;
 
     if (!id) {
-      if (!name || !width || !height || !price || !stock || !productId) {
+      if (
+        !name ||
+        !width ||
+        !height ||
+        !price ||
+        !stock ||
+        !weight ||
+        !productId
+      ) {
         return ActionResponses.badRequest(
-          "name, width, height, price, and stock is required.",
+          "name, width, height, price, weight, and stock is required.",
         );
       }
 
@@ -40,6 +49,7 @@ export const upsertVariant = async ({
         height,
         price,
         stock,
+        weight,
       });
 
       return ActionResponses.success("Success create product variant");

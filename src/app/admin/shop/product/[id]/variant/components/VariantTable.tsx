@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteVariant as removeVariant } from "@/actions/productVariants";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,34 +16,28 @@ import { ProductVariant } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useRouter } from "next-nprogress-bar";
-import { FC, useMemo, useState } from "react";
+import { FC, useMemo } from "react";
 import { toast } from "sonner";
-import { deleteVariant as removeVariant } from "@/actions/productVariants";
 
 export const VariantTable: FC<{
   productId: string;
   variants: ProductVariant[];
 }> = ({ productId, variants }) => {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
 
   const deleteVariant = async (id: string) => {
-    setLoading(true);
-
     const loading = toast.loading("Menghapus varian...");
 
     try {
       const upsertProductResult = await removeVariant(id);
 
       if (!upsertProductResult.success) {
-        setLoading(false);
         return toast.error(upsertProductResult.error?.message, { id: loading });
       }
 
-      setLoading(false);
       toast.success("Berhasil menghapus varian!", { id: loading });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
-      setLoading(false);
       return toast.error("Gagal menghapus varian!", { id: loading });
     }
   };
@@ -128,6 +123,27 @@ export const VariantTable: FC<{
             {formatNumber(row.original.width.toString())}cm x{" "}
             {formatNumber(row.original.height.toString())}cm
           </div>
+        ),
+        enableSorting: true,
+        enableColumnFilter: true,
+      },
+      {
+        accessorKey: "weight",
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Berat
+              <ArrowUpDown size={16} />
+            </Button>
+          );
+        },
+        cell: ({ row }) => (
+          <div>{formatNumber(row.original.weight.toString())}kg</div>
         ),
         enableSorting: true,
         enableColumnFilter: true,

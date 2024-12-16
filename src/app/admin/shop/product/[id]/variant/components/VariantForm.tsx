@@ -38,8 +38,9 @@ export const VariantForm = ({
         height: z.string().min(1, "Tinggi varian wajib diisi."),
         price: z.string().min(1, "Harga wajib diisi."),
         stock: z.string().min(1, "Stok wajib diisi."),
+        weight: z.string().min(1, "Berat wajib diisi."),
       }),
-    [updateData],
+    [],
   );
   const [loading, setLoading] = useState(false);
   const form = useZodForm({
@@ -49,6 +50,7 @@ export const VariantForm = ({
       height: updateData?.height.toString() || "",
       price: updateData?.price.toString() || "",
       stock: updateData?.stock.toString() || "",
+      weight: updateData?.weight.toString() || "",
     },
     schema: upsertProductSchema,
   });
@@ -60,7 +62,7 @@ export const VariantForm = ({
       updateData ? "Memperbarui varian..." : "Menambahkan varian...",
     );
 
-    const { name, width, height, price, stock } = values;
+    const { name, width, height, price, stock, weight } = values;
 
     const upsertProductResult = await upsertVariant({
       data: {
@@ -70,6 +72,7 @@ export const VariantForm = ({
         height: parseNumberInput(height),
         price: parseNumberInput(price),
         stock: parseNumberInput(stock),
+        weight: parseNumberInput(weight),
         productId,
       },
     });
@@ -201,6 +204,26 @@ export const VariantForm = ({
                     field.onChange(formattedValue);
                   }}
                   placeholder="Masukkan stok varian"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="weight"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="weight">Berat (kg)</FormLabel>
+              <FormControl>
+                <Input
+                  {...field}
+                  onChange={(e) => {
+                    const formattedValue = formatNumber(e.target.value, false);
+                    field.onChange(formattedValue);
+                  }}
+                  placeholder="Masukkan berat varian"
                 />
               </FormControl>
               <FormMessage />
