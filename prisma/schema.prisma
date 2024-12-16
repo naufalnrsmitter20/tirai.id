@@ -73,6 +73,9 @@ model Product {
   name         String
   description  String
   photos       String[]
+  stock        Int?
+  price        Float?
+  weight       Float?
   slug         String   @unique
   is_published Boolean  @default(false)
   created_at   DateTime @default(now())
@@ -99,12 +102,6 @@ model Review {
   @@unique([order_item_id, order_id])
 }
 
-model Material {
-  id    String @id @default(uuid())
-  name  String @unique
-  price Float
-}
-
 model ProductVariant {
   id         String   @id @default(uuid())
   name       String   @unique
@@ -112,12 +109,19 @@ model ProductVariant {
   height     Float
   price      Float
   stock      Int
+  weight     Float
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   product    Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
   product_id String
   items      OrderItem[]
+}
+
+model Material {
+  id    String @id @default(uuid())
+  name  String @unique
+  price Float
 }
 
 model Model {

@@ -44,6 +44,8 @@ export type ProductCatalog = Prisma.ProductGetPayload<{
     slug: true;
     description: true;
     is_published: true;
+    stock: true;
+    price: true;
     photos: true;
     created_at: true;
     updated_at: true;

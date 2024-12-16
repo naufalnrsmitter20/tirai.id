@@ -58,7 +58,7 @@ export const Hero: FC = () => {
                 if (sanitizedSearchTerm !== "") {
                   const currentParams = new URLSearchParams(searchParams);
 
-                  currentParams.append("term", sanitizedSearchTerm);
+                  currentParams.set("term", sanitizedSearchTerm);
                   router.push(`/shop?${currentParams.toString()}`);
                 }
               }}
@@ -66,7 +66,7 @@ export const Hero: FC = () => {
             >
               <div className="w-[90%]">
                 <Input
-                  placeholder="Cari artikel dari Tirai.id..."
+                  placeholder="Cari produk dari Tirai.id..."
                   className="w-full"
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -86,7 +86,7 @@ export const Hero: FC = () => {
                 onValueChange={(value) => {
                   const currentParams = new URLSearchParams(searchParams);
 
-                  currentParams.append("sortBy", value);
+                  currentParams.set("sortBy", value);
                   router.push(`/shop?${currentParams.toString()}`);
                 }}
                 defaultValue={searchParams.get("sortBy") || ""}

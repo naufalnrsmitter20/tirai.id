@@ -33,7 +33,7 @@ export const sanitizeInput = (searchTerm: string) => {
 };
 
 export const formatNumber = (value: string, isInt?: boolean) => {
-  let numericValue = isInt
+  const numericValue = isInt
     ? value.replace(/[^0-9]/g, "")
     : value.replace(/[^0-9.]/g, "");
 
@@ -48,7 +48,8 @@ export const formatNumber = (value: string, isInt?: boolean) => {
 
 export const parseNumberInput = (formattedNumber: string) => {
   const cleaned = formattedNumber.replace(/[^0-9.-]+/g, "");
-  return parseFloat(cleaned);
+  const parsed = parseFloat(cleaned);
+  return isNaN(parsed) ? 0 : parsed;
 };
 
 export const MAX_FILE_SIZE = 5_000_000;

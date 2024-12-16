@@ -10,12 +10,14 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useRouter } from "next-nprogress-bar";
+import { useSearchParams } from "next/navigation";
 
 export const PageSelector = ({
   meta: { currentPage, lastPage, next, prev },
 }: {
   meta: PaginationMetadata;
 }) => {
+  const searchParams = useSearchParams();
   const router = useRouter();
 
   return (
@@ -24,7 +26,12 @@ export const PageSelector = ({
         <Button
           size="icon"
           disabled={currentPage === 1}
-          onClick={() => router.push(`?page=1`, { scroll: false })}
+          onClick={() => {
+            const previousParams = new URLSearchParams(searchParams);
+            previousParams.set("page", "1");
+
+            router.push(`?${previousParams.toString()}`, { scroll: false });
+          }}
           className="group"
         >
           <ArrowLeftToLineIcon strokeWidth={1} />
@@ -32,7 +39,12 @@ export const PageSelector = ({
         <Button
           size="icon"
           disabled={!Boolean(prev)}
-          onClick={() => router.push(`?page=${prev}`, { scroll: false })}
+          onClick={() => {
+            const previousParams = new URLSearchParams(searchParams);
+            previousParams.set("page", prev!.toString());
+
+            router.push(`?${previousParams.toString()}`, { scroll: false });
+          }}
           className="group"
         >
           <ChevronLeft strokeWidth={1} />
@@ -43,17 +55,27 @@ export const PageSelector = ({
       </Body3>
       <div className="inline-flex gap-2">
         <Button
-          size={"icon"}
+          size="icon"
           disabled={!Boolean(next)}
-          onClick={() => router.push(`?page=${next}`, { scroll: false })}
+          onClick={() => {
+            const previousParams = new URLSearchParams(searchParams);
+            previousParams.set("page", next!.toString());
+
+            router.push(`?${previousParams.toString()}`, { scroll: false });
+          }}
           className="group"
         >
           <ChevronRight strokeWidth={1} />
         </Button>
         <Button
-          size={"icon"}
+          size="icon"
           disabled={!Boolean(lastPage) || currentPage === lastPage}
-          onClick={() => router.push(`?page=${lastPage}`, { scroll: false })}
+          onClick={() => {
+            const previousParams = new URLSearchParams(searchParams);
+            previousParams.set("page", lastPage.toString());
+
+            router.push(`?${previousParams.toString()}`, { scroll: false });
+          }}
           className="group"
         >
           <ArrowRightToLineIcon strokeWidth={1} />
