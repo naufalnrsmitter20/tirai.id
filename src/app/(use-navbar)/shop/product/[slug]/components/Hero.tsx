@@ -13,7 +13,6 @@ import {
 import { Body3, H3, H5 } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 import { Prisma } from "@prisma/client";
-import { ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import { FC, useEffect, useMemo, useState } from "react";
 
@@ -125,7 +124,7 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
               </Select>
             </div>
             <Button variant={"default"} className="w-full">
-              Masukkan Keranjang <ShoppingCart />
+              Masukkan Keranjang
             </Button>
           </div>
         </div>
