@@ -10,8 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Body3, H3, H5 } from "@/components/ui/text";
-import { cn } from "@/lib/utils";
+import { Body3, H3, H4, H5 } from "@/components/ui/text";
+import { cn, formatRupiah } from "@/lib/utils";
 import { Prisma } from "@prisma/client";
 import Image from "next/image";
 import { FC, useEffect, useMemo, useState } from "react";
@@ -20,21 +20,27 @@ type Product = Prisma.ProductGetPayload<{ include: { variants: true } }>;
 
 export const Hero: FC<{ product: Product }> = ({ product }) => {
   const [selectedVariant, setSelectedVariant] = useState(
-    product.variants[0] || null,
+    product.variants.find((variant) => variant.stock > 0),
   );
   const [selectedPhoto, setSelectedPhoto] = useState(product.photos[0]);
   const [selectedStock, setSelectedStock] = useState(1);
 
   const maxStock = useMemo(
-    () => product.stock || selectedVariant.stock,
-    [selectedVariant],
+    () =>
+      product.stock === null ? selectedVariant?.stock || 0 : product.stock,
+    [product.stock, selectedVariant],
+  );
+  const price = useMemo(
+    () =>
+      product.price === null ? selectedVariant?.price || 0 : product.price,
+    [product.price, selectedVariant],
   );
 
   useEffect(() => {
     if (selectedStock > maxStock) {
       setSelectedStock(maxStock);
     }
-  }, [maxStock]);
+  }, [maxStock, selectedStock]);
 
   return (
     <SectionContainer id="hero">
@@ -87,7 +93,7 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
                     variant={"default"}
                     className={cn(
                       "rounded-xl duration-0",
-                      variant.id === selectedVariant.id
+                      variant.id === selectedVariant?.id
                         ? ""
                         : "border border-primary-900 bg-white text-primary-900 hover:text-white",
                     )}
@@ -99,7 +105,8 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
               </div>
             </div>
           )}
-          <div className="mt-8 flex w-full flex-col items-center gap-2">
+          <H4 className="mt-12 text-black">{formatRupiah(price)}</H4>
+          <div className="mt-3 flex w-full flex-col items-center gap-2">
             <div className="flex w-full flex-col">
               <Label className="mb-2 text-black">Kuantitas</Label>
               <Select
@@ -107,6 +114,7 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
                   setSelectedStock(Number(value));
                 }}
                 value={selectedStock.toString()}
+                disabled={maxStock === 0}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue>{selectedStock}</SelectValue>
@@ -123,8 +131,12 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
                 </SelectContent>
               </Select>
             </div>
-            <Button variant={"default"} className="w-full">
-              Masukkan Keranjang
+            <Button
+              variant={"default"}
+              className="w-full"
+              disabled={maxStock === 0}
+            >
+              {maxStock === 0 ? "Sold Out" : "Masukkan Keranjang"}
             </Button>
           </div>
         </div>
