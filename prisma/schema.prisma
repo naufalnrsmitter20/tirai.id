@@ -85,6 +85,7 @@ model Product {
   category_id String
   variants    ProductVariant[]
   reviews     Review[]
+  items       OrderItem[]
 }
 
 model Review {
@@ -145,12 +146,13 @@ model CustomRequest {
 }
 
 model Order {
-  id          String      @id @default(uuid())
-  finished_at DateTime?
-  total_price Float
-  status      OrderStatus
-  created_at  DateTime    @default(now())
-  updated_at  DateTime    @updatedAt
+  id           String      @id @default(uuid())
+  finished_at  DateTime?
+  total_price  Float
+  status       OrderStatus
+  invoice_link String?
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
 
   reviews  Review[]
   items    OrderItem[]
@@ -169,6 +171,8 @@ model OrderItem {
   review            Review?
   order             Order           @relation(fields: [order_id], references: [id], onDelete: Cascade)
   order_id          String
+  product           Product?        @relation(fields: [product_id], references: [id])
+  product_id        String?
   variant           ProductVariant? @relation(fields: [variant_id], references: [id], onDelete: Cascade) // Jika user menginginkan custom option yang baru
   variant_id        String?
   custom_request    CustomRequest?  @relation(fields: [custom_request_id], references: [id])
