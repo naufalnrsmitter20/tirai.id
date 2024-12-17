@@ -1,8 +1,9 @@
 "use client";
 
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { NAV_ITEMS } from "@/constants/main-nav-items";
 import { Role } from "@prisma/client";
+import { ShoppingCart, UserRound } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { FC, useRef } from "react";
@@ -44,25 +45,59 @@ export const Navbar: FC = () => {
               </li>
             ))}
 
-            <Link
-              href={
-                session?.user?.role && status === "authenticated"
-                  ? ADMIN_ROLES.includes(session.user.role)
-                    ? "/admin"
-                    : "/shop"
-                  : "/shop"
-              }
-              className={buttonVariants({
-                variant: "default",
-                className: "ml-6 w-full text-center",
-              })}
-            >
-              {session?.user?.role && status === "authenticated"
-                ? ADMIN_ROLES.includes(session.user.role)
-                  ? "Dashboard"
-                  : "Belanja"
-                : "Belanja"}
-            </Link>
+            {status === "authenticated" &&
+              session.user?.role !== "CUSTOMER" &&
+              session.user?.role !== "SUPPLIER" && (
+                <Link
+                  href={"/admin"}
+                  className={buttonVariants({
+                    variant: "default",
+                    className: "ml-6 w-full text-center",
+                  })}
+                >
+                  Dashboard
+                </Link>
+              )}
+            {status === "authenticated" &&
+              (session.user?.role === "CUSTOMER" ||
+                session.user?.role === "SUPPLIER") && (
+                <div className="ml-6 flex items-center gap-x-2">
+                  <Link
+                    href={"/profile"}
+                    className={buttonVariants({
+                      variant: "default",
+                      className: "w-full text-center",
+                    })}
+                  >
+                    <UserRound />
+                  </Link>
+                  <Button variant={"default"}>
+                    <ShoppingCart />
+                  </Button>
+                </div>
+              )}
+            {status === "unauthenticated" && (
+              <div className="ml-6 flex items-center gap-x-2">
+                <Link
+                  href={"/auth/login"}
+                  className={buttonVariants({
+                    variant: "default",
+                    className: "w-full text-center",
+                  })}
+                >
+                  Masuk
+                </Link>
+                <Link
+                  href={"/auth/register"}
+                  className={buttonVariants({
+                    variant: "outline",
+                    className: "w-full text-center",
+                  })}
+                >
+                  Daftar
+                </Link>
+              </div>
+            )}
           </ul>
           <div className="flex items-center gap-2 lg:hidden">
             <input
