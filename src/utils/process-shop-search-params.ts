@@ -15,17 +15,47 @@ export const buildProductsQuery = (params: ShopSearchParams) => {
   query.where = {};
 
   if (params.availability) {
-    query.where.OR = [
-      ...(query.where.OR ? query.where.OR : []),
-      {
-        variants: {
-          some: {
-            stock: params.availability === "out-of-stock" ? 0 : { gt: 0 },
+    if (params.availability === "out-of-stock") {
+      query.where.OR = [
+        ...(query.where.OR ? query.where.OR : []),
+        {
+          variants: {
+            some: {
+              stock: 0,
+            },
           },
         },
-      },
+        {
+          stock: 0,
+        },
+      ];
+    } else if (params.availability === "in-stock") {
+      query.where.OR = [
+        ...(query.where.OR ? query.where.OR : []),
+        {
+          variants: {
+            some: {
+              stock: { gt: 0 },
+            },
+          },
+        },
+        {
+          stock: { gt: 0 },
+        },
+      ];
+    }
+  }
+
+  if (params.term) {
+    const previousAND = (query.where.AND || []) as never[];
+
+    query.where.AND = [
+      ...previousAND,
       {
-        stock: params.availability === "out-of-stock" ? 0 : { gt: 0 },
+        OR: [
+          { name: { contains: params.term, mode: "insensitive" } },
+          { description: { contains: params.term, mode: "insensitive" } },
+        ],
       },
     ];
   }
@@ -34,36 +64,35 @@ export const buildProductsQuery = (params: ShopSearchParams) => {
     query.where.category_id = { in: params.categories.split(",") };
   }
 
-  if (params.term) {
-    query.where.OR = [
-      ...(query.where.OR ? query.where.OR : []),
-      { name: { contains: params.term, mode: "insensitive" } },
-      { description: { contains: params.term, mode: "insensitive" } },
-    ];
-  }
-
   if (params.minPrice || params.maxPrice) {
-    query.where.OR = [
-      ...(query.where.OR ? query.where.OR : []),
+    const previousAND = (query.where.AND || []) as never[];
+
+    query.where.AND = [
+      ...previousAND,
       {
-        price: {
-          ...(params.minPrice ? { gte: Number(params.minPrice) } : {}),
-          ...(params.maxPrice ? { lte: Number(params.maxPrice) } : {}),
-        },
-      },
-      {
-        variants: {
-          some: {
+        OR: [
+          {
             price: {
               ...(params.minPrice ? { gte: Number(params.minPrice) } : {}),
               ...(params.maxPrice ? { lte: Number(params.maxPrice) } : {}),
             },
           },
-        },
+          {
+            variants: {
+              some: {
+                price: {
+                  ...(params.minPrice ? { gte: Number(params.minPrice) } : {}),
+                  ...(params.maxPrice ? { lte: Number(params.maxPrice) } : {}),
+                },
+              },
+            },
+          },
+        ],
       },
     ];
   }
 
+  // Handling sorting
   if (params.sortBy) {
     switch (params.sortBy) {
       case "Best Selling":
@@ -76,7 +105,10 @@ export const buildProductsQuery = (params: ShopSearchParams) => {
         query.orderBy = { name: "desc" };
         break;
       case "Price, low-high":
+        query.orderBy = { price: "asc" };
+        break;
       case "Price, high-low":
+        query.orderBy = { price: "desc" };
         break;
       case "Date, old-new":
         query.orderBy = { created_at: "asc" };

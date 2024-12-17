@@ -60,7 +60,7 @@ export const Filter: FC<{
     >
       <div className="block">
         <H5 className="mb-3 text-black">Kategori</H5>
-        <div className="itmes-start flex flex-col gap-x-3">
+        <div className="itmes-start flex flex-col gap-y-2">
           {availableCategories.map((category) => (
             <div className="flex items-center gap-x-2" key={category.id}>
               <Checkbox
