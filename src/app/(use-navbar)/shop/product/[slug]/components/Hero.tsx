@@ -15,10 +15,14 @@ import { useCart } from "@/hooks/use-cart";
 import { cn, formatRupiah } from "@/lib/utils";
 import { CartItem } from "@/types/cart";
 import { Prisma } from "@prisma/client";
+import { useRouter } from "next-nprogress-bar";
 import Image from "next/image";
 import { FC, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
-type Product = Prisma.ProductGetPayload<{ include: { variants: true } }>;
+type Product = Prisma.ProductGetPayload<{
+  include: { variants: true; category: { select: { name: true } } };
+}>;
 
 export const Hero: FC<{ product: Product }> = ({ product }) => {
   const [selectedVariant, setSelectedVariant] = useState(
@@ -26,9 +30,19 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
   );
   const [selectedPhoto, setSelectedPhoto] = useState(product.photos[0]);
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const { addItem } = useCart();
+  const { cart, addItem } = useCart();
 
+  const productInCart = useMemo(
+    () =>
+      cart?.find(
+        (item) =>
+          item.productId === product.id &&
+          selectedVariant?.id === item.variantId,
+      ),
+    [cart],
+  );
   const maxStock = useMemo(
     () =>
       product.stock === null ? selectedVariant?.stock || 0 : product.stock,
@@ -125,7 +139,11 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from(
-                    { length: maxStock > 30 ? 29 : maxStock },
+                    {
+                      length:
+                        (maxStock > 30 ? 29 : maxStock) -
+                        (productInCart ? productInCart.quantity : 0),
+                    },
                     (_, index) => index + 1,
                   ).map((sortOption) => (
                     <SelectItem key={sortOption} value={sortOption.toString()}>
@@ -138,7 +156,30 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
             <Button
               variant={"default"}
               className="w-full"
-              disabled={maxStock === 0}
+              disabled={maxStock === 0 || loading}
+              onClick={() => {
+                setLoading(true);
+                const loadingToast = toast.loading("Loading...");
+
+                const cartItem: Omit<CartItem, "id"> = {
+                  name: product.name,
+                  photo: product.photos[0],
+                  categoryName: product.category.name,
+                  pricePerItem: product.price ?? selectedVariant?.price!,
+                  quantity,
+                  productId: product.id,
+                  variantId: selectedVariant?.id,
+                  variantName: selectedVariant?.name,
+                };
+
+                addItem(cartItem);
+
+                setLoading(false);
+                toast.success("Berhasil menambahkan produk!", {
+                  id: loadingToast,
+                });
+                return location.reload();
+              }}
             >
               {maxStock === 0 ? "Sold Out" : "Masukkan Keranjang"}
             </Button>

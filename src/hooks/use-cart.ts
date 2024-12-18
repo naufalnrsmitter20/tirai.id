@@ -9,23 +9,35 @@ export function useCart() {
   const [cart, setCart] = useLocalStorage<CartItem[]>("cart", []);
   const [pendingUpdate, setPendingUpdate] = useState(false);
 
-  const addItem = (item: CartItem) => {
-    const existingItem = cart.find(
+  const addItem = (item: Omit<CartItem, "id">) => {
+    const existingItem = cart!.find(
       (i) => i.productId === item.productId && i.variantId === item.variantId,
     );
 
     if (existingItem) {
-      return cart.map((i) =>
-        i === existingItem ? { ...i, quantity: i.quantity + item.quantity } : i,
+      setCart(
+        cart!.map((i) =>
+          i.productId === item.productId && i.variantId === item.variantId
+            ? { ...i, quantity: i.quantity + item.quantity }
+            : i,
+        ),
       );
+    } else {
+      setCart([...cart!, { ...item, id: (cart!.length + 1).toString() }]);
     }
 
-    setCart([...cart, item]);
+    setPendingUpdate(true);
+  };
+
+  const editItem = (id: string, updates: Partial<Omit<CartItem, "id">>) => {
+    setCart(
+      cart!.map((item) => (item.id === id ? { ...item, ...updates } : item)),
+    );
     setPendingUpdate(true);
   };
 
   const removeItem = (id: string) => {
-    setCart(cart.filter((item) => item.id !== id));
+    setCart(cart!.filter((item) => item.id !== id));
     setPendingUpdate(true);
   };
 
@@ -52,7 +64,7 @@ export function useCart() {
     let timer: NodeJS.Timeout;
 
     const syncCart = async () => {
-      await updateCart(cart);
+      await updateCart(cart!);
       setPendingUpdate(false);
     };
 
@@ -65,5 +77,5 @@ export function useCart() {
     return () => clearTimeout(timer);
   }, [cart, pendingUpdate]);
 
-  return { cart, setCart, addItem, removeItem, clearCart };
+  return { cart, setCart, addItem, editItem, removeItem, clearCart };
 }
