@@ -16,8 +16,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Session } from "next-auth";
 
-const SIDEBAR_ITEMS = [
+let SIDEBAR_ITEMS = [
   {
     title: "Dashboard",
     url: "/admin",
@@ -62,21 +63,17 @@ const SIDEBAR_ITEMS = [
       },
     ],
   },
-  {
-    title: "Chat",
-    url: "/admin/chat",
-    icon: MessageCircleMore,
-    isActive: true,
-    children: [
-      {
-        title: "Chats",
-        url: "/admin/chat",
-      },
-    ],
-  },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ session }: { session: Session | null }) {
+  if (session?.user?.role === "SALES")
+    SIDEBAR_ITEMS.push({
+      title: "Chat",
+      url: "/admin/chat",
+      icon: MessageCircleMore,
+      isActive: true,
+    });
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>

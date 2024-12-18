@@ -4,19 +4,17 @@ import { findChatById, setReadMessage } from "@/actions/chat";
 import { Button } from "@/components/ui/button";
 import { Body2, Body3 } from "@/components/ui/text";
 import { Message, useMessage } from "@/hooks/use-message";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { supabaseBrowser } from "@/lib/supabase-browser";
 import { ChatUser } from "@/types/entityRelations";
 import { ArrowLeft } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { ChangeEventHandler, useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { FileMessageCard } from "../../../../components/widget/Chat/FileMessageCard";
-import { MessageCard } from "../../../../components/widget/Chat/MessageCard";
+import { MessagesMap } from "../../../../components/widget/Chat/MessagesMap";
 import { SendFileDialog } from "../../../../components/widget/Chat/dialog/SendFileDialog";
 import { MessageForm } from "./MessageForm";
 import { SearchBar } from "./SearchBar";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { MessagesMap } from "../../../../components/widget/Chat/MessagesMap";
 
 export const ChatInterface = ({
   conversation,
@@ -26,13 +24,11 @@ export const ChatInterface = ({
   recipients: ChatUser[];
 }) => {
   const {
-    actionMessage,
     addMessage,
     hasMore,
     messages,
     page,
     activeChat,
-    setActionMessage,
     setMessages,
     setActiveChat,
     setPage,

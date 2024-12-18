@@ -11,7 +11,8 @@ export default withAuth(function middleware(_) {}, {
         (pathname.startsWith("/admin") && !token) ||
         (pathname.startsWith("/admin") && token?.role === "CUSTOMER") ||
         (pathname.startsWith("/shop/cart") && !token) ||
-        (pathname.startsWith("/admin/user") && token?.role !== "SUPERADMIN")
+        (pathname.startsWith("/admin/user") && token?.role !== "SUPERADMIN") ||
+        (pathname.startsWith("/admin/chat") && token?.role !== "SALES")
       ) {
         return false;
       }
