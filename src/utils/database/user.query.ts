@@ -39,3 +39,18 @@ export const updateUser = async (
 export const deleteUser = async (where: Prisma.UserWhereUniqueInput) => {
   return await prisma.user.delete({ where });
 };
+
+export const findUserInById = async (ids: string[]) => {
+  return await prisma.user.findMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+    },
+  });
+};

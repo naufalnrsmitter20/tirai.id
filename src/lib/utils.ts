@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
+import moment from "moment-timezone";
 import { twMerge } from "tailwind-merge";
 
 export const cn = (...inputs: ClassValue[]) => {
@@ -76,3 +77,29 @@ export const MOTTOS: Motto[] = [
       "Menyediakan berbagai pilihan model dan jenis bahan dengan kualitas terbaik untuk memenuhi kebutuhan anda.",
   },
 ];
+
+export const strDateToEpoch = (dateString: string) => {
+  const date = moment(dateString + "Z")
+    .tz("Asia/Jakarta")
+    .toDate();
+  return date.setHours(0, 0, 0, 0);
+};
+
+export const formatRelativeDate = (dateString: string): string => {
+  const inputDate = moment(dateString + "Z").tz("Asia/Jakarta");
+  const today = moment().tz("Asia/Jakarta");
+  const yesterday = moment(today);
+  yesterday.date(today.date() - 1);
+
+  if (inputDate.toDate().toDateString() === today.toDate().toDateString())
+    return "Today";
+  if (inputDate.toDate().toDateString() === yesterday.toDate().toDateString())
+    return "Yesterday";
+
+  const options: Intl.DateTimeFormatOptions = {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  };
+  return inputDate.toDate().toLocaleDateString("id-ID", options);
+};

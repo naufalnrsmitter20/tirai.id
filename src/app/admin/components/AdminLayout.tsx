@@ -15,7 +15,7 @@ export default function AdminLayout({
           <SidebarTrigger className="m-2" />
           <div
             id="main-content"
-            className="relative mt-[90px] min-h-full w-full overflow-y-auto py-4 lg:mt-0"
+            className="relative mt-[12px] min-h-full w-full overflow-y-auto py-4 sm:mt-[90px] lg:mt-0"
           >
             <main className="pb-16">
               <div className="min-h-fit overflow-y-auto px-4 pt-4">

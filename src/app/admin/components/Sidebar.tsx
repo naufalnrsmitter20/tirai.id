@@ -1,6 +1,7 @@
 import {
   CircleGauge,
   Home,
+  MessageCircleMore,
   Newspaper,
   ShoppingCart,
   User2,
@@ -58,6 +59,18 @@ const SIDEBAR_ITEMS = [
       {
         title: "Add Article",
         url: "/admin/article/add",
+      },
+    ],
+  },
+  {
+    title: "Chat",
+    url: "/admin/chat",
+    icon: MessageCircleMore,
+    isActive: true,
+    children: [
+      {
+        title: "Chats",
+        url: "/admin/chat",
       },
     ],
   },

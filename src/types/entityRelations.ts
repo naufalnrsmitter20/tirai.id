@@ -62,3 +62,11 @@ export type ProductCatalog = Prisma.ProductGetPayload<{
     };
   };
 }>;
+
+export type ChatUser = Prisma.UserGetPayload<{
+  select: {
+    email: true;
+    name: true;
+    id: true;
+  };
+}>;
