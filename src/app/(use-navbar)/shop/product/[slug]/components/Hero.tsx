@@ -11,7 +11,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Body3, H3, H4, H5 } from "@/components/ui/text";
+import { useCart } from "@/hooks/use-cart";
 import { cn, formatRupiah } from "@/lib/utils";
+import { CartItem } from "@/types/cart";
 import { Prisma } from "@prisma/client";
 import Image from "next/image";
 import { FC, useEffect, useMemo, useState } from "react";
@@ -23,7 +25,9 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
     product.variants.find((variant) => variant.stock > 0),
   );
   const [selectedPhoto, setSelectedPhoto] = useState(product.photos[0]);
-  const [selectedStock, setSelectedStock] = useState(1);
+  const [quantity, setQuantity] = useState(1);
+
+  const { addItem } = useCart();
 
   const maxStock = useMemo(
     () =>
@@ -37,10 +41,10 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
   );
 
   useEffect(() => {
-    if (selectedStock > maxStock) {
-      setSelectedStock(maxStock);
+    if (quantity > maxStock) {
+      setQuantity(maxStock);
     }
-  }, [maxStock, selectedStock]);
+  }, [maxStock, quantity]);
 
   return (
     <SectionContainer id="hero">
@@ -111,13 +115,13 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
               <Label className="mb-2 text-black">Kuantitas</Label>
               <Select
                 onValueChange={(value) => {
-                  setSelectedStock(Number(value));
+                  setQuantity(Number(value));
                 }}
-                value={selectedStock.toString()}
+                value={quantity.toString()}
                 disabled={maxStock === 0}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue>{selectedStock}</SelectValue>
+                  <SelectValue>{quantity}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {Array.from(

@@ -18,18 +18,37 @@ export default async function ProductDetail({
   });
   if (!product) return notFound();
 
-  const others = await prisma.product.findMany({
-    where: { id: { not: product.id }, category_id: product.category_id },
-    include: { variants: true },
-    take: 4,
-  });
+  const [productsFromSameCategory, others] = await prisma.$transaction([
+    prisma.product.findMany({
+      where: { id: { not: product.id }, category_id: product.category_id },
+      include: { variants: true },
+      take: 4,
+    }),
+    prisma.product.findMany({
+      where: {
+        id: { not: product.id },
+        OR: [
+          { stock: { gt: 0 } },
+          { variants: { some: { stock: { gt: 0 } } } },
+        ],
+      },
+      include: { variants: true },
+      take: 4,
+    }),
+  ]);
 
   return (
     <PageContainer>
       <Hero product={product} />
       <Keunggulan />
       {others.length > 0 && (
-        <Others category={product.category.name} products={others} />
+        <Others title={"Mungkin Anda juga Suka"} products={others} />
+      )}
+      {productsFromSameCategory.length > 0 && (
+        <Others
+          title={`Lainnya dari Kategori ${product.category.name.replace(product.category.name[0], product.category.name[0].toUpperCase())}`}
+          products={productsFromSameCategory}
+        />
       )}
     </PageContainer>
   );

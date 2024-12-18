@@ -6,19 +6,14 @@ import { ProductCard } from "./ProductCard";
 
 type Product = Prisma.ProductGetPayload<{ include: { variants: true } }>;
 
-export const Others: FC<{ products: Product[]; category: string }> = ({
+export const Others: FC<{ title: string; products: Product[] }> = ({
+  title,
   products,
-  category,
 }) => {
   return (
     <SectionContainer id="others">
-      <H3 className="mb-12 text-black">
-        Lainnya dari{" "}
-        <span className="text-primary-900">
-          Kategori {category.replace(category[0], category[0].toUpperCase())}
-        </span>
-      </H3>
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4">
+      <H3 className="mb-12 text-black">{title}</H3>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
         ))}
