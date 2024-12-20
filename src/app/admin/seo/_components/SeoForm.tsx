@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { updateSeoById } from "@/actions/seo";
@@ -13,160 +12,144 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { H2 } from "@/components/ui/text";
+import { H3 } from "@/components/ui/text";
 import { useZodForm } from "@/hooks/use-zod-form";
 import { SEO } from "@prisma/client";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-export default function SEOForm({ updateData }: { updateData?: SEO }) {
-  const router = useRouter();
-  const createSEOSchema = useMemo(
-    () =>
-      z.object({
-        page: z.string().min(1, "Page wajib diisi."),
-        title: z.string().min(1, "Title wajib diisi."),
-        description: z.string().min(1, "Description wajib diisi."),
-        keywords: z.array(z.string().min(1, "Keywords wajib diisi.")),
-        canonicalURL: z.string().optional(),
-        ogTitle: z.string().optional(),
-        ogDescription: z.string().optional(),
-        ogImage: z
-          .instanceof(File)
-          .refine((file) => file.type.startsWith("image/"), {
-            message: "File harus berupa gambar.",
-          })
-          .optional(),
-        twitterCard: z.string().optional(),
-        twitterTitle: z.string().optional(),
-        twitterDescription: z.string().optional(),
-        twitterImage: z
-          .instanceof(File)
-          .refine((file) => file.type.startsWith("image/"), {
-            message: "File harus berupa gambar.",
-          })
-          .optional(),
-      }),
-    [],
-  );
+interface SEOFormProps {
+  updateData?: SEO;
+}
 
-  const [loading, setLoading] = useState(false);
+const createSEOSchema = z.object({
+  page: z.string().min(1, "Path halaman wajib diisi"),
+  title: z.string().min(1, "Judul wajib diisi"),
+  description: z.string().min(1, "Deskripsi wajib diisi"),
+  keywords: z.array(z.string().min(1, "Kata kunci wajib diisi")),
+  canonicalURL: z.string().optional(),
+  image: z
+    .instanceof(File)
+    .refine((file) => file.type.startsWith("image/"), {
+      message: "Berkas harus berupa gambar",
+    })
+    .optional(),
+});
+
+type SEOFormValues = z.infer<typeof createSEOSchema>;
+
+export default function SEOForm({ updateData }: Readonly<SEOFormProps>) {
+  const router = useRouter();
+
   const form = useZodForm({
     defaultValues: {
-      page: updateData?.page || "",
-      title: updateData?.title || "",
-      description: updateData?.description || "",
-      keywords: updateData?.keywords || [],
-      canonicalURL: updateData?.canonicalURL || "",
-      ogTitle: updateData?.ogTitle || "",
-      ogDescription: updateData?.ogDescription || "",
-      ogImage:undefined,
-      twitterCard: updateData?.twitterCard || "",
-      twitterTitle: updateData?.twitterTitle || "",
-      twitterDescription: updateData?.twitterDescription || "",
-      twitterImage:undefined
+      page: updateData?.page ?? "",
+      title: updateData?.title ?? "",
+      description: updateData?.description ?? "",
+      keywords: updateData?.keywords ?? [],
+      image: undefined,
     },
-
     schema: createSEOSchema,
   });
 
-  const onSubmit = form.handleSubmit(async (values:any) => {
-    setLoading(true);
-
-    const loadingToast = toast.loading(
-      updateData ? "Memperbarui data SEO..." : "Menambahkan data SEO...",
-    );
+  const handleSubmit = async (values: SEOFormValues) => {
+    const loadingMessage = updateData
+      ? "Memperbarui data SEO..."
+      : "Menambahkan data SEO...";
+    const loadingToast = toast.loading(loadingMessage);
 
     try {
-      const data = new FormData();
-      for (const key in values) {
-        data.append(key, values[key]);
-      }
-      const upsertSEOResult = await updateSeoById(
-        updateData?.id || null,
-        data,
+      const formData = new FormData();
+      Object.entries(values).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+
+      const result = await updateSeoById(
+        updateData?.id ?? null,
+        formData,
         values.keywords,
       );
 
-      if (!upsertSEOResult) {
-        setLoading(false);
-        return toast.error(
-          updateData
-            ? "Gagal memperbarui data SEO!"
-            : "Gagal menambahkan data SEO!" + updateData,
-          { id: loadingToast },
-        );
+      if (!result) {
+        const errorMessage = updateData
+          ? "Gagal memperbarui data SEO"
+          : "Gagal menambahkan data SEO";
+        toast.error(errorMessage, { id: loadingToast });
+        return;
       }
 
-      setLoading(false);
-      return toast.success(
-        updateData
-          ? "Berhasil memperbarui data SEO!"
-          : "Berhasil menambahkan data SEO!",
-        { id: loadingToast },
-      );
-    } catch (e) {
-      setLoading(false);
-      return toast.error(
-        updateData
-          ? `Gagal memperbarui data SEO! ${(e as Error).message}`
-          : "Gagal menambahkan data SEO!" + (e as Error).message,
-        { id: loadingToast },
-      );
+      const successMessage = updateData
+        ? "Berhasil memperbarui data SEO"
+        : "Berhasil menambahkan data SEO";
+      toast.success(successMessage, { id: loadingToast });
+      if (!updateData) router.push(`/admin/seo/${result.data?.id}`);
+    } catch (error) {
+      const errorMessage = updateData
+        ? `Gagal memperbarui data SEO: ${(error as Error).message}`
+        : `Gagal menambahkan data SEO: ${(error as Error).message}`;
+      toast.error(errorMessage, { id: loadingToast });
     }
-  });
+  };
 
   return (
     <Form {...form}>
-      {updateData && (
-        <div className="mb-5 flex items-center gap-4">
-          <Button
-            variant="link"
-            size="link"
-            onClick={() => router.back()}
-            type="button"
-          >
-            <ArrowLeft /> Kembali
-          </Button>
-          <H2 className="text-black">Edit SEO untuk {updateData.page}</H2>
-        </div>
-      )}
-      <form onSubmit={onSubmit} className="max-w-screen-lg space-y-8">
+      <div className="mb-5 flex items-center gap-4">
+        <Button
+          variant="link"
+          size="link"
+          onClick={() => "/admin/seo"}
+          type="button"
+        >
+          <ArrowLeft /> Kembali
+        </Button>
+        {updateData && (
+          <H3 className="text-black">Edit SEO untuk {updateData.page}</H3>
+        )}
+      </div>
+
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="max-w-screen-lg space-y-8"
+      >
         <FormField
           control={form.control}
           name="page"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Page</FormLabel>
+              <FormLabel>Path Halaman</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Masukkan nama halaman" />
+                <Input
+                  {...field}
+                  placeholder="Masukkan path halaman (contoh: /about)"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title</FormLabel>
+              <FormLabel>Judul</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Masukkan title halaman" />
+                <Input {...field} placeholder="Masukkan judul halaman" />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Deskripsi</FormLabel>
               <FormControl>
                 <Textarea {...field} placeholder="Masukkan deskripsi halaman" />
               </FormControl>
@@ -174,12 +157,13 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="keywords"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Keywords</FormLabel>
+              <FormLabel>Kata Kunci (optional)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -191,113 +175,7 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
                         .map((keyword) => keyword.trim()),
                     )
                   }
-                  placeholder="Masukkan keywords, pisahkan dengan koma"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="canonicalURL"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Canonical URL</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  readOnly
-                  placeholder="Masukkan canonical URL"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="ogTitle"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>OG Title</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Masukkan OG title" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="ogDescription"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>OG Description</FormLabel>
-              <FormControl>
-                <Textarea {...field} placeholder="Masukkan OG description" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="ogImage"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>OG Image</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  onChange={(e) => field.onChange(e.target.files?.[0])}
-                  placeholder="Upload OG image"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="twitterTitle"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Twitter Title</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Masukkan Twitter title" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="twitterDescription"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Twitter Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  {...field}
-                  placeholder="Masukkan Twitter description"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="twitterImage"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Twitter Image</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  onChange={(e) => field.onChange(e.target.files?.[0])}
-                  placeholder="Upload Twitter image"
+                  placeholder="Masukkan kata kunci, pisahkan dengan koma"
                 />
               </FormControl>
               <FormMessage />
@@ -305,7 +183,25 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
           )}
         />
 
-        <Button disabled={loading} type="submit" className="w-full">
+        <FormField
+          control={form.control}
+          name="image"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Gambar Halaman (optional)</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                  placeholder="Unggah gambar halaman"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" className="w-full">
           Simpan
         </Button>
       </form>

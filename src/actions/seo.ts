@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import {
   updateSeoPage,
   createSeoPage,
@@ -8,123 +9,123 @@ import {
   deleteSeoPage,
 } from "@/utils/database/seo.query";
 import { uploadImageCloudinary } from "./fileUploader";
+import { ActionResponse, ActionResponses } from "@/lib/actions";
+import { Prisma, SEO } from "@prisma/client";
+
+async function uploadSeoImage(
+  imageFile: FormDataEntryValue | null,
+): Promise<string | null> {
+  if (!imageFile || !(imageFile instanceof Blob)) {
+    return null;
+  }
+
+  try {
+    const imageBytes = await imageFile.arrayBuffer();
+    const imageBuffer = Buffer.from(imageBytes);
+    const uploadResult = await uploadImageCloudinary(imageBuffer);
+    return uploadResult.data?.url || null;
+  } catch (error) {
+    return null;
+  }
+}
+
 export async function updateSeoById(
-  id: number | null,
-  data: FormData,
-  keywordsData: string[],
-) {
+  pageId: number | null,
+  formData: FormData,
+  seoKeywords: string[],
+): Promise<ActionResponse<SEO>> {
   try {
-    const page = data.get("page") as string;
-    const title = data.get("title") as string;
-    const description = data.get("description") as string;
-    const keywords = keywordsData;
-    const canonicalURL = data.get("canonicalURL") as string;
-    const ogTitle = data.get("ogTitle") as string;
-    const ogDescription = data.get("ogDescription") as string;
-    const twitterCard = data.get("twitterCard") as string;
-    const twitterTitle = data.get("twitterTitle") as string;
-    const twitterDescription = data.get("twitterDescription") as string;
-    let ogImage = null;
-    const ogImageFile = data.get("ogImage");
-    if (ogImageFile && ogImageFile instanceof Blob) {
-      const bytes = await ogImageFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      ogImage = await uploadImageCloudinary(buffer);
-    }
+    const imageUrl = await uploadSeoImage(formData.get("ogImage"));
+    const page = formData.get("page") as string;
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+    const canonicalURL = formData.get("canonicalURL") as string | null;
+    const twitterCard = formData.get("twitterCard") as string | null;
 
-    let twitterImg = null;
-    const twitterImgFile = data.get("twitterImg");
-    if (twitterImgFile && twitterImgFile instanceof Blob) {
-      const bytes = await twitterImgFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      twitterImg = await uploadImageCloudinary(buffer);
-    }
+    const seoPageData: Prisma.SEOUncheckedCreateInput = {
+      page,
+      title,
+      description,
+      keywords: seoKeywords,
+      canonicalURL,
+      ogTitle: title,
+      ogDescription: description,
+      ogImage: imageUrl || undefined,
+      twitterCard,
+      twitterTitle: title,
+      twitterDescription: description,
+      twitterImage: imageUrl || undefined,
+    };
 
-    if (id) {
-      const seoCurrentData = await getSeoPageById(id);
-      const updateSeo = updateSeoPage(id, {
-        page: page ?? seoCurrentData.page,
-        title: title ?? seoCurrentData.title,
-        description: description ?? seoCurrentData.description,
-        keywords: keywords?.length ? keywords : seoCurrentData.keywords,
-        canonicalURL: canonicalURL ?? seoCurrentData.canonicalURL,
-        ogTitle: ogTitle ?? seoCurrentData.ogTitle,
-        ogDescription: ogDescription ?? seoCurrentData.ogDescription,
-        ogImage: ogImage?.data?.url ?? seoCurrentData.ogImage,
-        twitterCard: twitterCard ?? seoCurrentData.twitterCard,
-        twitterTitle: twitterTitle ?? seoCurrentData.twitterTitle,
-        twitterDescription:
-          twitterDescription ?? seoCurrentData.twitterDescription,
-        twitterImage: twitterImg?.data?.url ?? seoCurrentData.twitterImage,
+    if (pageId) {
+      const existingSeoPage = await getSeoPageById(pageId);
+      if (!existingSeoPage) {
+        return ActionResponses.notFound(`SEO page with id ${pageId} not found`);
+      }
+
+      const updatedSeoPage = await updateSeoPage(pageId, {
+        ...existingSeoPage,
+        ...seoPageData,
+        keywords: seoKeywords?.length
+          ? seoPageData.keywords
+          : existingSeoPage.keywords,
       });
 
-      if (!updateSeo) {
-        throw new Error("invalid to update data");
-      }
-      return updateSeo;
-    } else {
-      const createSeo = createSeoPage({
-        page: page,
-        description: description,
-        title: title,
-        canonicalURL: canonicalURL || null,
-        keywords: keywords || [],
-        ogDescription: ogDescription || null,
-        ogImage: ogImage?.data?.url || null,
-        ogTitle: ogTitle || null,
-        twitterCard: twitterCard || null,
-        twitterDescription: twitterDescription || null,
-        twitterImage: twitterImg?.data?.url || null,
-        twitterTitle: twitterTitle || null,
-      });
-
-      if (!createSeo) {
-        throw new Error("invalid to create data");
-      }
-      return createSeo;
+      revalidatePath("/", "layout");
+      return ActionResponses.success(updatedSeoPage);
     }
+
+    const newSeoPage = await createSeoPage(seoPageData);
+    revalidatePath("/", "layout");
+    return ActionResponses.success(newSeoPage);
   } catch (error) {
-    throw new Error((error as Error).message);
+    return ActionResponses.serverError((error as Error).message);
   }
 }
 
-export async function getData(id: number | null) {
+export async function getSeoPages(
+  pageId: number | null,
+): Promise<ActionResponse> {
   try {
-    if (id) {
-      const getDataById = await getSeoPageById(id);
-      if (!getDataById) {
-        throw new Error("invalid to get data");
+    if (pageId) {
+      const seoPage = await getSeoPageById(pageId);
+      if (!seoPage) {
+        return ActionResponses.notFound(`SEO page with id ${pageId} not found`);
       }
-      return getDataById;
-    } else {
-      const getAllData = await getSeo();
-      const getDataSeo = getAllData.map((data) => {
-        return {
-          id: data.id,
-          title: data.title,
-          description: data.description,
-          page: data.page,
-        };
-      });
-      if (!getDataSeo) {
-        throw new Error("invalid get all data");
-      }
-      return getDataSeo;
+      return ActionResponses.success(seoPage);
     }
+
+    const allSeoPages = await getSeo();
+    const seoPagesSummary = allSeoPages.map(
+      ({ id, title, description, page }) => ({
+        id,
+        title,
+        description,
+        page,
+      }),
+    );
+    return ActionResponses.success(seoPagesSummary);
   } catch (error) {
-    throw new Error((error as Error).message);
+    return ActionResponses.serverError((error as Error).message);
   }
 }
 
-export async function deleteDataSeoById(id: number) {
+export async function deleteSeoPageById(
+  pageId: number,
+): Promise<ActionResponse> {
   try {
-    if (!id) throw new Error("please input the id");
-    const deleteSeoData = await deleteSeoPage(id);
-    if (!deleteSeoData) {
-      throw new Error("invalid to delete this data");
+    if (!pageId) {
+      return ActionResponses.badRequest("Page ID is required");
     }
-    return deleteSeoData;
+
+    const deletedPage = await deleteSeoPage(pageId);
+    if (!deletedPage) {
+      return ActionResponses.notFound(`SEO page with id ${pageId} not found`);
+    }
+
+    revalidatePath("/", "layout");
+    return ActionResponses.success(deletedPage);
   } catch (error) {
-    throw new Error((error as Error).message);
+    return ActionResponses.serverError((error as Error).message);
   }
 }

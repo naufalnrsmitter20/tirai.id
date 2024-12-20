@@ -43,6 +43,14 @@ export async function getSeoPageById(id: number) {
     throw new Error((error as Error).message);
   }
 }
+
+export function getSeoPageByPath(path: string) {
+  return prisma.sEO.findUnique({
+    where: {
+      page: path,
+    },
+  });
+}
 export async function createSeoPage(data: Prisma.SEOCreateInput) {
   try {
     const createSeoPage = await prisma.sEO.create({
