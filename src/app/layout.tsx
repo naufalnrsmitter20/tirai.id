@@ -44,3 +44,5 @@ export default function RootLayout({
     </NextAuthProvider>
   );
 }
+
+export const dynamic = "force-dynamic";
