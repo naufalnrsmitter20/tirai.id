@@ -150,7 +150,7 @@ export const SEOTable: FC<{
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {
-                    router.push(`/admin/seo/${row.original.id}`);
+                    router.push(`/admin/seo/${row.id+1}`);
                   }}
                 >
                   <Pencil />
@@ -165,6 +165,7 @@ export const SEOTable: FC<{
     ],
     [meta, router]
   );
+  
 
   return (
     <DataTable

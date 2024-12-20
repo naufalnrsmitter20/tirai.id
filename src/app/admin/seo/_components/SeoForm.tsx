@@ -29,18 +29,25 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
         page: z.string().min(1, "Page wajib diisi."),
         title: z.string().min(1, "Title wajib diisi."),
         description: z.string().min(1, "Description wajib diisi."),
-        keywords: z
-          .string()
-          .min(1, "Keywords wajib diisi.")
-          .transform((val) => val.split(",").map((keyword) => keyword.trim())),
+        keywords: z.array(z.string().min(1, "Keywords wajib diisi.")),
         canonicalURL: z.string().optional(),
         ogTitle: z.string().optional(),
         ogDescription: z.string().optional(),
-        ogImage: z.string().optional(),
+        ogImage: z
+          .instanceof(File)
+          .refine((file) => file.type.startsWith("image/"), {
+            message: "File harus berupa gambar.",
+          })
+          .optional(),
         twitterCard: z.string().optional(),
         twitterTitle: z.string().optional(),
         twitterDescription: z.string().optional(),
-        twitterImage: z.string().optional(),
+        twitterImage: z
+          .instanceof(File)
+          .refine((file) => file.type.startsWith("image/"), {
+            message: "File harus berupa gambar.",
+          })
+          .optional(),
       }),
     [],
   );
@@ -55,11 +62,9 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
       canonicalURL: updateData?.canonicalURL || "",
       ogTitle: updateData?.ogTitle || "",
       ogDescription: updateData?.ogDescription || "",
-      ogImage: updateData?.ogImage || "",
       twitterCard: updateData?.twitterCard || "",
       twitterTitle: updateData?.twitterTitle || "",
       twitterDescription: updateData?.twitterDescription || "",
-      twitterImage: updateData?.twitterImage || "",
     },
 
     schema: createSEOSchema,
@@ -73,9 +78,13 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
     );
 
     try {
+      const data = new FormData();
+      for (const key in values) {
+        data.append(key, values[key]);
+      }
       const upsertSEOResult = await updateSeoById(
         updateData?.id || null,
-        new FormData(),
+        data,
         values.keywords,
       );
 
@@ -84,7 +93,7 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
         return toast.error(
           updateData
             ? "Gagal memperbarui data SEO!"
-            : "Gagal menambahkan data SEO!",
+            : "Gagal menambahkan data SEO!" + updateData,
           { id: loadingToast },
         );
       }
@@ -101,7 +110,7 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
       return toast.error(
         updateData
           ? `Gagal memperbarui data SEO! ${(e as Error).message}`
-          : "Gagal menambahkan data SEO!",
+          : "Gagal menambahkan data SEO!" + (e as Error).message,
         { id: loadingToast },
       );
     }
@@ -171,14 +180,14 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
               <FormControl>
                 <Input
                   {...field}
-                  value={(field.value as string[]).join(", ")} 
+                  value={(field.value as string[]).join(", ")}
                   onChange={(e) =>
                     field.onChange(
                       e.target.value
                         .split(",")
                         .map((keyword) => keyword.trim()),
                     )
-                  } 
+                  }
                   placeholder="Masukkan keywords, pisahkan dengan koma"
                 />
               </FormControl>
@@ -188,22 +197,104 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
         />
         <FormField
           control={form.control}
-          name="keywords"
+          name="canonicalURL"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Keywords</FormLabel>
+              <FormLabel>Canonical URL</FormLabel>
               <FormControl>
                 <Input
                   {...field}
-                  value={(field.value as string[]).join(", ")} 
-                  onChange={(e) =>
-                    field.onChange(
-                      e.target.value
-                        .split(",")
-                        .map((keyword) => keyword.trim()),
-                    )
-                  } 
-                  placeholder="Masukkan keywords, pisahkan dengan koma"
+                  readOnly
+                  placeholder="Masukkan canonical URL"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="ogTitle"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>OG Title</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Masukkan OG title" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="ogDescription"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>OG Description</FormLabel>
+              <FormControl>
+                <Textarea {...field} placeholder="Masukkan OG description" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="ogImage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>OG Image</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                  placeholder="Upload OG image"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="twitterTitle"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Twitter Title</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Masukkan Twitter title" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="twitterDescription"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Twitter Description</FormLabel>
+              <FormControl>
+                <Textarea
+                  {...field}
+                  placeholder="Masukkan Twitter description"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="twitterImage"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Twitter Image</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                  placeholder="Upload Twitter image"
                 />
               </FormControl>
               <FormMessage />

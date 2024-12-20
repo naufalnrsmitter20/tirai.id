@@ -1,3 +1,5 @@
+"use server";
+
 import {
   updateSeoPage,
   createSeoPage,
@@ -19,17 +21,22 @@ export async function updateSeoById(
     const canonicalURL = data.get("canonicalURL") as string;
     const ogTitle = data.get("ogTitle") as string;
     const ogDescription = data.get("ogDescription") as string;
-    const ogImageRaw = data.get("ogImage") as File;
-    const ogImageBuffer = await ogImageRaw.arrayBuffer();
-    const ogImage = await uploadImageCloudinary(Buffer.from(ogImageBuffer));
     const twitterCard = data.get("twitterCard") as string;
     const twitterTitle = data.get("twitterTitle") as string;
     const twitterDescription = data.get("twitterDescription") as string;
-    const twitterImgRaw = data.get("twitterImg") as File;
-    const twitterImgBuffer = await twitterImgRaw.arrayBuffer();
-    const twitterImg = await uploadImageCloudinary(
-      Buffer.from(twitterImgBuffer),
-    );
+    const ogImageRaw = data.get("ogImage") as File | null;
+    let ogImage = null;
+    if (ogImageRaw) {
+      const ogImageBuffer = await ogImageRaw.arrayBuffer();
+      ogImage = await uploadImageCloudinary(Buffer.from(ogImageBuffer));
+    }
+
+    const twitterImgRaw = data.get("twitterImg") as File | null;
+    let twitterImg = null;
+    if (twitterImgRaw) {
+      const twitterImgBuffer = await twitterImgRaw.arrayBuffer();
+      twitterImg = await uploadImageCloudinary(Buffer.from(twitterImgBuffer));
+    }
 
     if (id) {
       const seoCurrentData = await getSeoPageById(id);
@@ -37,36 +44,38 @@ export async function updateSeoById(
         page: page ?? seoCurrentData.page,
         title: title ?? seoCurrentData.title,
         description: description ?? seoCurrentData.description,
-        keywords: keywords?.length ? keywords : seoCurrentData.keywords, 
+        keywords: keywords?.length ? keywords : seoCurrentData.keywords,
         canonicalURL: canonicalURL ?? seoCurrentData.canonicalURL,
         ogTitle: ogTitle ?? seoCurrentData.ogTitle,
         ogDescription: ogDescription ?? seoCurrentData.ogDescription,
         ogImage: ogImage?.data?.url ?? seoCurrentData.ogImage,
         twitterCard: twitterCard ?? seoCurrentData.twitterCard,
         twitterTitle: twitterTitle ?? seoCurrentData.twitterTitle,
-        twitterDescription: twitterDescription ?? seoCurrentData.twitterDescription,
+        twitterDescription:
+          twitterDescription ?? seoCurrentData.twitterDescription,
         twitterImage: twitterImg?.data?.url ?? seoCurrentData.twitterImage,
       });
-      
+
       if (!updateSeo) {
         throw new Error("invalid to update data");
       }
       return updateSeo;
     } else {
       const createSeo = createSeoPage({
-        page,
-        description,
-        title,
-        canonicalURL,
+        page: page,
+        description: description,
+        title: title ,
+        canonicalURL: canonicalURL || null,
         keywords: keywords || [],
-        ogDescription,
-        ogImage: ogImage?.data?.url,
-        ogTitle,
-        twitterCard,
-        twitterDescription,
-        twitterImage: twitterImg?.data?.url,
-        twitterTitle,
-      });      
+        ogDescription: ogDescription || null,
+        ogImage: ogImage?.data?.url || null,
+        ogTitle: ogTitle || null,
+        twitterCard: twitterCard || null,
+        twitterDescription: twitterDescription || null,
+        twitterImage: twitterImg?.data?.url || null,
+        twitterTitle: twitterTitle || null,
+      });
+      
       if (!createSeo) {
         throw new Error("invalid to create data");
       }
@@ -105,15 +114,15 @@ export async function getData(id: number | null) {
   }
 }
 
-export async function deleteDataSeoById(id:number){
-    try{
-        if(!id) throw new Error('please input the id');
-        const deleteSeoData=await deleteSeoPage(id);
-        if(!deleteSeoData){
-            throw new Error('invalid to delete this data');
-        }
-        return deleteSeoData;
-    }catch(error){
-        throw new Error((error as Error).message)
+export async function deleteDataSeoById(id: number) {
+  try {
+    if (!id) throw new Error("please input the id");
+    const deleteSeoData = await deleteSeoPage(id);
+    if (!deleteSeoData) {
+      throw new Error("invalid to delete this data");
     }
+    return deleteSeoData;
+  } catch (error) {
+    throw new Error((error as Error).message);
+  }
 }

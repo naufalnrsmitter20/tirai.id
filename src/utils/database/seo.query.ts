@@ -22,7 +22,7 @@ export const findSEOEntries = async (
   const paginate = paginator({ perPage });
 
   return await paginate<SEO, Prisma.SEOFindManyArgs>(
-    prisma.user,
+    prisma.sEO,
     { page },
     args,
   );

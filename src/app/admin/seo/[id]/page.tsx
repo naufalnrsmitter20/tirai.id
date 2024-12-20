@@ -13,6 +13,6 @@ export default async function UpdateUser({
 
   const seo = await getSeoPageById( parseInt(id) );
   if (!seo) return notFound();
-
+  
   return <SeoForm updateData={seo} />;
 }
