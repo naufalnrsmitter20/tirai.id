@@ -12,7 +12,6 @@ export default async function SEOPage({
   const page = parseInt(queryPage || "1");
   const response = await findSEOEntries(6, page);
   const seoEntries = response.data;
-  console.log(seoEntries)
 
   return (
     <div className="flex flex-col">

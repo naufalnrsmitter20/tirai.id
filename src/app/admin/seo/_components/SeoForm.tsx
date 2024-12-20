@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { updateSeoById } from "@/actions/seo";
@@ -62,15 +63,17 @@ export default function SEOForm({ updateData }: { updateData?: SEO }) {
       canonicalURL: updateData?.canonicalURL || "",
       ogTitle: updateData?.ogTitle || "",
       ogDescription: updateData?.ogDescription || "",
+      ogImage:undefined,
       twitterCard: updateData?.twitterCard || "",
       twitterTitle: updateData?.twitterTitle || "",
       twitterDescription: updateData?.twitterDescription || "",
+      twitterImage:undefined
     },
 
     schema: createSEOSchema,
   });
 
-  const onSubmit = form.handleSubmit(async (values) => {
+  const onSubmit = form.handleSubmit(async (values:any) => {
     setLoading(true);
 
     const loadingToast = toast.loading(

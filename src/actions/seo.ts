@@ -24,18 +24,20 @@ export async function updateSeoById(
     const twitterCard = data.get("twitterCard") as string;
     const twitterTitle = data.get("twitterTitle") as string;
     const twitterDescription = data.get("twitterDescription") as string;
-    const ogImageRaw = data.get("ogImage") as File | null;
     let ogImage = null;
-    if (ogImageRaw) {
-      const ogImageBuffer = await ogImageRaw.arrayBuffer();
-      ogImage = await uploadImageCloudinary(Buffer.from(ogImageBuffer));
+    const ogImageFile = data.get("ogImage");
+    if (ogImageFile && ogImageFile instanceof Blob) {
+      const bytes = await ogImageFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      ogImage = await uploadImageCloudinary(buffer);
     }
 
-    const twitterImgRaw = data.get("twitterImg") as File | null;
     let twitterImg = null;
-    if (twitterImgRaw) {
-      const twitterImgBuffer = await twitterImgRaw.arrayBuffer();
-      twitterImg = await uploadImageCloudinary(Buffer.from(twitterImgBuffer));
+    const twitterImgFile = data.get("twitterImg");
+    if (twitterImgFile && twitterImgFile instanceof Blob) {
+      const bytes = await twitterImgFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      twitterImg = await uploadImageCloudinary(buffer);
     }
 
     if (id) {
@@ -64,7 +66,7 @@ export async function updateSeoById(
       const createSeo = createSeoPage({
         page: page,
         description: description,
-        title: title ,
+        title: title,
         canonicalURL: canonicalURL || null,
         keywords: keywords || [],
         ogDescription: ogDescription || null,
@@ -75,7 +77,7 @@ export async function updateSeoById(
         twitterImage: twitterImg?.data?.url || null,
         twitterTitle: twitterTitle || null,
       });
-      
+
       if (!createSeo) {
         throw new Error("invalid to create data");
       }
