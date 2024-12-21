@@ -45,7 +45,7 @@ export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
   },
-  pages: { signIn: "/auth/login" },
+  pages: { signIn: "/auth/login", newUser: "/auth/register" },
   providers: [
     CredentialsProvider({
       name: "Credentials",
