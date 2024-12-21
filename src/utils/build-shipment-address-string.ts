@@ -3,7 +3,8 @@ import { ShippingAddress } from "@prisma/client";
 export const buildShipmentAddressString = (
   shipping_address: ShippingAddress,
 ) => {
-  const { street, city, region, postal_code } = shipping_address;
+  const { street, city, village, district, province, postal_code } =
+    shipping_address;
 
-  return `${street}, ${city}, ${region}, Indonesia, ${postal_code}`;
+  return `${street}, ${village}, ${district}, ${city}, ${province}, Indonesia, ${postal_code}`;
 };
