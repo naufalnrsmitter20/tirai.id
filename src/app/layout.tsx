@@ -9,7 +9,7 @@ import "./prosemirror.css";
 import Script from "next/script";
 import { MIDTRANS_CLIENT_KEY, MIDTRANS_SNAP_URL } from "@/lib/midtrans-client";
 
-export { generateMetadata } from "@/lib/seo";
+export { metadata } from "@/lib/seo";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -44,5 +44,3 @@ export default function RootLayout({
     </NextAuthProvider>
   );
 }
-
-export const dynamic = "force-dynamic";
