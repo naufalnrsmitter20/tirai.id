@@ -1,4 +1,4 @@
-import { PageSelector } from "@/components/ui/PageSelector";
+import { PageSelector } from "@/components/widget/PageSelector";
 import { H1 } from "@/components/ui/text";
 import { findSEOEntries } from "@/utils/database/seo.query";
 import { SEOTable } from "./_components/SeoTable";

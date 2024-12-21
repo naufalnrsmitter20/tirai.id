@@ -1,6 +1,6 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { AddressForm } from "./components/AddressForm";
-import { Details } from "./components/details";
+import { Details } from "./components/Details";
 
 export default function Checkout() {
   return (
