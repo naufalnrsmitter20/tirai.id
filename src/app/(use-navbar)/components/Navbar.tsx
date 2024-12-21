@@ -152,6 +152,9 @@ export const Navbar: FC = () => {
                     variant: "default",
                     className: "ml-6 w-full text-center",
                   })}
+                  onClick={() => {
+                    navbarToggle.current!.checked = false;
+                  }}
                 >
                   Dashboard
                 </Link>
@@ -161,11 +164,14 @@ export const Navbar: FC = () => {
                 session.user?.role === "SUPPLIER") && (
                 <div className="ml-6 flex items-center gap-x-2">
                   <Link
-                    href={"/profile"}
+                    href={"/account"}
                     className={buttonVariants({
                       variant: "default",
                       className: "w-full text-center",
                     })}
+                    onClick={() => {
+                      navbarToggle.current!.checked = false;
+                    }}
                   >
                     <UserRound />
                   </Link>
@@ -175,6 +181,9 @@ export const Navbar: FC = () => {
                       variant: "default",
                       className: "w-full text-center",
                     })}
+                    onClick={() => {
+                      navbarToggle.current!.checked = false;
+                    }}
                   >
                     <ShoppingCart />
                     {cart && cart.length > 0 && <Body5>{cart.length}</Body5>}
@@ -189,6 +198,9 @@ export const Navbar: FC = () => {
                     variant: "default",
                     className: "w-full text-center",
                   })}
+                  onClick={() => {
+                    navbarToggle.current!.checked = false;
+                  }}
                 >
                   Masuk
                 </Link>
@@ -198,6 +210,9 @@ export const Navbar: FC = () => {
                     variant: "outline",
                     className: "w-full text-center",
                   })}
+                  onClick={() => {
+                    navbarToggle.current!.checked = false;
+                  }}
                 >
                   Daftar
                 </Link>

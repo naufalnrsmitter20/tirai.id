@@ -30,7 +30,6 @@ export default function UserForm({ updateData }: { updateData?: User }) {
           .string()
           .min(1, "Email wajib diisi.")
           .email("Email Tidak Valid."),
-        phonenumber: z.string().optional(),
         password: updateData
           ? z.string().optional()
           : z.string().min(6, "Password minimal 6 karakter"),
@@ -42,7 +41,6 @@ export default function UserForm({ updateData }: { updateData?: User }) {
     defaultValues: {
       username: updateData?.name || "",
       email: updateData?.email || "",
-      phonenumber: updateData?.phone_number || "",
       password: "",
     },
     schema: upsertUserSchema,
@@ -62,7 +60,6 @@ export default function UserForm({ updateData }: { updateData?: User }) {
           email: values.email,
           name: values.username,
           password: values.password,
-          phone_number: values.phonenumber,
         },
       });
 
@@ -129,19 +126,6 @@ export default function UserForm({ updateData }: { updateData?: User }) {
               <FormLabel htmlFor="title">Email User</FormLabel>
               <FormControl>
                 <Input {...field} placeholder="Masukkan email user" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="phonenumber"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel htmlFor="title">No. Telp User</FormLabel>
-              <FormControl>
-                <Input {...field} placeholder="Masukkan No. Telp user" />
               </FormControl>
               <FormMessage />
             </FormItem>

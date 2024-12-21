@@ -36,9 +36,9 @@ export default function RootLayout({
         <body
           className={`${generalSansFont.className} overflow-x-hidden bg-white antialiased`}
         >
+          <Toaster />
           {children}
           <ProgressBarProvider />
-          <Toaster />
         </body>
       </html>
     </NextAuthProvider>

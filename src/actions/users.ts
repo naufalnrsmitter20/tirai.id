@@ -16,14 +16,13 @@ export const upsertUser = async ({
 }: {
   data: {
     id?: string;
-    phone_number?: string;
     name: string;
     email: string;
     password?: string;
     role?: Role;
   };
 }): Promise<ActionResponse<{ message: string }>> => {
-  const { id, name, email, password, phone_number, role = "CUSTOMER" } = data;
+  const { id, name, email, password, role = "CUSTOMER" } = data;
 
   try {
     if (!id) {
@@ -31,21 +30,11 @@ export const upsertUser = async ({
       if (existingEmail) {
         return ActionResponses.badRequest("This email is already in use");
       }
-
-      if (phone_number) {
-        const existingPhone = await findUser({ phone_number });
-        if (existingPhone) {
-          return ActionResponses.badRequest(
-            "This phone number is already in use",
-          );
-        }
-      }
     }
 
     const payload: Prisma.UserCreateInput = {
       name,
       email,
-      phone_number,
       password: password ? encrypt(password) : undefined,
       is_verified: false,
       role,
