@@ -28,26 +28,33 @@ export const Hero: FC<{ models: Models[]; bahans: Bahans[] }> = ({
   models,
   bahans,
 }) => {
-  const [height, setHeight] = useState(0);
-  const [width, setWidth] = useState(0);
+  const [panjang, setPanjang] = useState(0);
+  const [lebar, setLebar] = useState(0);
+  const [price, setPrice] = useState(0);
   const [estimatedPrice, setEstimatedPrice] = useState(0);
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
 
   const calculatePrice = () => {
-    const area = height * width;
-    const pricePerSquareCm = 10;
-    setEstimatedPrice(area * pricePerSquareCm);
+    const area = panjang * lebar;
+    setEstimatedPrice(area * price);
   };
-
+  const handlePanjangChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPanjang(parseInt(event.target.value));
+    calculatePrice();
+  };
+  const handleLebarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setLebar(parseInt(event.target.value));
+    calculatePrice();
+  };
   const handleColorChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedColor(event.target.value);
   };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = event.target as HTMLFormElement;
-    const data = new FormData(form);
-    console.log(data);
+    const data = new FormData(event.target as HTMLFormElement);
+    data.append("price", estimatedPrice.toString());
+    console.log(data.get("material"));
   };
 
   return (
@@ -61,15 +68,15 @@ export const Hero: FC<{ models: Models[]; bahans: Bahans[] }> = ({
         </H1>
 
         <form onSubmit={handleFormSubmit}>
-          <div className="col-span-1 min-w-max my-40">
+          <div className="col-span-1 my-40 min-w-max">
             <div className="mt-20 flex items-center justify-between gap-2 border-b-2 border-gray-400 bg-transparent p-5">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <Settings className="h-8 w-12 text-gray-500" />
                 <H5 className="text-md text-gray-500">Model</H5>
               </div>
               <p className="text-sm text-gray-500">None</p>
             </div>
-            <ul className="mt-2 flex w-full flex-wrap p-2 m-16">
+            <ul className="m-16 mt-2 flex w-full flex-wrap p-2">
               {models.map((model) => (
                 <li key={model.id} className="group relative gap-16">
                   <input
@@ -80,7 +87,7 @@ export const Hero: FC<{ models: Models[]; bahans: Bahans[] }> = ({
                   />
                   <label
                     htmlFor={`model-${model.id}`}
-                    className="flex h-[8rem] w-full items-center flex-col justify-center gap-2 rounded-md border border-gray-300 bg-gradient-to-bl from-black to-white p-4 text-sm font-medium shadow-sm transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:bg-primary-100 group-hover:text-white"
+                    className="flex h-[8rem] w-full flex-col items-center justify-center gap-2 rounded-md border border-gray-300 bg-gradient-to-bl from-black to-white p-4 text-sm font-medium shadow-sm transition-all duration-300 ease-in-out group-hover:scale-105 group-hover:bg-primary-100 group-hover:text-white"
                     style={{
                       backgroundImage: model.image
                         ? `url(${model.image})`
@@ -113,39 +120,47 @@ export const Hero: FC<{ models: Models[]; bahans: Bahans[] }> = ({
             </ul>
           </div>
 
-          <div className="col-span-1 min-w-max my-40">
+          <div className="col-span-1 my-40 min-w-max">
             <div className="mt-20 flex items-center justify-between gap-2 border-b-2 border-gray-400 bg-transparent p-5">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <FabricIcon className="h-8 w-12 text-gray-500" />
                 <H5 className="text-md text-gray-500">Bahan</H5>
               </div>
               <p className="text-sm text-gray-500">Cotton</p>
             </div>
-            <ul className="mt-2 flex w-full flex-wrap p-2 m-16">
+            <ul className=" mt-2 flex w-full flex-col flex-wrap p-2">
               {bahans.map((bahan) => (
-                <li key={bahan.id} className="flex justify-center items-center gap-16">
-                  <input
-                    type="radio"
-                    id={`bahan-${bahan.id}`}
-                    name="bahan"
-                    value={bahan.name}
-                  />
-                  <div>
-                  <label className="mx-3 flex items-center text-black justify-center gap-2 rounded-md p-4 font-medium focus-within:ring-2 focus-within:ring-primary-500 focus-within:ring-offset-2">
-                    {bahan.name}
-                  </label>
-                  <p className="text-center text-gray-400">
-                    {bahan.description}
-                  </p>
+                <li
+                  key={bahan.id}
+                  className="w-full rounded-t-lg border-b border-gray-200 dark:border-gray-600"
+                >
+                  <div className="flex items-center pe-3 justify-evenly ps-3">
+                    <input
+                      id={`bahan-${bahan.id}`}
+                      type="radio"
+                      value={bahan.name}
+                      onChange={(e) => setPrice(bahan.price)}
+                      name="material"
+                      className="h-4 w-4 m-2 border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-700"
+                    />
+                    <label
+                      htmlFor={`bahan-${bahan.id}`}
+                      className="mx-2 w-full py-3 text-sm font-medium text-gray-900 dark:text-gray-300"
+                    >
+                      {bahan.name}
+                    </label>
+                    <p className="text-center m-2 text-gray-400">
+                      {bahan.description}
+                    </p>
                   </div>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="col-span-1 min-w-max my-40">
+          <div className="col-span-1 my-40 min-w-max">
             <div className="mt-20 flex items-center justify-between gap-2 border-b-2 border-gray-400 bg-transparent p-5">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <ColorIcon className="h-8 w-12 text-gray-500" />
                 <H5 className="text-md text-gray-500">Color</H5>
               </div>
@@ -156,13 +171,13 @@ export const Hero: FC<{ models: Models[]; bahans: Bahans[] }> = ({
               name="color"
               value={selectedColor ?? "#ffffff"}
               onChange={handleColorChange}
-              className="h-[5rem] cursor-pointer w-full p-0 shadow-sm m-5"
+              className="m-5 h-[5rem] w-full cursor-pointer p-0 shadow-sm"
             />
           </div>
 
           <div className="col-span-1 my-40">
             <div className="mt-20 flex items-center justify-between gap-2 border-b-2 border-gray-400 bg-transparent p-5">
-              <div className="flex gap-2 items-center">
+              <div className="flex items-center gap-2">
                 <ChevronDown className="h-4 w-4 text-red-400" />
                 <Settings className="h-8 w-12 text-gray-500" />
                 <H5 className="text-md text-gray-500">Ukuran</H5>
@@ -170,55 +185,40 @@ export const Hero: FC<{ models: Models[]; bahans: Bahans[] }> = ({
               <p className="text-sm text-gray-500">None</p>
             </div>
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col m-5">
+              <div className="m-5 flex flex-col">
                 <label htmlFor="panjang" className="text-lg font-semibold">
                   Panjang <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
                   required
-                  name="panjang"
+                  name="height"
                   id="panjang"
+                  onChange={handlePanjangChange}
                   placeholder="Panjang (dalam cm)"
                   className="w-full rounded-md border border-gray-300 px-4 py-2 text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
 
-              <div className="flex flex-col m-5">
+              <div className="m-5 flex flex-col">
                 <label htmlFor="lebar" className="text-lg font-semibold">
                   Lebar <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"
                   required
-                  name="lebar"
+                  name="width"
                   id="lebar"
+                  onChange={handleLebarChange}
                   placeholder="Lebar (dalam cm)"
-                  className="w-full rounded-md border border-gray-300 px-4 py-2 text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-
-              <div className="flex flex-col m-5">
-                <label htmlFor="tinggi" className="text-lg font-semibold">
-                  Tinggi <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  required
-                  name="tinggi"
-                  id="tinggi"
-                  placeholder="Tinggi (dalam cm)"
                   className="w-full rounded-md border border-gray-300 px-4 py-2 text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
             </div>
           </div>
           <div className="mt-6">
-            <Button
-              onClick={calculatePrice}
-              className="bg-primary-800 text-white"
-            >
-              Bayar
+            <Button className="bg-primary-800 text-white" type="submit">
+              Kirim Permintaan
             </Button>
             {estimatedPrice > 0 && (
               <p className="mt-4 text-lg font-semibold text-gray-800">
