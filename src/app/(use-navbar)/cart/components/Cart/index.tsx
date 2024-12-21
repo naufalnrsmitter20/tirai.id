@@ -81,7 +81,7 @@ export const Cart: FC<{
               )}
             </div>
             <Link
-              href={"/checkout"}
+              href={"/shop/checkout"}
               className={buttonVariants({
                 size: "lg",
                 className: "mb-3 w-full",

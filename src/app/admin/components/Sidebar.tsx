@@ -4,6 +4,7 @@ import {
   MessageCircleMore,
   Newspaper,
   ShoppingCart,
+  SquarePen,
   User2,
   Building,
 } from "lucide-react";
@@ -62,6 +63,22 @@ const SIDEBAR_ITEMS = [
       {
         title: "Add Article",
         url: "/admin/article/add",
+      },
+    ],
+  },
+  {
+    title: "Produk Kustom",
+    url: "/admin",
+    icon: SquarePen,
+    isActive: true,
+    children: [
+      {
+        title: "Material",
+        url: "/admin/material",
+      },
+      {
+        title: "Model",
+        url: "/admin/model",
       },
     ],
   },

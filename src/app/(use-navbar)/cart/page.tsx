@@ -1,9 +1,10 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { getServerSession } from "@/lib/next-auth";
 import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Cart } from "./components/Cart";
 import { CartItem } from "@/types/cart";
+import { updateCart } from "@/actions/cart";
 
 export default async function CartPage() {
   const session = await getServerSession();
@@ -15,7 +16,8 @@ export default async function CartPage() {
     : "not found";
 
   if (cart === null) {
-    return notFound();
+    await updateCart([]);
+    return redirect("/cart");
   }
 
   const products =
