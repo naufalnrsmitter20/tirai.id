@@ -32,6 +32,7 @@ export const addCustomProductByUser = async (data: FormData) => {
       price,
       material,
       model,
+      supplier_price: 0, // TODO: Handle this
     });
     if (!productCustom) {
       return ActionResponses.serverError("Failed to get create Product Custom");
