@@ -40,7 +40,7 @@ export const CategoryTable: FC<{
 
       setLoading(false);
       toast.success("Berhasil menghapus kategori!", { id: loading });
-    } catch (e) {
+    } catch {
       setLoading(false);
       return toast.error("Gagal menghapus kategori!", { id: loading });
     }
@@ -175,6 +175,7 @@ export const CategoryTable: FC<{
                   onClick={async () => {
                     return await deleteCategory(row.original.id);
                   }}
+                  disabled={loading}
                 >
                   <Trash />
                   <span>Hapus</span>

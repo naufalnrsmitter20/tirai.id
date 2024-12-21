@@ -14,7 +14,7 @@ export default async function ProductAdmin({
   }>;
 }) {
   const { page } = await searchParams;
-  let curPage = page ? parseInt(page) : 1;
+  const curPage = page ? parseInt(page) : 1;
 
   const res = await getProducts(12, curPage, "latest");
 

@@ -71,7 +71,7 @@ export const ChatProvider = ({ session }: { session: Session }) => {
           const message = payload.new as Message;
           if (message.customer_id === session.user?.id)
             setMessages((prev) => {
-              let list = prev;
+              const list = prev;
               const index = list.findIndex((i) => i.id === message.id);
               list[index] = message;
               return list;
@@ -96,7 +96,8 @@ export const ChatProvider = ({ session }: { session: Session }) => {
   }, []);
 
   useEffect(() => {
-    findChatById(session.user?.id!).then((i) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
+    findChatById(session?.user?.id!).then((i) => {
       const res = i.data?.data ?? [];
       const count = i.data?.count ?? 0;
       setMessages(res);
@@ -107,6 +108,7 @@ export const ChatProvider = ({ session }: { session: Session }) => {
 
   useEffect(() => {
     if (inView) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
       findChatById(session.user?.id!, page).then((res) => {
         const messagesRes = res.data?.data ?? [];
         const count = res.data?.count ?? 0;
@@ -120,21 +122,25 @@ export const ChatProvider = ({ session }: { session: Session }) => {
   }, [inView]);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     if (isOpen && isFocused) handleReadMessage(session.user?.id!);
   }, [messages, isFocused]);
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
     if (isOpen && isFocused) handleReadMessage(session.user?.id!);
   }, [isOpen, isFocused]);
+
+  if (session.user === undefined) return <></>;
 
   return (
     <>
       {file && isOpen && (
         <div className="relative z-[9999999999] h-full w-full">
           <SendFileDialog
-            customerId={session.user?.id!}
+            customerId={session.user.id}
             file={file}
-            senderId={session.user?.id!}
+            senderId={session.user.id}
             setFile={setFile}
           />
         </div>
@@ -152,7 +158,7 @@ export const ChatProvider = ({ session }: { session: Session }) => {
           <div className="h-full w-full overflow-hidden rounded-lg border border-neutral-200 bg-blue-50">
             <div className="flex h-[100%] w-full flex-col-reverse gap-1 overflow-y-scroll px-3 pb-[90px] pt-4">
               <div ref={messagesEndRef} />
-              <MessagesMap session={session!} messages={messages} />
+              <MessagesMap session={session} messages={messages} />
               {messages.length > 0 && hasMore && (
                 <div className="w-full text-black" ref={ref}>
                   Loading...
@@ -161,7 +167,7 @@ export const ChatProvider = ({ session }: { session: Session }) => {
             </div>
           </div>
           <ChatForm
-            activeChat={session.user?.id!}
+            activeChat={session.user.id}
             session={session}
             setFile={setFile}
           />

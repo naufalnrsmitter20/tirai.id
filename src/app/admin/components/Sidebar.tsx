@@ -20,7 +20,7 @@ import {
 import { Session } from "next-auth";
 import { useEffect } from "react";
 
-let SIDEBAR_ITEMS = [
+const SIDEBAR_ITEMS = [
   {
     title: "Dashboard",
     url: "/admin",

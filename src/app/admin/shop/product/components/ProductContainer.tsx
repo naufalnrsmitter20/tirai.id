@@ -31,7 +31,7 @@ export const ProductContainer = ({
 
       setLoading(false);
       toast.success("Berhasil memperbarui Product!", { id: loading });
-    } catch (e) {
+    } catch {
       setLoading(false);
       return toast.error("Gagal memperbarui Product!", { id: loading });
     }

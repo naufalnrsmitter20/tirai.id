@@ -10,7 +10,7 @@ export const ArticlesResultDisplay: FC<{
   articles: ArticleWithUser[];
   meta: PaginationMetadata;
   term: string;
-}> = ({ articles, meta, term }) => {
+}> = ({ articles, meta }) => {
   return (
     <div id="articles-result" className="block lg:max-w-screen-md">
       <SectionTitle>Artikel</SectionTitle>

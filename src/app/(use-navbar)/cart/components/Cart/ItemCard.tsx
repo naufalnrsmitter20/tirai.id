@@ -30,7 +30,7 @@ export const ItemCard: FC<{
     [product],
   );
   const maxStock = useMemo(
-    () => (itemVariant ? itemVariant.stock : product?.stock!),
+    () => (itemVariant ? itemVariant.stock : product?.stock!), // eslint-disable-line @typescript-eslint/no-non-null-asserted-optional-chain
     [product, itemVariant],
   );
   const quantity = useMemo(

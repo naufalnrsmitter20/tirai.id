@@ -11,8 +11,8 @@ import { ArrowLeft } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { ChangeEventHandler, useEffect, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
-import { MessagesMap } from "../../../../components/widget/Chat/MessagesMap";
-import { SendFileDialog } from "../../../../components/widget/Chat/dialog/SendFileDialog";
+import { MessagesMap } from "@/components/widget/Chat/MessagesMap";
+import { SendFileDialog } from "@/components/widget/Chat/dialog/SendFileDialog";
 import { MessageForm } from "./MessageForm";
 import { SearchBar } from "./SearchBar";
 
@@ -39,7 +39,7 @@ export const ChatInterface = ({
   } = useMessage();
 
   const [filteredConvo, setFilteredConvo] = useState<Message[]>(conversation);
-  const [_, setFilterTerm] = useState<string | null>(null);
+  const [, setFilterTerm] = useState<string | null>(null);
   const client = supabaseBrowser();
   const [file, setFile] = useState<File | undefined | null>(null);
   const { data: session } = useSession();
@@ -72,7 +72,7 @@ export const ChatInterface = ({
       findChatById(activeChat).then((i) => {
         const res = i.data?.data ?? [];
         const count = i.data?.count ?? 0;
-        let userIds = [...new Set(res.map((item) => item.customer_id))];
+        const userIds = [...new Set(res.map((item) => item.customer_id))];
         getChatUsers(userIds).then((i) => {
           setParticipants(i.data ?? []);
         });
@@ -115,7 +115,7 @@ export const ChatInterface = ({
             const message = payload.new as Message;
             if (activeChat === message.customer_id) {
               setMessages((prev) => {
-                let list = prev;
+                const list = prev;
                 const index = list.findIndex((i) => i.id === message.id);
                 list[index] = message;
                 return list;
@@ -135,7 +135,7 @@ export const ChatInterface = ({
         { event: "*", schema: "public", table: "messages" },
         (payload) => {
           setFilteredConvo((prev) => {
-            let list = prev;
+            const list = prev;
             const index = list.findIndex(
               (i) => i.customer_id === (payload.new as Message).customer_id,
             );
@@ -202,6 +202,8 @@ export const ChatInterface = ({
     }
   }, [messages, isFocused]);
 
+  if (session?.user === undefined) return <></>;
+
   return (
     <>
       <div className="hidden h-[600px] w-full grid-cols-[25%_75%] overflow-hidden rounded-lg border border-neutral-300 text-black sm:grid">
@@ -211,7 +213,7 @@ export const ChatInterface = ({
           handleConversationClick={handleConversationClick}
           handleFiltering={handleFiltering}
           recipients={recipients}
-          session={session!}
+          session={session}
         />
         <div className="h-full w-full">
           {!activeChat && (
@@ -235,7 +237,7 @@ export const ChatInterface = ({
                 <div ref={messagesEndRef} />
                 <MessagesMap
                   messages={messages}
-                  session={session!}
+                  session={session}
                   participants={participants}
                 />
                 {messages.length > 0 && hasMore && (
@@ -246,7 +248,7 @@ export const ChatInterface = ({
               </div>
               <MessageForm
                 activeChat={activeChat}
-                session={session!}
+                session={session}
                 file={file}
                 setFile={setFile}
               />
@@ -257,7 +259,7 @@ export const ChatInterface = ({
               file={file}
               setFile={setFile}
               customerId={activeChat}
-              senderId={session?.user?.id!}
+              senderId={session.user.id}
             />
           )}
         </div>
@@ -270,7 +272,7 @@ export const ChatInterface = ({
             handleConversationClick={handleConversationClick}
             handleFiltering={handleFiltering}
             recipients={recipients}
-            session={session!}
+            session={session}
           />
         )}
         {activeChat && (
@@ -294,7 +296,7 @@ export const ChatInterface = ({
             </div>
             <div className="relative z-0 flex h-[90%] min-h-max w-full flex-col-reverse gap-y-1 overflow-y-scroll px-4 pb-[72px] pt-5">
               <div ref={messagesEndRef} />
-              <MessagesMap messages={messages} session={session!} />
+              <MessagesMap messages={messages} session={session} />
               {messages.length > 0 && isMobile && hasMore && (
                 <div className="w-full text-black" ref={ref}>
                   Loading...
@@ -303,7 +305,7 @@ export const ChatInterface = ({
             </div>
             <MessageForm
               activeChat={activeChat}
-              session={session!}
+              session={session}
               file={file}
               setFile={setFile}
             />
@@ -314,7 +316,7 @@ export const ChatInterface = ({
             file={file}
             setFile={setFile}
             customerId={activeChat}
-            senderId={session?.user?.id!}
+            senderId={session.user.id}
           />
         )}
       </div>

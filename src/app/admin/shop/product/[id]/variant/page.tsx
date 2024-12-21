@@ -21,7 +21,7 @@ export default async function ProductVariantsPage({
     <div className="flex flex-col">
       <H1 className="mb-8 text-black">
         Manajemen Varian Produk{" "}
-        <span className="text-primary-900">"{product.name}"</span>
+        <span className="text-primary-900">&quot;{product.name}&quot;</span>
       </H1>
       <div className="mb-2">
         <VariantTable productId={product.id} variants={variants} />

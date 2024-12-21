@@ -3,7 +3,6 @@ import { ChatUser } from "@/types/entityRelations";
 import { useState } from "react";
 
 export type Message = Database["public"]["Tables"]["messages"]["Row"];
-const LIMIT_MESSAGES = 20;
 
 const useMessage = () => {
   const [activeChat, setActiveChat] = useState<string | undefined>();

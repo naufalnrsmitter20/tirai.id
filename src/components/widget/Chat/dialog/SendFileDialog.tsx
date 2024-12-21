@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -17,7 +16,6 @@ export const SendFileDialog = ({
   file,
   setFile,
   customerId,
-  senderId,
 }: {
   file: File | null | undefined;
   setFile: Dispatch<SetStateAction<File | null | undefined>>;

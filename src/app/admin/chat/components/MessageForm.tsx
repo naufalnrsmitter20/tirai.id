@@ -3,12 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { File, Send } from "lucide-react";
 import { Session } from "next-auth";
-import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useRef } from "react";
 
 export const MessageForm = ({
   session,
   activeChat,
-  file,
   setFile,
 }: {
   session: Session;
@@ -18,7 +17,7 @@ export const MessageForm = ({
 }) => {
   const formRef = useRef<HTMLFormElement>(null);
   const handleSendMessage = async (data: FormData) => {
-    if (activeChat && session && session.user) {
+    if (activeChat && session?.user) {
       const message = data.get("message") as string | null | undefined;
       if (message && message !== "") {
         await sendMessage(data, activeChat);

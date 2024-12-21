@@ -38,7 +38,7 @@ export const findChatById = async (
 export const sendMessage = async (
   formData: FormData,
   customerId: string,
-): Promise<ActionResponse<any>> => {
+): Promise<ActionResponse<PostgrestSingleResponse<null>>> => {
   const session = await getServerSession();
   const content = formData.get("message") as string;
   try {
@@ -46,7 +46,7 @@ export const sendMessage = async (
 
     const res = await client.from("messages").insert({
       customer_id: customerId,
-      sender_id: session?.user?.id!,
+      sender_id: session?.user?.id!, // eslint-disable-line @typescript-eslint/no-non-null-asserted-optional-chain
       content,
       created_at: new Date(
         new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }),
@@ -63,7 +63,7 @@ export const sendMessage = async (
 
 export const setReadMessage = async (
   customerId: string,
-): Promise<ActionResponse<any>> => {
+): Promise<ActionResponse<PostgrestSingleResponse<null>>> => {
   const session = await getServerSession();
   try {
     const client = await supabase;
@@ -87,8 +87,10 @@ export const setReadMessage = async (
 export const sendFile = async (
   formData: FormData,
   customerId: string,
-): Promise<ActionResponse<any>> => {
+): Promise<ActionResponse<PostgrestSingleResponse<null>>> => {
   const session = await getServerSession();
+  if (!session?.user) return ActionResponses.unauthorized();
+
   const content = formData.get("message") as string | undefined;
   const file = formData.get("file") as File;
   const fileBuff = Buffer.from(await file.arrayBuffer());
@@ -98,7 +100,7 @@ export const sendFile = async (
 
     const res = await client.from("messages").insert({
       customer_id: customerId,
-      sender_id: session?.user?.id!,
+      sender_id: session.user.id,
       content,
       created_at: new Date(
         new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }),
