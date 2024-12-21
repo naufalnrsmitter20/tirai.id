@@ -37,6 +37,7 @@ interface DataTableProps<TData> {
   data: TData[];
   columns: ColumnDef<TData>[];
   createPath?: string;
+  columnSearch?: string;
   filterPlaceholder?: string;
 }
 
@@ -45,6 +46,7 @@ export const DataTable: FC<DataTableProps<any>> = ({
   data,
   columns,
   createPath,
+  columnSearch = "name",
   filterPlaceholder = "Search...",
 }) => {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -76,9 +78,11 @@ export const DataTable: FC<DataTableProps<any>> = ({
       <div className="flex items-center justify-between py-4">
         <Input
           placeholder={filterPlaceholder}
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          value={
+            (table.getColumn(columnSearch)?.getFilterValue() as string) ?? ""
+          }
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn(columnSearch)?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
