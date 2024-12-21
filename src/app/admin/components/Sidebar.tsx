@@ -5,6 +5,7 @@ import {
   Newspaper,
   ShoppingCart,
   User2,
+  Building,
 } from "lucide-react";
 import { SidebarMainContent } from "./SidebarMainContent";
 
@@ -63,6 +64,12 @@ let SIDEBAR_ITEMS = [
         url: "/admin/article/add",
       },
     ],
+  },
+  {
+    title: "SEO",
+    url: "/admin/seo",
+    icon: Building,
+    isActive: true,
   },
 ];
 
