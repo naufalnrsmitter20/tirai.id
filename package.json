@@ -12,6 +12,7 @@
     "prisma:migratedev": "dotenv -e .env.local -- npx prisma migrate dev",
     "prisma:migratedeploy": "dotenv -e .env.local -- npx prisma migrate deploy",
     "prisma:seed": "dotenv -e .env.local -- tsx prisma/seed.ts",
+    "prisma:seed:transaction": "dotenv -e .env.local -- tsx prisma/seeders/transaction.ts",
     "prisma:pull:prod": "dotenv -e .env -- npx prisma db pull",
     "prisma:push:prod": "dotenv -e .env -- npx prisma db push",
     "prisma:migratedev:prod": "dotenv -e .env -- npx prisma migrate dev",
