@@ -27,19 +27,19 @@ const SIDEBAR_ITEMS = [
     title: "Dashboard",
     url: "/admin",
     icon: Home,
-    isActive: true,
+    isActive: false,
   },
   {
     title: "User",
     url: "/admin/user",
     icon: User2,
-    isActive: true,
+    isActive: false,
   },
   {
     title: "Shop",
     url: "/admin/shop",
     icon: ShoppingCart,
-    isActive: true,
+    isActive: false,
     children: [
       {
         title: "Category",
@@ -55,7 +55,7 @@ const SIDEBAR_ITEMS = [
     title: "Articles",
     url: "/admin/article",
     icon: Newspaper,
-    isActive: true,
+    isActive: false,
     children: [
       {
         title: "All Articles",
@@ -71,8 +71,12 @@ const SIDEBAR_ITEMS = [
     title: "Produk Kustom",
     url: "/admin",
     icon: SquarePen,
-    isActive: true,
+    isActive: false,
     children: [
+      {
+        title: "Request",
+        url: "/admin/custom-products",
+      },
       {
         title: "Bahan",
         url: "/admin/material",
@@ -87,7 +91,7 @@ const SIDEBAR_ITEMS = [
     title: "SEO",
     url: "/admin/seo",
     icon: Building,
-    isActive: true,
+    isActive: false,
   },
   {
     title: "Order",
@@ -104,7 +108,7 @@ export function AppSidebar({ session }: { session: Session | null }) {
         title: "Chat",
         url: "/admin/chat",
         icon: MessageCircleMore,
-        isActive: true,
+        isActive: false,
       });
   }, []);
 

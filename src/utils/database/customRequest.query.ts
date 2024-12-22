@@ -1,5 +1,8 @@
+"use server";
+
+import { paginator } from "@/lib/paginator";
 import prisma from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
+import { CustomRequest, Prisma } from "@prisma/client";
 
 export const createCustomRequest = async (
   data: Prisma.CustomRequestCreateInput,
@@ -30,4 +33,18 @@ export const findCustomRequests = async (
   where: Prisma.CustomRequestWhereInput,
 ) => {
   return await prisma.customRequest.findMany({ where });
+};
+
+export const findCustomRequestEntries = async (
+  perPage = 6,
+  page = 1,
+  args?: Prisma.CustomRequestFindManyArgs,
+) => {
+  const paginate = paginator({ perPage });
+
+  return await paginate<CustomRequest, Prisma.CustomRequestFindManyArgs>(
+    prisma.customRequest,
+    { page },
+    args,
+  );
 };
