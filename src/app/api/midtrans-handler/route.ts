@@ -9,7 +9,6 @@ const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || "";
 export async function POST(req: Request) {
   try {
     const body: MidtransWebhookBody = await req.json();
-    console.log(body);
 
     const expectedSignature = crypto
       .createHash("sha512")
