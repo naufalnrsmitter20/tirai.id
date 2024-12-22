@@ -54,7 +54,7 @@ export default async function OrderDetail({
           )}
         </div>
       </div>
-      {order.status === "PENDING" && (
+      {order.status === "PENDING" && order.payment?.status === "COMPLETED" && (
         <div className="flex w-full justify-center">
           <ConfirmButton order={order} />
         </div>
