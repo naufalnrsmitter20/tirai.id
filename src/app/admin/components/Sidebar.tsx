@@ -30,10 +30,10 @@ const SIDEBAR_ITEMS = [
     isActive: false,
   },
   {
-    title: "User",
-    url: "/admin/user",
-    icon: User2,
-    isActive: false,
+    title: "Order",
+    url: "/admin/order",
+    icon: Receipt,
+    isActive: true,
   },
   {
     title: "Shop",
@@ -93,12 +93,6 @@ const SIDEBAR_ITEMS = [
     icon: Building,
     isActive: false,
   },
-  {
-    title: "Order",
-    url: "/admin/order",
-    icon: Receipt,
-    isActive: true,
-  },
 ];
 
 export function AppSidebar({ session }: { session: Session | null }) {
@@ -108,6 +102,13 @@ export function AppSidebar({ session }: { session: Session | null }) {
         title: "Chat",
         url: "/admin/chat",
         icon: MessageCircleMore,
+        isActive: false,
+      });
+    if (session?.user?.role === "SUPERADMIN")
+      SIDEBAR_ITEMS.push({
+        title: "User",
+        url: "/admin/user",
+        icon: User2,
         isActive: false,
       });
   }, []);

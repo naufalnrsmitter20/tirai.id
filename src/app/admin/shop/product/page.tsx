@@ -1,4 +1,3 @@
-import { getProducts } from "@/actions/products";
 import { buttonVariants } from "@/components/ui/button";
 import { Body3, H1 } from "@/components/ui/text";
 import { PageSelector } from "@/components/widget/PageSelector";

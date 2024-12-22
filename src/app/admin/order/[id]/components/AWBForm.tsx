@@ -17,18 +17,19 @@ export const AWBForm = ({
   const [trackingId, setTrackingId] = useState(order.shipment?.tracking_id);
 
   const handleUpsert = async () => {
-    setLoading(true);
-    const loadingId = toast.loading("Mengedit resi...");
-
-    if (!trackingId || trackingId === "") {
-      setLoading(false);
-      return toast.error("tracking id must be filled", {
-        id: loadingId,
-      });
+    if (!trackingId?.trim()) {
+      return toast.error("Nomor resi harus diisi");
     }
 
-    if (order.shipment) {
+    setLoading(true);
+    const loadingId = toast.loading("Mengupdate resi...");
+
+    try {
       await updateResi(order.id, trackingId);
+      toast.success("Berhasil mengupdate resi", { id: loadingId });
+    } catch {
+      toast.error("Gagal mengupdate resi", { id: loadingId });
+    } finally {
       setLoading(false);
       return toast.success("Berhasil mengupdate resi", {
         id: loadingId,
@@ -44,38 +45,40 @@ export const AWBForm = ({
 
   return (
     <div className="flex w-full justify-center">
-      <div className="flex w-[35vw] flex-col gap-3 rounded-lg bg-white px-3 py-4 shadow-black drop-shadow">
-        <H2 className="py-0">Pengiriman</H2>
-        <div className="flex w-full items-center justify-between">
-          <Body2>Kurir Pilihan</Body2>
-          <Body3>{order.shipment?.carrier}</Body3>
-        </div>
-        <div className="flex w-full items-start justify-between">
-          <Body2>Alamat Pengiriman</Body2>
-          <Body3 className="max-w-[50%] text-wrap break-words">
-            {order.shipping_address}
-          </Body3>
-        </div>
-        {order.status !== "UNPAID" && (
-          <div className="flex w-full flex-col items-start">
-            <Body2>No. Resi</Body2>
-            <Input
-              defaultValue={trackingId ?? ""}
-              onChange={(e) => {
-                e.preventDefault();
-                setTrackingId(e.target.value);
-              }}
-              placeholder="Input Resi"
-            />
-            <Button
-              className="mt-2 w-full"
-              disabled={loading}
-              onClick={handleUpsert}
-            >
-              {trackingId ? "Edit" : "Simpan"}
-            </Button>
+      <div className="w-[35vw] rounded-lg bg-white px-6 py-4 shadow-md">
+        <H2 className="mb-4 border-b pb-2">Pengiriman</H2>
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Body2>Kurir Pilihan</Body2>
+            <Body3>{order.shipment?.carrier.toUpperCase()}</Body3>
           </div>
-        )}
+
+          <div className="flex items-start justify-between">
+            <Body2>Alamat Pengiriman</Body2>
+            <Body3 className="max-w-[50%] break-words text-right">
+              {order.shipping_address}
+            </Body3>
+          </div>
+
+          {order.status === "PACKING" && (
+            <div className="space-y-2">
+              <Body2>No. Resi</Body2>
+              <Input
+                value={trackingId ?? ""}
+                onChange={(e) => setTrackingId(e.target.value)}
+                placeholder="Input Resi"
+              />
+              <Button
+                className="w-full"
+                disabled={loading}
+                onClick={handleUpsert}
+              >
+                {trackingId ? "Edit" : "Simpan"}
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

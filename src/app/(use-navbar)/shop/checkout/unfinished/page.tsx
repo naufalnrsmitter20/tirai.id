@@ -1,6 +1,6 @@
 import { buttonVariants } from "@/components/ui/button";
 import { H2 } from "@/components/ui/text";
-import { CircleHelp, CircleX } from "lucide-react";
+import { CircleHelp } from "lucide-react";
 import Link from "next/link";
 
 export default async function SuccessPage() {

@@ -202,24 +202,27 @@ type CustomerRetentionRate = {
 }[];
 
 export async function getCustomerRetentionRate(): Promise<CustomerRetentionRate> {
-  return await prisma.$queryRaw`
-    WITH RepeatCustomers AS (
-      SELECT user_id
-      FROM "Order"
-      WHERE status IN ('FINISHED', 'DELIVERED')
-      GROUP BY user_id
-      HAVING COUNT(DISTINCT DATE_TRUNC('month', created_at)) > 1
-    )
-    SELECT 
-      ROUND(
-        (COUNT(DISTINCT rc.user_id)::FLOAT / 
-        NULLIF(COUNT(DISTINCT o.user_id), 0) * 100)::numeric, 
-        2
-      ) as retention_rate
-    FROM "Order" o
-    LEFT JOIN RepeatCustomers rc ON o.user_id = rc.user_id
-    WHERE o.status IN ('FINISHED', 'DELIVERED')
-  `;
+  const query = await prisma.$queryRaw`
+  WITH RepeatCustomers AS (
+    SELECT user_id
+    FROM "Order"
+    WHERE status IN ('FINISHED', 'DELIVERED')
+    GROUP BY user_id
+    HAVING COUNT(DISTINCT DATE_TRUNC('month', created_at)) > 1
+  )
+  SELECT 
+    ROUND(
+      (COUNT(DISTINCT rc.user_id)::FLOAT / 
+      NULLIF(COUNT(DISTINCT o.user_id), 0) * 100)::numeric, 
+      2
+    ) as retention_rate
+  FROM "Order" o
+  LEFT JOIN RepeatCustomers rc ON o.user_id = rc.user_id
+  WHERE o.status IN ('FINISHED', 'DELIVERED')
+`;
+  return (query as CustomerRetentionRate).map((item) => ({
+    retention_rate: Number(item.retention_rate),
+  }));
 }
 
 export async function getLowStockProducts(threshold: number = 10) {
@@ -263,6 +266,16 @@ export async function getLowStockProducts(threshold: number = 10) {
   });
 }
 
+export async function getAverageRating(): Promise<number> {
+  const result = await prisma.review.aggregate({
+    _avg: {
+      rating: true,
+    },
+  });
+
+  return result._avg.rating || 0;
+}
+
 export async function getPaymentMethodDistribution() {
   return await prisma.payment.groupBy({
     by: ["method"],
@@ -275,7 +288,6 @@ export async function getPaymentMethodDistribution() {
   });
 }
 
-// Tipe untuk Order Count by Category
 type OrderCountByCategory = {
   category: string;
   orderCount: number;

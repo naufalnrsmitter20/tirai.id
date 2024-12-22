@@ -9,7 +9,6 @@ const MIDTRANS_SERVER_KEY = process.env.MIDTRANS_SERVER_KEY || "";
 export async function POST(req: Request) {
   try {
     const body: MidtransWebhookBody = await req.json();
-    console.log(body);
 
     const expectedSignature = crypto
       .createHash("sha512")
@@ -31,7 +30,7 @@ export async function POST(req: Request) {
         if (body.fraud_status === "accept") {
           const payment = await prisma.payment.update({
             where: {
-              transaction_id: body.transaction_id,
+              order_id: body.order_id,
             },
             data: {
               status: "COMPLETED",
@@ -50,7 +49,7 @@ export async function POST(req: Request) {
       case "pending":
         await prisma.payment.update({
           where: {
-            transaction_id: body.transaction_id,
+            order_id: body.order_id,
           },
           data: {
             status: "PENDING",
@@ -62,7 +61,7 @@ export async function POST(req: Request) {
       case "cancel":
         const payment = await prisma.payment.update({
           where: {
-            transaction_id: body.transaction_id,
+            order_id: body.order_id,
           },
           data: {
             status: "FAILED",

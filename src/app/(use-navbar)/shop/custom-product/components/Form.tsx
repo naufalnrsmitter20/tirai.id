@@ -19,7 +19,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AddressSection, ShippingAddress } from "./Address";
-import { User } from "next-auth";
+import { Session } from "next-auth";
 import { toast } from "sonner";
 import { addCustomProductByUser, saveAddress } from "../actions";
 import { useRouter } from "next/navigation";
@@ -43,13 +43,15 @@ export const Form: FC<{
   models: Models[];
   bahans: Bahans[];
   addresses: ShippingAddress[];
-  user: User;
+  user: Session["user"];
 }> = ({ models, bahans, addresses, user }) => {
   const [dimensions, setDimensions] = useState({ length: 0, width: 0 });
   const [selectedMaterial, setSelectedMaterial] = useState<Bahans | null>(null);
   const [estimatedPrice, setEstimatedPrice] = useState(0);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const router = useRouter();
+
+  if (!user) return <></>;
 
   const calculatePrice = (
     length: number,
@@ -67,7 +69,7 @@ export const Form: FC<{
       const price = calculatePrice(
         dimensions.length,
         dimensions.width,
-        material.price,
+        user?.role === "SUPPLIER" ? material.supplier_price : material.price,
       );
       setEstimatedPrice(price);
     }

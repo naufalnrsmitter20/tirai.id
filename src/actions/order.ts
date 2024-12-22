@@ -71,6 +71,16 @@ export const updateResi = async (
       },
       data: {
         tracking_id: trackingId,
+        status: "PENDING",
+      },
+    });
+
+    await prisma.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        status: "SHIPPING",
       },
     });
 
