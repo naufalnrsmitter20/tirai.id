@@ -16,7 +16,7 @@ export default async function SuccessPage() {
         href={"/account/order-history"}
         className={buttonVariants({ variant: "default" })}
       >
-        Kembali
+        Lihat riwayat
       </Link>
     </div>
   );

@@ -9,11 +9,13 @@ import { formatRupiah } from "@/lib/utils";
 import { Prisma } from "@prisma/client";
 import Link from "next/link";
 import { FC, useEffect, useState } from "react";
-import { EmptyCart } from "./EmptyCart";
+import { EmptyCart } from "../EmptyCart";
 import { ItemCard } from "./ItemCard";
+import { CustomRequestItem } from "@/types/cart";
 
-export const Cart: FC<{
+export const CartItems: FC<{
   products: Prisma.ProductGetPayload<{ include: { variants: true } }>[] | null;
+  customRequest: CustomRequestItem | null;
 }> = ({ products }) => {
   const { cart } = useCart();
   const [quantities, setQuantities] = useState<

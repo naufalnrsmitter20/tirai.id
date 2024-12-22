@@ -4,7 +4,20 @@ import { getServerSession } from "@/lib/next-auth";
 import prisma from "@/lib/prisma";
 import { CartItem } from "@/types/cart";
 import { redirect } from "next/navigation";
-import { Cart } from "./components/Cart";
+import { CartItems } from "./components/Cart";
+import { SectionContainer } from "@/components/layout/SectionContainer";
+import { EmptyCart } from "./components/EmptyCart";
+import { type Cart } from "@/types/cart";
+
+const isCustomCart = (
+  content: unknown,
+): content is Cart & { type: "custom" } => {
+  return (
+    typeof content === "object" &&
+    content !== null &&
+    (content as Cart).type === "custom"
+  );
+};
 
 export default async function CartPage() {
   const session = await getServerSession();
@@ -16,9 +29,11 @@ export default async function CartPage() {
     : "not found";
 
   if (cart === null) {
-    // Update the cart to empty array, because there is no way the cart will be null in the db unless the user is not adding anything yet
-    await updateCart([]);
-    return redirect("/cart");
+    return (
+      <SectionContainer id="cart">
+        <EmptyCart />
+      </SectionContainer>
+    );
   }
 
   const products =
@@ -35,9 +50,14 @@ export default async function CartPage() {
         })
       : null;
 
+  const customRequest =
+    cart !== "not found" && isCustomCart(cart.json_content)
+      ? cart.json_content.item
+      : null;
+
   return (
     <PageContainer>
-      <Cart products={products} />
+      <CartItems products={products} customRequest={customRequest} />
     </PageContainer>
   );
 }

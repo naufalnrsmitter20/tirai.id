@@ -1,5 +1,14 @@
 import { Prisma } from "@prisma/client";
 
 export type OrderWithPayment = Prisma.OrderGetPayload<{
-  include: { payment: true };
+  include: {
+    payment: true;
+    shipment: true;
+    items: {
+      include: {
+        product: true;
+        variant: true;
+      };
+    };
+  };
 }>;

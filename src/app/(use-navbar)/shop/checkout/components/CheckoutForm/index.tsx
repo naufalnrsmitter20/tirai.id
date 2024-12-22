@@ -13,6 +13,7 @@ import { Details } from "./Details";
 import { ProductCard } from "./ProductCard";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const CourierSelector = dynamic(() => import("./CourierSelector"), {
   ssr: false,
@@ -30,6 +31,8 @@ export const CheckoutForm: FC<{
 
   const handleCheckOut = async () => {
     if (selectedAddressId && selectedCourier) {
+      const loadingToast = toast.loading("Loading...");
+
       setLoading(true);
       const res = await upsertCheckout(
         cart,
@@ -39,6 +42,7 @@ export const CheckoutForm: FC<{
       router.push(res.data?.payment_link_url!);
 
       setLoading(false);
+      toast.success("Berhasil!", { id: loadingToast });
     }
   };
 

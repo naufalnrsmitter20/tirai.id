@@ -3,10 +3,10 @@
 import { ActionResponse, ActionResponses } from "@/lib/actions";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "@/lib/next-auth";
-import { CartItem } from "@/types/cart";
+import { Cart, CartItem } from "@/types/cart";
 
 export const getCart = async (): Promise<
-  ActionResponse<{ cart: CartItem[] }>
+  ActionResponse<{ cart: Cart | null }>
 > => {
   try {
     const session = await getServerSession();
@@ -17,9 +17,9 @@ export const getCart = async (): Promise<
 
     const cart = await prisma.cart.findUnique({ where: { user_id: userId } });
 
-    if (!cart) return ActionResponses.success({ cart: [] });
+    if (!cart) return ActionResponses.success({ cart: null });
 
-    return ActionResponses.success({ cart: cart.json_content as CartItem[] });
+    return ActionResponses.success({ cart: cart.json_content as Cart });
   } catch (error) {
     console.log(error);
     return ActionResponses.serverError();
@@ -27,7 +27,7 @@ export const getCart = async (): Promise<
 };
 
 export const updateCart = async (
-  cart_data: CartItem[],
+  cart_data: Cart,
 ): Promise<ActionResponse<{ message: string }>> => {
   try {
     const session = await getServerSession();

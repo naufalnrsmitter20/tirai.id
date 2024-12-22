@@ -48,7 +48,6 @@ export const Details = ({
       .filter(Boolean);
   }, [cart, products]);
 
-  // Calculate total product price
   const productPrice = useMemo(() => {
     return detailedCartItems.reduce(
       (sum, item) => sum + item!.totalItemPrice,

@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
+
 import { FC, useState } from "react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { H1, H5 } from "@/components/ui/text";
@@ -128,20 +128,20 @@ export const Hero: FC<{ models: Models[]; bahans: Bahans[] }> = ({
               </div>
               <p className="text-sm text-gray-500">Cotton</p>
             </div>
-            <ul className=" mt-2 flex w-full flex-col flex-wrap p-2">
+            <ul className="mt-2 flex w-full flex-col flex-wrap p-2">
               {bahans.map((bahan) => (
                 <li
                   key={bahan.id}
                   className="w-full rounded-t-lg border-b border-gray-200 dark:border-gray-600"
                 >
-                  <div className="flex items-center pe-3 justify-evenly ps-3">
+                  <div className="flex items-center justify-evenly pe-3 ps-3">
                     <input
                       id={`bahan-${bahan.id}`}
                       type="radio"
                       value={bahan.name}
                       onChange={(e) => setPrice(bahan.price)}
                       name="material"
-                      className="h-4 w-4 m-2 border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-700"
+                      className="m-2 h-4 w-4 border-gray-300 bg-gray-100 text-blue-600 focus:ring-2 focus:ring-blue-500 dark:border-gray-500 dark:bg-gray-600 dark:ring-offset-gray-700 dark:focus:ring-blue-600 dark:focus:ring-offset-gray-700"
                     />
                     <label
                       htmlFor={`bahan-${bahan.id}`}
@@ -149,7 +149,7 @@ export const Hero: FC<{ models: Models[]; bahans: Bahans[] }> = ({
                     >
                       {bahan.name}
                     </label>
-                    <p className="text-center m-2 text-gray-400">
+                    <p className="m-2 text-center text-gray-400">
                       {bahan.description}
                     </p>
                   </div>

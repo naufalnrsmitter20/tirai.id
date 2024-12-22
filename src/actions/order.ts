@@ -18,6 +18,19 @@ export const ConfirmOrder = async (
   }
 };
 
+export const FinishOrder = async (
+  orderId: string,
+): Promise<ActionResponse<{ message: string }>> => {
+  try {
+    await updateOrder({ id: orderId }, { status: "FINISHED" });
+    revalidatePath("/admin/order");
+    return ActionResponses.success({ message: "Order updated successfully" });
+  } catch (error) {
+    console.error(error);
+    return ActionResponses.serverError("Failed to upsert user");
+  }
+};
+
 export const AddResi = async (
   orderId: string,
   courier: string,

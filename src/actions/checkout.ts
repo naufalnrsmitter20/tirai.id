@@ -72,7 +72,15 @@ export const upsertCheckout = async (
           user_id: session?.user?.id!,
           phone_number: shipmentAddress.recipient_phone_number,
           total_price: 0,
-          desired_carrier_name: courier.name + " - " + courier.service,
+        },
+      });
+
+      await prisma.shipment.create({
+        data: {
+          carrier: courier.code + " - " + courier.service,
+          estimated_finish_time: "2-14 hari",
+          status: "PENDING",
+          order_id: order.id,
         },
       });
 
@@ -170,6 +178,7 @@ export const upsertCheckout = async (
           order_id: order.id,
           status: "PENDING",
           transaction_id: data.id,
+          method: "BANK_TRANSFER",
         },
       });
 

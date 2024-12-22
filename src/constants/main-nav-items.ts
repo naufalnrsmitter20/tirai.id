@@ -8,4 +8,5 @@ export const NAV_ITEMS: NavItem[] = [
   { title: "Tentang Kami", href: "/about" },
   { title: "Artikel", href: "/article" },
   { title: "Belanja", href: "/shop" },
+  { title: "Kustom", href: "/shop/custom-product" },
 ] as const;

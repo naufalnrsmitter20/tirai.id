@@ -173,7 +173,9 @@ export const EditAddressDialog: FC<
                 name="city"
                 render={({ field }) => (
                   <FormItem className="flex flex-col space-y-1.5">
-                    <FormLabel htmlFor="city">Kota/Kabupaten</FormLabel>
+                    <FormLabel htmlFor="city">
+                      Kota/Kabupaten (Gunakan kota/kabupaten didepan nama)
+                    </FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="Kota Malang" />
                     </FormControl>

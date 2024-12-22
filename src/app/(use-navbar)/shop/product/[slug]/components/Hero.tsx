@@ -31,15 +31,17 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  const { cart, addItem } = useCart();
+  const { cart, addReadyStockItem } = useCart();
 
   const productInCart = useMemo(
     () =>
-      cart?.find(
-        (item) =>
-          item.productId === product.id &&
-          selectedVariant?.id === item.variantId,
-      ),
+      cart !== null && cart?.type === "ready-stock"
+        ? cart.items.find(
+            (item) =>
+              item.productId === product.id &&
+              selectedVariant?.id === item.variantId,
+          )
+        : undefined,
     [cart, product.id, selectedVariant?.id],
   );
   const maxStock = useMemo(
@@ -52,6 +54,12 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
       product.price === null ? selectedVariant?.price || 0 : product.price,
     [product.price, selectedVariant],
   );
+  const hasCustomProductInCart = useMemo(
+    () => (cart !== null ? cart?.type === "custom" : false),
+    [cart],
+  );
+
+  console.log(hasCustomProductInCart);
 
   useEffect(() => {
     if (quantity > maxStock) {
@@ -155,7 +163,7 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
             <Button
               variant={"default"}
               className="w-full"
-              disabled={maxStock === 0 || loading}
+              disabled={maxStock === 0 || loading || hasCustomProductInCart}
               onClick={() => {
                 setLoading(true);
                 const loadingToast = toast.loading("Loading...");
@@ -171,7 +179,7 @@ export const Hero: FC<{ product: Product }> = ({ product }) => {
                   variantName: selectedVariant?.name,
                 };
 
-                addItem(cartItem);
+                addReadyStockItem(cartItem);
 
                 setLoading(false);
                 toast.success("Berhasil menambahkan produk!", {

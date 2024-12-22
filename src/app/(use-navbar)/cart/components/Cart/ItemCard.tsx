@@ -23,7 +23,7 @@ export const ItemCard: FC<{
   >;
   product?: Prisma.ProductGetPayload<{ include: { variants: true } }>;
 }> = ({ item, quantities, setQuantities, product }) => {
-  const { editItem, removeItem } = useCart();
+  const { editReadyStockItem, removeReadyStockItem } = useCart();
 
   const itemVariant = useMemo(
     () => product?.variants.find((variant) => variant.id === item.variantId),
@@ -86,7 +86,7 @@ export const ItemCard: FC<{
   }, [item, product]);
 
   useEffect(() => {
-    editItem(item.id, { quantity });
+    editReadyStockItem(item.id, { quantity });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quantity, item.id]);
 
@@ -221,7 +221,7 @@ export const ItemCard: FC<{
                   return q;
                 }),
               );
-              editItem(item.id, { quantity: Number(value) });
+              editReadyStockItem(item.id, { quantity: Number(value) });
             }}
             value={quantity.toString()}
           >
@@ -243,7 +243,7 @@ export const ItemCard: FC<{
           </Select>
           <button
             onClick={() => {
-              removeItem(item.id);
+              removeReadyStockItem(item.id);
               return location.reload();
             }}
             className="text-black"
