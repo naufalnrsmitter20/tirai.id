@@ -144,7 +144,6 @@ model CustomRequest {
   width          String
   height         String
   price          Float
-  size           String
   shipping_price Float?
 
   user User @relation(fields: [userId], references: [id])
