@@ -14,7 +14,7 @@ import { getCouriers } from "@/utils/couriers";
 import { ShippingAddress } from "@prisma/client";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-export const CourierSelector = ({
+const CourierSelector = ({
   address,
   courier,
   weightInKg,
@@ -31,7 +31,10 @@ export const CourierSelector = ({
     const init = async () => {
       const couriers = await getCouriers({
         originCity: process.env.NEXT_PUBLIC_ORIGIN_CITY as string,
-        destinationCity: address.city.split(" ")[1],
+        destinationCity:
+          address.city.split(" ").length > 1
+            ? address.city.split(" ")[1]
+            : address.city,
         weightInKg,
       });
 
@@ -82,3 +85,5 @@ export const CourierSelector = ({
     </div>
   );
 };
+
+export default CourierSelector;

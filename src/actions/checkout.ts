@@ -9,17 +9,21 @@ import { buildShipmentAddressString } from "@/utils/build-shipment-address-strin
 import { generateToken } from "@/utils/random-string";
 import { addMinutes } from "date-fns";
 import { createTransactionInvoice } from "./midtrans";
+import { Courier } from "@/types/courier";
+import { getCostByCourierCode } from "@/utils/couriers";
+import { calculateCartWeight } from "@/utils/calculate-cart-weight";
+import { updateCart } from "./cart";
 
 export const upsertCheckout = async (
-  cartItem: CartItem[],
+  cart: CartItem[],
   shipmentAddressId: string,
-  shipmentDetail: { code: string },
+  courier: Courier,
 ): Promise<ActionResponse<CreateInvoiceSuccessResponse>> => {
   const session = await getServerSession();
 
   const data = await prisma.$transaction(
     async (prisma) => {
-      const itemIds = cartItem.map((i) => i.productId);
+      const itemIds = cart.map((i) => i.productId);
 
       const user = await prisma.user.findUnique({
         where: {
@@ -46,6 +50,21 @@ export const upsertCheckout = async (
         return ActionResponses.notFound("Alamat pengiriman tidak ditemukan!");
       }
 
+      const shipmentCost = await getCostByCourierCode({
+        courierCode: courier.code,
+        service: courier.service,
+        originCity: process.env.NEXT_PUBLIC_ORIGIN_CITY as string,
+        destinationCity:
+          shipmentAddress.city.split(" ").length > 1
+            ? shipmentAddress.city.split(" ")[1]
+            : shipmentAddress.city,
+        weightInKg: calculateCartWeight(products, cart),
+      });
+
+      if (!shipmentCost) {
+        return ActionResponses.serverError();
+      }
+
       const order = await prisma.order.create({
         data: {
           shipping_address: buildShipmentAddressString(shipmentAddress),
@@ -58,16 +77,9 @@ export const upsertCheckout = async (
       });
 
       let amount = 0;
-      let itemDetail: ItemDetail[] = [
-        {
-          description: "cobek",
-          price: 1,
-          quantity: 1,
-        },
-      ];
-
+      let itemDetail: ItemDetail[] = [];
       await prisma.orderItem.createMany({
-        data: cartItem.map((item) => {
+        data: cart.map((item) => {
           const product = products.find((j) => item.productId === j.id);
           const variant = item.variantId
             ? product?.variants.find((j) => item.variantId === j.id)
@@ -77,11 +89,11 @@ export const upsertCheckout = async (
             item.quantity *
             (item.variantId ? variant?.price! : product?.price!);
 
-          // itemDetail.push({
-          //   description: product?.name!,
-          //   price: item.variantId ? variant?.price! : product?.price!,
-          //   quantity: item.quantity,
-          // });
+          itemDetail.push({
+            description: product?.name!,
+            price: item.variantId ? variant?.price! : product?.price!,
+            quantity: item.quantity,
+          });
 
           return {
             order_id: order.id,
@@ -93,7 +105,7 @@ export const upsertCheckout = async (
         }),
       });
 
-      cartItem.forEach(async (item) => {
+      cart.forEach(async (item) => {
         const product = products.find((j) => item.productId === j.id);
         const variant = item.variantId
           ? product?.variants.find((j) => item.variantId === j.id)
@@ -143,11 +155,15 @@ export const upsertCheckout = async (
         amount: {
           vat: "0",
           discount: "0",
-          shipping: "0",
+          shipping: shipmentCost.toString(),
         },
       });
 
-      const data = result.data!;
+      if (!result.success || result.error || !result.data) {
+        return ActionResponses.serverError();
+      }
+
+      const data = result.data;
 
       await prisma.payment.create({
         data: {
@@ -157,10 +173,11 @@ export const upsertCheckout = async (
         },
       });
 
+      await updateCart([]);
+
       return ActionResponses.success(data);
-      // TODO: Decrease the stock of a product/variant
     },
-    { isolationLevel: "Serializable" },
+    { isolationLevel: "Serializable", timeout: 20000 },
   );
 
   return data;

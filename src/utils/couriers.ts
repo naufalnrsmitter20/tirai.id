@@ -40,12 +40,12 @@ export const getCouriers = async ({
 };
 
 export const getCostByCourierCode = async ({
-  carrierCode,
+  courierCode,
   service,
   originCity,
   destinationCity,
   weightInKg,
-}: GetCarriersProps & { carrierCode: string; service: string }) => {
+}: GetCarriersProps & { courierCode: string; service: string }) => {
   const couriers = await getCouriers({
     originCity,
     destinationCity,
@@ -57,7 +57,7 @@ export const getCostByCourierCode = async ({
   }
 
   const chosenCarrier = couriers.costs.find(
-    (c) => c.code === carrierCode && c.service === service,
+    (c) => c.code === courierCode && c.service === service,
   );
 
   const cost = chosenCarrier ? Number(chosenCarrier.price) : undefined;

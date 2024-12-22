@@ -3,16 +3,20 @@
 import { upsertCheckout } from "@/actions/checkout";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { CartItem } from "@/types/cart";
+import { Courier } from "@/types/courier";
 import { ProductWithVariant } from "@/types/entityRelations";
+import { calculateCartWeight } from "@/utils/calculate-cart-weight";
 import { ShippingAddress } from "@prisma/client";
-import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
 import { AddressSelector } from "./AddressSelector";
-import { CourierSelector } from "./CourierSelector";
 import { Details } from "./Details";
 import { ProductCard } from "./ProductCard";
-import { calculateCartWeight } from "@/utils/calculate-cart-weight";
-import { Courier } from "@/types/courier";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+
+const CourierSelector = dynamic(() => import("./CourierSelector"), {
+  ssr: false,
+});
 
 export const CheckoutForm: FC<{
   addresses: ShippingAddress[];
@@ -25,11 +29,14 @@ export const CheckoutForm: FC<{
   const router = useRouter();
 
   const handleCheckOut = async () => {
-    if (selectedAddressId) {
+    if (selectedAddressId && selectedCourier) {
       setLoading(true);
-      const res = await upsertCheckout(cart, selectedAddressId, { code: "" });
-      console.log(res.data);
-      router.push(res.data!.payment_link_url);
+      const res = await upsertCheckout(
+        cart,
+        selectedAddressId,
+        selectedCourier,
+      );
+      router.push(res.data?.payment_link_url!);
 
       setLoading(false);
     }

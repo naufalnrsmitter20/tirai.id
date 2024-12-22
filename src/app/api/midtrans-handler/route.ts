@@ -42,7 +42,7 @@ export async function POST(req: Request) {
               id: payment.order_id,
             },
             data: {
-              status: "PACKING",
+              status: "PENDING",
             },
           });
         }
