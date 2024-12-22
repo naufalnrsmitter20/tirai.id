@@ -40,7 +40,7 @@ export function Card({
   value,
   persentation,
   color,
-}: {
+}: Readonly<{
   value: number;
   persentation: number;
   title: string;
@@ -48,11 +48,11 @@ export function Card({
   Icon: React.ForwardRefExoticComponent<
     Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
   >;
-}) {
+}>) {
   return (
     <div
       className={cn(
-        "col-span-12 md:col-span-6 lg:col-span-3 px-6 py-4 shadow-sm shadow-gray-400 rounded-sm",
+        "col-span-12 md:col-span-6 px-6 py-4 shadow-sm shadow-gray-400 rounded-xl",
       )}
     >
       <div className="flex justify-between mb-4">
@@ -75,7 +75,7 @@ export function Card({
 
 export function CardSkeleton() {
   return (
-    <Skeleton className="col-span-12 md:col-span-6 lg:col-span-3 px-6 py-4 shadow-gray-400 rounded-sm bg-white shadow-sm">
+    <Skeleton className="col-span-12 md:col-span-6 lg:col-span-3 px-6 py-4 shadow-gray-400 rounded-xl bg-white shadow-sm">
       <div className="flex justify-between mb-4">
         <div>
           <Skeleton className="h-9 w-24 mb-1 bg-gray-200" />
@@ -108,7 +108,7 @@ export function TopFiveData({
   return (
     <div
       className={cn(
-        "col-span-12 md:col-span-5 shadow-sm my-1 shadow-gray-400 rounded-sm border border-slate-100 px-6 py-4",
+        "col-span-12 md:col-span-5 shadow-sm my-1 shadow-gray-400 rounded-xl border border-slate-100 px-6 py-4",
         className,
       )}
     >
@@ -142,7 +142,7 @@ function TopFiveDataSkeleton({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "col-span-5 shadow-sm my-1 shadow-gray-400 rounded-sm border border-slate-100 px-6 py-4",
+        "col-span-5 shadow-sm my-1 shadow-gray-400 rounded-xl border border-slate-100 px-6 py-4",
         className,
       )}
     >
