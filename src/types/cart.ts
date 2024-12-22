@@ -6,13 +6,13 @@ export type Cart =
   | { type: "ready-stock"; items: CartItem[] };
 
 export type CustomRequestItem = {
+  id: string;
   material: string;
   model: string;
   color: string;
   width: string;
   height: string;
   price: number;
-  size: string;
   shipping_price?: number;
 };
 

@@ -1,3 +1,4 @@
+import { Cart } from "@/types/cart";
 import { clsx, type ClassValue } from "clsx";
 import moment from "moment-timezone";
 import { twMerge } from "tailwind-merge";
@@ -102,4 +103,24 @@ export const formatRelativeDate = (dateString: string): string => {
     year: "numeric",
   };
   return inputDate.toDate().toLocaleDateString("id-ID", options);
+};
+
+export const isCustomCart = (
+  content: unknown,
+): content is Cart & { type: "custom" } => {
+  return (
+    typeof content === "object" &&
+    content !== null &&
+    (content as Cart).type === "custom"
+  );
+};
+
+export const isReadyStockCart = (
+  content: unknown,
+): content is Cart & { type: "ready-stock" } => {
+  return (
+    typeof content === "object" &&
+    content !== null &&
+    (content as Cart).type === "ready-stock"
+  );
 };

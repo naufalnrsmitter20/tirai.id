@@ -1,13 +1,11 @@
 "use server";
 
 import { ActionResponse, ActionResponses } from "@/lib/actions";
-import prisma from "@/lib/prisma";
 import { getServerSession } from "@/lib/next-auth";
-import { Cart, CartItem } from "@/types/cart";
+import prisma from "@/lib/prisma";
+import { Cart } from "@/types/cart";
 
-export const getCart = async (): Promise<
-  ActionResponse<{ cart: Cart | null }>
-> => {
+export const getCart = async (): Promise<ActionResponse<{ cart?: Cart }>> => {
   try {
     const session = await getServerSession();
 
@@ -17,7 +15,7 @@ export const getCart = async (): Promise<
 
     const cart = await prisma.cart.findUnique({ where: { user_id: userId } });
 
-    if (!cart) return ActionResponses.success({ cart: null });
+    if (!cart) return ActionResponses.success({ cart: undefined });
 
     return ActionResponses.success({ cart: cart.json_content as Cart });
   } catch (error) {
