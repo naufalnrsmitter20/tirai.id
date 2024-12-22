@@ -14,7 +14,7 @@ export const formatRupiah = (amount: number) => {
 };
 
 export const formatDate = (date: Date) => {
-  return `${date.getDay()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+  return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 };
 
 export const sanitizeInput = (searchTerm: string) => {

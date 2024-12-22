@@ -17,7 +17,7 @@ export default async function ProductAdmin({
   const { page } = await searchParams;
   const curPage = page ? parseInt(page) : 1;
 
-  const res = await await findProducts(12, curPage, "latest");
+  const res = await findProducts(12, curPage, "latest");
 
   const products = res.data;
 

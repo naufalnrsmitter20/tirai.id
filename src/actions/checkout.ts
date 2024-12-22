@@ -72,7 +72,7 @@ export const upsertCheckout = async (
           user_id: session?.user?.id!,
           phone_number: shipmentAddress.recipient_phone_number,
           total_price: 0,
-          desired_carrier_name: "",
+          desired_carrier_name: courier.name + " - " + courier.service,
         },
       });
 
