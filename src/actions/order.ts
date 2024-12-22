@@ -1,11 +1,11 @@
 "use server";
 
 import { ActionResponse, ActionResponses } from "@/lib/actions";
-import { findOrderById, updateOrder } from "@/utils/database/order.query";
-import { revalidatePath } from "next/cache";
 import prisma from "@/lib/prisma";
+import { updateOrder } from "@/utils/database/order.query";
+import { revalidatePath } from "next/cache";
 
-export const ConfirmOrder = async (
+export const confirmOrder = async (
   orderId: string,
 ): Promise<ActionResponse<{ message: string }>> => {
   try {
@@ -18,7 +18,7 @@ export const ConfirmOrder = async (
   }
 };
 
-export const FinishOrder = async (
+export const finishOrder = async (
   orderId: string,
 ): Promise<ActionResponse<{ message: string }>> => {
   try {
@@ -31,7 +31,7 @@ export const FinishOrder = async (
   }
 };
 
-export const AddResi = async (
+export const addResi = async (
   orderId: string,
   courier: string,
   trackingId: string,
@@ -60,7 +60,7 @@ export const AddResi = async (
   }
 };
 
-export const UpdateResi = async (
+export const updateResi = async (
   orderId: string,
   trackingId: string,
 ): Promise<ActionResponse<{ message: string }>> => {

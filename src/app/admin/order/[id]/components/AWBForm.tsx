@@ -1,6 +1,6 @@
 "use client";
 
-import { AddResi, UpdateResi } from "@/actions/order";
+import { addResi, updateResi } from "@/actions/order";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Body2, Body3, H2 } from "@/components/ui/text";
@@ -28,14 +28,14 @@ export const AWBForm = ({
     }
 
     if (order.shipment) {
-      await UpdateResi(order.id, trackingId);
+      await updateResi(order.id, trackingId);
       setLoading(false);
       return toast.success("Berhasil mengupdate resi", {
         id: loadingId,
       });
     }
 
-    await AddResi(order.id, order.desired_carrier_name, trackingId);
+    await addResi(order.id, order.shipment!.carrier, trackingId);
     setLoading(false);
     return toast.success("Berhasil menambahkan resi", {
       id: loadingId,
@@ -48,7 +48,7 @@ export const AWBForm = ({
         <H2 className="py-0">Pengiriman</H2>
         <div className="flex w-full items-center justify-between">
           <Body2>Kurir Pilihan</Body2>
-          <Body3>{order.desired_carrier_name}</Body3>
+          <Body3>{order.shipment?.carrier}</Body3>
         </div>
         <div className="flex w-full items-start justify-between">
           <Body2>Alamat Pengiriman</Body2>

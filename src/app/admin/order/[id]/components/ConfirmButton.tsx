@@ -1,6 +1,6 @@
 "use client";
 
-import { ConfirmOrder } from "@/actions/order";
+import { confirmOrder } from "@/actions/order";
 import { Button } from "@/components/ui/button";
 import { OrderWithItemsProductsPaymentShipment } from "@/types/entityRelations";
 import { useState } from "react";
@@ -16,7 +16,7 @@ export const ConfirmButton = ({
     setLoading(true);
     const loadingId = toast.loading("Konfirmasi Order...");
 
-    await ConfirmOrder(order.id);
+    await confirmOrder(order.id);
     setLoading(false);
     return toast.success("Berhasil Konfirmasi Order", {
       id: loadingId,

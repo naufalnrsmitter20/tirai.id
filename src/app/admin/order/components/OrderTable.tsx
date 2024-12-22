@@ -1,6 +1,6 @@
 "use client";
 
-import { ConfirmOrder } from "@/actions/order";
+import { confirmOrder } from "@/actions/order";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -34,7 +34,7 @@ export const OrderTable = ({
     setLoading(true);
     const loadingId = toast.loading("Konfirmasi Order...");
 
-    await ConfirmOrder(orderId);
+    await confirmOrder(orderId);
     setLoading(false);
     return toast.success("Berhasil Konfirmasi Order", {
       id: loadingId,
