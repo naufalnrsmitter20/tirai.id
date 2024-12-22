@@ -48,12 +48,34 @@ export async function POST(req: Request) {
         }
         break;
       case "pending":
-        // TODO: Update order to 'waiting payment'
+        await prisma.payment.update({
+          where: {
+            transaction_id: body.transaction_id,
+          },
+          data: {
+            status: "PENDING",
+          },
+        });
         break;
       case "deny":
       case "expire":
       case "cancel":
-        // TODO: Update order to 'failure or cancel'
+        const payment = await prisma.payment.update({
+          where: {
+            transaction_id: body.transaction_id,
+          },
+          data: {
+            status: "FAILED",
+          },
+        });
+        await prisma.order.update({
+          where: {
+            id: payment.order_id,
+          },
+          data: {
+            status: "PACKING",
+          },
+        });
         break;
       default:
         // Handle unexpected status
