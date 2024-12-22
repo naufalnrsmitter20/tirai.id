@@ -1,15 +1,16 @@
 "use client";
 
+import { updateCart } from "@/actions/cart";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { buttonVariants } from "@/components/ui/button";
 import { Body3, H1, H2, H3 } from "@/components/ui/text";
 import { useCart } from "@/hooks/use-cart";
 import { formatRupiah } from "@/lib/utils";
+import { Prisma } from "@prisma/client";
 import Link from "next/link";
 import { FC, useEffect, useState } from "react";
 import { EmptyCart } from "./EmptyCart";
 import { ItemCard } from "./ItemCard";
-import { Prisma } from "@prisma/client";
 
 export const Cart: FC<{
   products: Prisma.ProductGetPayload<{ include: { variants: true } }>[] | null;
@@ -25,10 +26,23 @@ export const Cart: FC<{
   useEffect(() => {
     if (cart !== undefined) {
       setQuantities(
-        cart.map((item) => ({ id: item.id, quantity: item.quantity })),
+        cart
+          .filter((item) => {
+            const product = products?.find(
+              (product) => product.id === item.productId,
+            );
+            if (!product) return false;
+
+            if (product.price !== null) return true;
+
+            return product.variants.some(
+              (variant) => variant.id === item.variantId,
+            );
+          })
+          .map((item) => ({ id: item.id, quantity: item.quantity })),
       );
     }
-  }, [cart]);
+  }, [cart, products]);
 
   if (cart === undefined)
     return (
@@ -44,9 +58,11 @@ export const Cart: FC<{
           <div className="block w-full lg:w-[65%]">
             <H1 className="text-black">
               Keranjang Anda{" "}
-              <span className="text-lg text-neutral-500">
-                ({cart.reduce((prev, curr) => prev + curr.quantity, 0)})
-              </span>
+              {quantities && (
+                <span className="text-lg text-neutral-500">
+                  ({quantities.reduce((prev, curr) => prev + curr.quantity, 0)})
+                </span>
+              )}
             </H1>
             <div className="my-8 flex flex-col divide-y divide-neutral-500">
               {cart.map((item) => (
@@ -86,6 +102,22 @@ export const Cart: FC<{
                 size: "lg",
                 className: "mb-3 w-full",
               })}
+              onClick={async () => {
+                const filteredCart = cart.filter((item) => {
+                  const product = products?.find(
+                    (product) => product.id === item.productId,
+                  );
+                  if (!product) return false;
+
+                  if (product.price !== null) return true;
+
+                  return product.variants.some(
+                    (variant) => variant.id === item.variantId,
+                  );
+                });
+
+                await updateCart(filteredCart);
+              }}
             >
               Proses ke Checkout
             </Link>

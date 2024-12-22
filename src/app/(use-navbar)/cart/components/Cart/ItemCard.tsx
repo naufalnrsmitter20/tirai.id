@@ -27,7 +27,7 @@ export const ItemCard: FC<{
 
   const itemVariant = useMemo(
     () => product?.variants.find((variant) => variant.id === item.variantId),
-    [product],
+    [item.variantId, product?.variants],
   );
   const maxStock = useMemo(
     () => (itemVariant ? itemVariant.stock : product?.stock!), // eslint-disable-line @typescript-eslint/no-non-null-asserted-optional-chain
@@ -35,12 +35,8 @@ export const ItemCard: FC<{
   );
   const quantity = useMemo(
     () => quantities?.find((q) => q.id === item.id)?.quantity || item.quantity,
-    [quantities],
+    [item.id, item.quantity, quantities],
   );
-
-  useEffect(() => {
-    console.log(product?.stock || product?.variants.map((v) => v.stock));
-  }, [product]);
 
   useEffect(() => {
     const init = () => {
@@ -91,7 +87,49 @@ export const ItemCard: FC<{
 
   useEffect(() => {
     editItem(item.id, { quantity });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quantity, item.id]);
+
+  if (itemVariant === undefined && product === undefined) {
+    return (
+      <div
+        className={cn(
+          "pointer-events-none flex w-full flex-row items-center justify-between py-6 opacity-50",
+        )}
+      >
+        <div className="flex w-full max-w-xs items-center gap-x-4 lg:max-w-fit">
+          <Image
+            src={item.photo}
+            width={400}
+            height={400}
+            className="aspect-square size-24 rounded-md md:size-32"
+            alt={`${item.name}'s Photo`}
+            unoptimized
+          />
+          <div className="block">
+            <Body4 className="text-black">
+              {item.categoryName.replace(
+                item.categoryName[0],
+                item.categoryName[0].toUpperCase(),
+              )}
+            </Body4>
+            <H3 className="text-black">{item.name}</H3>
+            {item.variantName && (
+              <Body4 className="mt-1 text-neutral-500">
+                {item.variantName}
+              </Body4>
+            )}
+          </div>
+        </div>
+        <div className="flex h-full flex-col items-end justify-between">
+          <Body3 className="mb-4 text-black">
+            {formatRupiah(quantity * item.pricePerItem)}
+          </Body3>
+          <Body3 className="text-destructive">Barang Invalid</Body3>
+        </div>
+      </div>
+    );
+  }
 
   if (maxStock === 0) {
     return (
