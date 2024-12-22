@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import SeoForm from "../_components/SeoForm";
 import { getSeoPageById } from "@/utils/database/seo.query";
 
-export default async function UpdateUser({
+export default async function UpdateSeo({
   params,
 }: {
   params: Promise<{ id?: string }>;
