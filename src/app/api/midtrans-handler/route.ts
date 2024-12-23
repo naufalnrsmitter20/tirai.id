@@ -1,4 +1,3 @@
-// file: app/api/midtrans-webhook/route.ts
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { MidtransWebhookBody } from "@/types/midtrans";
@@ -34,6 +33,7 @@ export async function POST(req: Request) {
             },
             data: {
               status: "COMPLETED",
+              method: body.payment_type,
             },
           });
           await prisma.order.update({
@@ -53,12 +53,13 @@ export async function POST(req: Request) {
           },
           data: {
             status: "PENDING",
+            method: body.payment_type,
           },
         });
         break;
       case "deny":
       case "expire":
-      case "cancel":
+      case "cancel": {
         const payment = await prisma.payment.update({
           where: {
             order_id: body.order_id,
@@ -76,6 +77,7 @@ export async function POST(req: Request) {
           },
         });
         break;
+      }
       default:
         // Handle unexpected status
         return NextResponse.json(

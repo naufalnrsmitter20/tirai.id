@@ -213,7 +213,7 @@ model Article {
 
 model Payment {
   id             String        @id @default(uuid())
-  method         PaymentMethod
+  method         String?
   status         PaymentStatus
   created_at     DateTime      @default(now())
   transaction_id String? // ID Transaksi dari payment gateway
