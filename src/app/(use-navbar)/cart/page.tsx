@@ -41,12 +41,11 @@ export default async function CartPage() {
       ? cart.json_content.item
       : null;
 
-  const customRequest =
-    customRequestCart !== null
-      ? await prisma.customRequest.findUnique({
-          where: { id: customRequestCart.id },
-        })
-      : null;
+  const customRequest = customRequestCart
+    ? await prisma.customRequest.findUnique({
+        where: { id: customRequestCart.id },
+      })
+    : null;
 
   return (
     <PageContainer>
