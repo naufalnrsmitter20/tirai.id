@@ -79,6 +79,8 @@ export const addCustomProductByUser = async (data: FormData) => {
       model,
       address,
       userId,
+      recipient_name: recipientName,
+      recipient_phone_number: recipientPhoneNumber,
     });
 
     if (!productCustom) {

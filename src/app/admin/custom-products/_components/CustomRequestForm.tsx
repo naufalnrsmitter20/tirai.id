@@ -50,6 +50,11 @@ const customRequestSchema = z.object({
     .nullable()
     .optional(),
   address: z.string().min(1, "Alamat wajib diisi"),
+  recipient_name: z.string().min(1, "Nama penerima wajib diisi"),
+  recipient_phone_number: z
+    .string()
+    .min(1, "Nomor penerima wajib diisi")
+    .regex(/^(?:\+62|62|0)[2-9]\d{7,14}$/, "Nomor telepon tidak valid"),
   carrier_code: z.string().min(1, "Kurir wajib dipilih"),
 });
 
@@ -72,6 +77,8 @@ export default function CustomRequestForm({
       shipping_price: updateData.shipping_price,
       address: updateData.address,
       carrier_code: updateData.carrier_code || "",
+      recipient_name: updateData.recipient_name,
+      recipient_phone_number: updateData.recipient_phone_number,
     },
     schema: customRequestSchema,
   });
@@ -218,7 +225,8 @@ export default function CustomRequestForm({
                 </FormItem>
               )}
             />
-
+          </div>
+          <div className="flex flex-col gap-4">
             <FormField
               control={form.control}
               name="shipping_price"
@@ -246,7 +254,7 @@ export default function CustomRequestForm({
               name="carrier_code"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Kurir</FormLabel>
+                  <FormLabel>Nama Ekspedisi</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
@@ -268,21 +276,46 @@ export default function CustomRequestForm({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Alamat</FormLabel>
+                  <FormControl>
+                    <Textarea {...field} placeholder="Masukkan alamat" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="recipient_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nama Penerima</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Masukkan Nama Penerima" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="recipient_phone_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nomor Penerima</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="Masukkan Nomor Penerima" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-
-          <FormField
-            control={form.control}
-            name="address"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Alamat</FormLabel>
-                <FormControl>
-                  <Textarea {...field} placeholder="Masukkan alamat" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
         </div>
 
         <Button type="submit" className="w-full">
