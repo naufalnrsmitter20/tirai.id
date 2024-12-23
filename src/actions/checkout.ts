@@ -82,6 +82,7 @@ export const upsertCheckout = async (
             shipping_address: buildShipmentAddressString(shipmentAddress),
             status: "UNPAID",
             user_id: session.user.id,
+            shipping_price: shipmentCost,
             phone_number: shipmentAddress.recipient_phone_number,
             total_price: 0,
           },
@@ -145,7 +146,7 @@ export const upsertCheckout = async (
 
         await prisma.order.update({
           where: { id: order.id },
-          data: { total_price: amount },
+          data: { total_price: amount + shipmentCost },
         });
 
         const result = await createTransactionInvoice({
@@ -233,6 +234,7 @@ export const upsertCheckout = async (
             user_id: session.user.id,
             phone_number: customRequest.recipient_phone_number,
             total_price: customRequest.shipping_price + customRequest.price,
+            shipping_price: customRequest.shipping_price,
           },
         });
 

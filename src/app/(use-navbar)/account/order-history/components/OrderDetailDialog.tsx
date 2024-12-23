@@ -112,6 +112,25 @@ export const OrderDetailDialog: FC<
               </div>
             </div>
           </div>
+          <div className="flex w-full justify-center">
+            <div className="flex w-[90%] flex-col gap-1 rounded-lg bg-white px-3 py-4 shadow-black drop-shadow">
+              <H2 className="py-0">Total</H2>
+              <div className="flex w-full items-center justify-between">
+                <Body2>Total Barang ({order.items.length} Barang)</Body2>
+                <Body3>
+                  {formatRupiah(order.total_price - order.shipping_price)}
+                </Body3>
+              </div>
+              <div className="flex w-full items-center justify-between">
+                <Body2>Ongkos Kirim</Body2>
+                <Body3>{formatRupiah(order.shipping_price)}</Body3>
+              </div>
+              <div className="flex w-full items-center justify-between">
+                <Body2>Subtotal</Body2>
+                <Body3>{formatRupiah(order.total_price)}</Body3>
+              </div>
+            </div>
+          </div>
           {order.shipment &&
             order.shipment.status === "DELIVERED" &&
             order.status === "DELIVERED" && (
