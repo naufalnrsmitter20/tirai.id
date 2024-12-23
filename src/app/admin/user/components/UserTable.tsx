@@ -1,5 +1,6 @@
 "use client";
 
+import { deleteUserAction } from "@/actions/users";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,16 +14,17 @@ import { DataTable } from "@/components/widget/DataTable";
 import { PaginationMetadata } from "@/lib/paginator";
 import { User } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal, Pencil } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useRouter } from "next-nprogress-bar";
 import { FC, useMemo } from "react";
+import { toast } from "sonner";
 
 export const UserTable: FC<{
   users: User[];
   meta: PaginationMetadata;
 }> = ({ users, meta }) => {
   const router = useRouter();
-
+  
   const columns: ColumnDef<User>[] = useMemo(
     (): ColumnDef<User>[] => [
       {
@@ -147,6 +149,21 @@ export const UserTable: FC<{
                 >
                   <Pencil />
                   <span>Edit</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                      const data={id: row.original.id};
+                      const deleteUser= await deleteUserAction({data});
+                      if(!deleteUser){
+                        toast.error("Gagal menghapus user");
+                      }
+                      toast.success("User berhasil dihapus");
+                      router.refresh();
+                      return deleteUser;
+                  }}
+                >
+                  <Trash />
+                  <span>delete</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

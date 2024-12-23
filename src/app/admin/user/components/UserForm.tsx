@@ -11,14 +11,21 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { H2 } from "@/components/ui/text";
 import { useZodForm } from "@/hooks/use-zod-form";
-import { User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next-nprogress-bar";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
+import { nativeEnum, z } from "zod";
 
 export default function UserForm({ updateData }: { updateData?: User }) {
   const router = useRouter();
@@ -33,6 +40,7 @@ export default function UserForm({ updateData }: { updateData?: User }) {
         password: updateData
           ? z.string().optional()
           : z.string().min(6, "Password minimal 6 karakter"),
+        role: nativeEnum(Role),
       }),
     [updateData],
   );
@@ -42,6 +50,7 @@ export default function UserForm({ updateData }: { updateData?: User }) {
       username: updateData?.name || "",
       email: updateData?.email || "",
       password: "",
+      role: updateData?.role || "CUSTOMER",
     },
     schema: upsertUserSchema,
   });
@@ -60,6 +69,7 @@ export default function UserForm({ updateData }: { updateData?: User }) {
           email: values.email,
           name: values.username,
           password: values.password,
+          role: values.role || "CUSTOMER",
         },
       });
 
@@ -148,6 +158,34 @@ export default function UserForm({ updateData }: { updateData?: User }) {
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="role"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel htmlFor="role">Role User</FormLabel>
+              <FormControl>
+                <Select
+                  onValueChange={(value) => field.onChange(value)} 
+                  value={field.value}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.values(Role).map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role.charAt(0).toUpperCase() + role.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button disabled={loading} type="submit" className="w-full">
           Simpan
         </Button>

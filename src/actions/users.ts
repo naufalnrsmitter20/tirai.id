@@ -22,7 +22,7 @@ export const upsertUser = async ({
     role?: Role;
   };
 }): Promise<ActionResponse<{ message: string }>> => {
-  const { id, name, email, password, role = "CUSTOMER" } = data;
+  const { id, name, email, password, role } = data;
 
   try {
     if (!id) {
