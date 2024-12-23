@@ -13,6 +13,7 @@ import { Courier } from "@/types/courier";
 import { getCostByCourierCode } from "@/utils/couriers";
 import { calculateCartWeight } from "@/utils/calculate-cart-weight";
 import { updateCart } from "./cart";
+import { revalidatePath } from "next/cache";
 
 interface CartObject {
   cartItems?: CartItem[];
@@ -320,6 +321,9 @@ export const upsertCheckout = async (
     },
     { isolationLevel: "Serializable", timeout: 20000 },
   );
+
+  revalidatePath("/admin/order");
+  revalidatePath("/account/order-history");
 
   return data;
 };

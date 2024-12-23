@@ -10,7 +10,9 @@ export const confirmOrder = async (
 ): Promise<ActionResponse<{ message: string }>> => {
   try {
     await updateOrder({ id: orderId }, { status: "PACKING" });
+
     revalidatePath("/admin/order");
+    revalidatePath("/account/order-history");
     return ActionResponses.success({ message: "Order updated successfully" });
   } catch (error) {
     console.error(error);
@@ -23,7 +25,9 @@ export const finishOrder = async (
 ): Promise<ActionResponse<{ message: string }>> => {
   try {
     await updateOrder({ id: orderId }, { status: "FINISHED" });
+
     revalidatePath("/admin/order");
+    revalidatePath("/account/order-history");
     return ActionResponses.success({ message: "Order updated successfully" });
   } catch (error) {
     console.error(error);
@@ -53,6 +57,7 @@ export const addResi = async (
     );
 
     revalidatePath("/admin/order");
+    revalidatePath("/account/order-history");
     return ActionResponses.success({ message: "Order updated successfully" });
   } catch (error) {
     console.error(error);
@@ -85,6 +90,7 @@ export const updateResi = async (
     });
 
     revalidatePath("/admin/order");
+    revalidatePath("/account/order-history");
     return ActionResponses.success({ message: "Order updated successfully" });
   } catch (error) {
     console.error(error);

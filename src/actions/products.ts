@@ -110,6 +110,7 @@ export const upsertProduct = async ({
       },
     );
 
+    revalidatePath("/", "layout");
     return ActionResponses.success("Success Update Product");
   } catch (error) {
     console.log(error);
@@ -150,7 +151,8 @@ export const changeProductPublishedStatus = async (
         is_published: status,
       },
     );
-    revalidatePath("/admin/shop/product");
+
+    revalidatePath("/", "layout");
     return ActionResponses.success("Success Update Product");
   } catch (error) {
     console.log((error as Error).message);
@@ -161,7 +163,8 @@ export const changeProductPublishedStatus = async (
 export const removeProduct = async (id: string) => {
   try {
     await deleteProduct({ id });
-    revalidatePath("/admin/shop/product");
+
+    revalidatePath("/", "layout");
     return ActionResponses.success("Success delete Product");
   } catch (error) {
     console.log((error as Error).message);

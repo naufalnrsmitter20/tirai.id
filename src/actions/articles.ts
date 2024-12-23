@@ -86,8 +86,8 @@ const buildArticleInput = ({
   published_at: publishedAt
     ? new Date(publishedAt)
     : isPublished
-      ? new Date()
-      : null,
+    ? new Date()
+    : null,
   cover_url: coverUrl,
 });
 
@@ -175,6 +175,7 @@ export const updateArticleStatus = async (
     await updateArticle({ id }, { is_published, published_at: new Date() });
 
     revalidatePath("/article", "layout");
+    revalidatePath("/admin/article");
     return ActionResponses.success({ id });
   } catch (error) {
     console.log(error);

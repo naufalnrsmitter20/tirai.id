@@ -4,6 +4,7 @@ import { ActionResponse, ActionResponses } from "@/lib/actions";
 import { getServerSession } from "@/lib/next-auth";
 import prisma from "@/lib/prisma";
 import { Cart } from "@/types/cart";
+import { revalidatePath } from "next/cache";
 
 export const getCart = async (): Promise<ActionResponse<{ cart?: Cart }>> => {
   try {
@@ -40,7 +41,9 @@ export const updateCart = async (
         data: { user: { connect: { id: userId } }, json_content: cart_data },
       });
       return ActionResponses.success({
-        message: `Successfully created ${session.user?.name.split(" ")[0]}'s cart`,
+        message: `Successfully created ${
+          session.user?.name.split(" ")[0]
+        }'s cart`,
       });
     }
 
@@ -48,8 +51,12 @@ export const updateCart = async (
       where: { id: cart.id },
       data: { json_content: cart_data },
     });
+
+    revalidatePath("/cart");
     return ActionResponses.success({
-      message: `Successfully updated ${session.user?.name.split(" ")[0]}'s cart`,
+      message: `Successfully updated ${
+        session.user?.name.split(" ")[0]
+      }'s cart`,
     });
   } catch (error) {
     console.log(error);
