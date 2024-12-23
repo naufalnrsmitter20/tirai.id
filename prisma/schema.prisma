@@ -158,14 +158,15 @@ model CustomRequest {
 }
 
 model Order {
-  id           String      @id @default(uuid())
-  finished_at  DateTime?
-  total_price  Float
-  phone_number String
-  status       OrderStatus
-  invoice_link String?
-  created_at   DateTime    @default(now())
-  updated_at   DateTime    @updatedAt
+  id             String      @id @default(uuid())
+  finished_at    DateTime?
+  total_price    Float
+  phone_number   String
+  status         OrderStatus
+  invoice_link   String?
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  shipping_price Float
 
   reviews  Review[]
   items    OrderItem[]
@@ -212,7 +213,7 @@ model Article {
 
 model Payment {
   id             String        @id @default(uuid())
-  method         PaymentMethod
+  method         String?
   status         PaymentStatus
   created_at     DateTime      @default(now())
   transaction_id String? // ID Transaksi dari payment gateway

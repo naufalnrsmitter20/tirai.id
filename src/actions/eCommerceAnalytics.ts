@@ -1,7 +1,6 @@
 "use server";
 import prisma from "@/lib/prisma";
 
-// Tipe untuk Monthly Revenue Trend
 type MonthlyRevenueTrend = {
   month: Date;
   revenue: number;
@@ -26,7 +25,6 @@ export async function getMonthlyRevenueTrend(
   `;
 }
 
-// Tipe untuk Average Order Value
 export async function getAverageOrderValue(
   startDate: Date,
   endDate: Date,
@@ -82,7 +80,6 @@ export async function getTopProducts(limit: number = 5) {
   });
 }
 
-// Tipe untuk Top Customers
 type TopCustomer = {
   id: string;
   name: string;
@@ -158,7 +155,6 @@ export async function getTopCustomers(
   }
 }
 
-// Tipe untuk Top Customers Raw
 type TopCustomerRaw = {
   id: string;
   name: string;
@@ -196,7 +192,6 @@ export async function getTopCustomersRaw(
   }
 }
 
-// Tipe untuk Customer Retention Rate
 type CustomerRetentionRate = {
   retention_rate: number;
 }[];
@@ -284,6 +279,7 @@ export async function getPaymentMethodDistribution() {
     },
     where: {
       status: "COMPLETED",
+      method: { not: null },
     },
   });
 }

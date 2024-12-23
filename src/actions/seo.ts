@@ -35,7 +35,7 @@ export async function updateSeoById(
   seoKeywords: string[],
 ): Promise<ActionResponse<SEO>> {
   try {
-    const imageUrl = await uploadSeoImage(formData.get("ogImage"));
+    const imageUrl = await uploadSeoImage(formData.get("image"));
     const page = formData.get("page") as string;
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;

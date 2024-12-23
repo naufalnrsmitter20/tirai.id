@@ -1,4 +1,3 @@
-// file: app/api/midtrans-webhook/route.ts
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { MidtransWebhookBody } from "@/types/midtrans";
@@ -24,16 +23,19 @@ export async function POST(req: Request) {
       );
     }
 
+    const orderId = body.order_id.split("-").slice(0, 5).join("-");
+
     switch (body.transaction_status) {
       case "capture":
       case "settlement":
         if (body.fraud_status === "accept") {
           const payment = await prisma.payment.update({
             where: {
-              order_id: body.order_id,
+              order_id: orderId,
             },
             data: {
               status: "COMPLETED",
+              method: body.payment_type,
             },
           });
           await prisma.order.update({
@@ -49,19 +51,20 @@ export async function POST(req: Request) {
       case "pending":
         await prisma.payment.update({
           where: {
-            order_id: body.order_id,
+            order_id: orderId,
           },
           data: {
             status: "PENDING",
+            method: body.payment_type,
           },
         });
         break;
       case "deny":
       case "expire":
-      case "cancel":
+      case "cancel": {
         const payment = await prisma.payment.update({
           where: {
-            order_id: body.order_id,
+            order_id: orderId,
           },
           data: {
             status: "FAILED",
@@ -76,6 +79,7 @@ export async function POST(req: Request) {
           },
         });
         break;
+      }
       default:
         // Handle unexpected status
         return NextResponse.json(

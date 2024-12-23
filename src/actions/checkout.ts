@@ -28,13 +28,7 @@ export const upsertCheckout = async (
 
   const data = await prisma.$transaction(
     async (prisma) => {
-      if (
-        cart.cartItems &&
-        session &&
-        session.user &&
-        shipmentAddressId &&
-        courier
-      ) {
+      if (cart.cartItems && session?.user && shipmentAddressId && courier) {
         const itemIds = cart.cartItems.map((i) => i.productId);
 
         const user = await prisma.user.findUnique({
@@ -82,6 +76,7 @@ export const upsertCheckout = async (
             shipping_address: buildShipmentAddressString(shipmentAddress),
             status: "UNPAID",
             user_id: session.user.id,
+            shipping_price: shipmentCost,
             phone_number: shipmentAddress.recipient_phone_number,
             total_price: 0,
           },
@@ -145,7 +140,7 @@ export const upsertCheckout = async (
 
         await prisma.order.update({
           where: { id: order.id },
-          data: { total_price: amount },
+          data: { total_price: amount + shipmentCost },
         });
 
         const result = await createTransactionInvoice({
@@ -155,7 +150,7 @@ export const upsertCheckout = async (
             id: user?.id,
             phone: shipmentAddress.recipient_phone_number?.startsWith("0")
               ? shipmentAddress.recipient_phone_number.slice(1, 0)
-              : shipmentAddress.recipient_phone_number!,
+              : shipmentAddress.recipient_phone_number,
           },
           payment_link: {
             enabled_payments: [
@@ -169,7 +164,9 @@ export const upsertCheckout = async (
           order_id: order.id,
           due_date: addMinutes(new Date(), 10).toISOString(),
           invoice_date: new Date().toISOString(),
-          invoice_number: `${process.env.NODE_ENV === "production" ? "TRX" : "DEV"}-${generateToken(12)}`,
+          invoice_number: `${
+            process.env.APP_ENV === "production" ? "TRX" : "DEV"
+          }-${generateToken(12)}`,
           item_details: itemDetail,
           payment_type: "payment_link",
           amount: {
@@ -197,7 +194,6 @@ export const upsertCheckout = async (
             order_id: order.id,
             status: "PENDING",
             transaction_id: data.id,
-            method: "BANK_TRANSFER",
           },
         });
 
@@ -206,7 +202,7 @@ export const upsertCheckout = async (
         return ActionResponses.success(data);
       }
 
-      if (cart.customRequest && session && session.user) {
+      if (cart.customRequest && session?.user) {
         const customRequest = await prisma.customRequest.findUnique({
           where: {
             id: cart.customRequest.id,
@@ -233,6 +229,7 @@ export const upsertCheckout = async (
             user_id: session.user.id,
             phone_number: customRequest.recipient_phone_number,
             total_price: customRequest.shipping_price + customRequest.price,
+            shipping_price: customRequest.shipping_price,
           },
         });
 
@@ -267,7 +264,7 @@ export const upsertCheckout = async (
             id: user?.id,
             phone: customRequest.recipient_phone_number?.startsWith("0")
               ? customRequest.recipient_phone_number.slice(1, 0)
-              : customRequest.recipient_phone_number!,
+              : customRequest.recipient_phone_number,
           },
           payment_link: {
             enabled_payments: [
@@ -281,7 +278,9 @@ export const upsertCheckout = async (
           order_id: order.id,
           due_date: addMinutes(new Date(), 10).toISOString(),
           invoice_date: new Date().toISOString(),
-          invoice_number: `${process.env.NODE_ENV === "production" ? "TRX" : "DEV"}-${generateToken(12)}`,
+          invoice_number: `${
+            process.env.NODE_ENV === "production" ? "TRX" : "DEV"
+          }-${generateToken(12)}`,
           item_details: itemDetail,
           payment_type: "payment_link",
           amount: {
@@ -309,7 +308,6 @@ export const upsertCheckout = async (
             order_id: order.id,
             status: "PENDING",
             transaction_id: data.id,
-            method: "BANK_TRANSFER",
           },
         });
 

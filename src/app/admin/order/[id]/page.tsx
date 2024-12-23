@@ -146,6 +146,26 @@ export default async function OrderDetail({
         </div>
       </div>
 
+      <div className="flex w-full justify-center">
+        <div className="w-[35vw] rounded-lg bg-white px-6 py-4 shadow-md">
+          <H2 className="py-0">Total</H2>
+          <div className="flex w-full items-center justify-between">
+            <Body2>Total Barang ({order.items.length} Barang)</Body2>
+            <Body3>
+              {formatRupiah(order.total_price - order.shipping_price)}
+            </Body3>
+          </div>
+          <div className="flex w-full items-center justify-between">
+            <Body2>Ongkos Kirim</Body2>
+            <Body3>{formatRupiah(order.shipping_price)}</Body3>
+          </div>
+          <div className="flex w-full items-center justify-between">
+            <Body2>Subtotal</Body2>
+            <Body3>{formatRupiah(order.total_price)}</Body3>
+          </div>
+        </div>
+      </div>
+
       <AWBForm order={order} />
     </div>
   );

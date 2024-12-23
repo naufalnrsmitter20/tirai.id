@@ -195,6 +195,7 @@ async function main() {
         shipping_address: "",
         created_at: new Date(),
         updated_at: new Date(),
+        shipping_price: 0,
       },
     });
   }
