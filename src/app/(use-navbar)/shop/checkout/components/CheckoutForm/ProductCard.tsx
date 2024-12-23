@@ -1,12 +1,10 @@
 "use client";
 
-import { Body2, Body3, Body4, H3 } from "@/components/ui/text";
+import { Body3, Body4, H3 } from "@/components/ui/text";
 import { cn, formatRupiah } from "@/lib/utils";
 import { CartItem } from "@/types/cart";
 import { ProductWithVariant } from "@/types/entityRelations";
-import { Product } from "@prisma/client";
 import Image from "next/image";
-import Link from "next/link";
 
 export const ProductCard = ({
   cartItem,

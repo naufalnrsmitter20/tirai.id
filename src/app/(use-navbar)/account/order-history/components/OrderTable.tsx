@@ -1,10 +1,8 @@
 "use client";
 
 import { FC, useState } from "react";
-import { Prisma } from "@prisma/client";
 import { OrderWithPayment } from "@/types/order";
 import { Body3, H5 } from "@/components/ui/text";
-import { Button } from "@/components/ui/button";
 import { formatDate, formatRupiah } from "@/lib/utils";
 import { OrderDetailDialog } from "./OrderDetailDialog";
 

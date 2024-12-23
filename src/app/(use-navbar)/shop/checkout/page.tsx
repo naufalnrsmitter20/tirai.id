@@ -2,14 +2,14 @@ import { updateCart } from "@/actions/cart";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { getServerSession } from "@/lib/next-auth";
 import prisma from "@/lib/prisma";
-import { Cart, CartItem } from "@/types/cart";
+import { Cart } from "@/types/cart";
 import { notFound, redirect } from "next/navigation";
 import { CheckoutForm } from "./components/CheckoutForm";
 import { isCustomCart } from "@/lib/utils";
 
 export default async function Checkout() {
   const session = await getServerSession();
-  if (!session || !session.user) return notFound();
+  if (!session?.user) return notFound();
 
   const addresses = await prisma.shippingAddress.findMany({
     where: {

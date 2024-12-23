@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Body3, H3 } from "@/components/ui/text";
-import { useCart } from "@/hooks/use-cart";
 import { formatRupiah } from "@/lib/utils";
 import { CartItem } from "@/types/cart";
 import { ProductWithVariant } from "@/types/entityRelations";
