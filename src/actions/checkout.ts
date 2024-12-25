@@ -84,7 +84,7 @@ export const upsertCheckout = async (
 
         await prisma.shipment.create({
           data: {
-            carrier: courier.code + " - " + courier.service,
+            carrier: courier.code,
             estimated_finish_time: addDays(new Date(), 5),
             status: "PENDING",
             order_id: order.id,

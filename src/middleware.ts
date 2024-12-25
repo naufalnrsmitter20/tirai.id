@@ -13,7 +13,8 @@ export default withAuth(
       (pathname.startsWith("/shop/cart") && !token) ||
       (pathname.startsWith("/shop/product") && !token) ||
       (pathname.startsWith("/account") && !token) ||
-      (pathname.startsWith("/shop/custom-product") && !token)
+      (pathname.startsWith("/shop/custom-product") && !token) ||
+      (pathname.startsWith("/cek-resi") && !token)
     ) {
       return NextResponse.redirect(
         new URL(`/auth/login?callbackUrl=${pathname}`, req.url),

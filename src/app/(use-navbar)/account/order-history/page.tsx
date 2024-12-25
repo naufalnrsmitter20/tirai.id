@@ -33,6 +33,7 @@ export default async function OrderHistory({
           include: {
             product: true;
             variant: true;
+            custom_request: true;
           };
         };
       };
@@ -55,6 +56,7 @@ export default async function OrderHistory({
           include: {
             product: true,
             variant: true,
+            custom_request: true,
           },
         },
       },

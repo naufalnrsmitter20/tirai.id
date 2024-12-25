@@ -67,7 +67,7 @@ export const getCostByCourierCode = async ({
 
 export const getShipmentStatus = async (courierCode: string, awb: string) => {
   try {
-    const SHIPMENT_STATUS_URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/track?courierCode=${courierCode}&awb=${awb}`;
+    const SHIPMENT_STATUS_URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/shipment/check-receipt?courierCode=${courierCode}&awb=${awb}`;
 
     const res = await fetch(SHIPMENT_STATUS_URL);
     const shipmentStatus: BinderbyteApiResponse<{

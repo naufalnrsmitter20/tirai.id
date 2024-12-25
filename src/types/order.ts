@@ -8,6 +8,7 @@ export type OrderWithPayment = Prisma.OrderGetPayload<{
       include: {
         product: true;
         variant: true;
+        custom_request: true;
       };
     };
   };
