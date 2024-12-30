@@ -13,6 +13,7 @@ import { SendFileDialog } from "../widget/Chat/dialog/SendFileDialog";
 import { MessagesMap } from "../widget/Chat/MessagesMap";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { findProductByIds } from "@/actions/products";
 
 export const ChatProvider = ({ session }: { session: Session }) => {
   const [isOpen, setOpen] = useState(false);
@@ -25,6 +26,9 @@ export const ChatProvider = ({ session }: { session: Session }) => {
     setPage,
     setHasMore,
     hasMore,
+    products,
+    setProducts,
+    addProduct,
   } = useMessage();
   const { inView, ref } = useInView();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -57,8 +61,21 @@ export const ChatProvider = ({ session }: { session: Session }) => {
         (payload) => {
           const message = payload.new as Message;
           if (message.customer_id === session.user?.id) {
+            if (
+              !products.find((i) => i.id === message.product_id) &&
+              message.product_id
+            ) {
+              findProductByIds([message.product_id]).then((product) => {
+                addProduct(product.data ?? []);
+                addMessage(message);
+                scrollToBottom();
+                setOpen(true);
+                return;
+              });
+            }
             addMessage(message);
             scrollToBottom();
+            setOpen(true);
           }
         },
       )
@@ -102,9 +119,19 @@ export const ChatProvider = ({ session }: { session: Session }) => {
     findChatById(session?.user?.id!).then((i) => {
       const res = i.data?.data ?? [];
       const count = i.data?.count ?? 0;
-      setMessages(res);
-      if (messages.length < count) setHasMore(true);
-      else setHasMore(false);
+      const productIds =
+        (
+          res.map((i) => {
+            if (i.product_id) return i.product_id;
+          }) as string[]
+        ).filter((i) => Boolean(i)) ?? [];
+
+      findProductByIds([...new Set(productIds)]).then((products) => {
+        setProducts(products.data ?? []);
+        setMessages(res);
+        if (messages.length < count) setHasMore(true);
+        else setHasMore(false);
+      });
     });
   }, []);
 
@@ -177,7 +204,7 @@ export const ChatProvider = ({ session }: { session: Session }) => {
             </CardHeader>
 
             <CardContent className="flex-1 overflow-y-auto p-0">
-              <div className="flex h-full w-full flex-col-reverse gap-1 px-3 pb-[90px] pt-4 overflow-y-scroll">
+              <div className="flex h-full w-full flex-col-reverse gap-1 overflow-y-scroll px-3 pb-[90px] pt-4">
                 <div ref={messagesEndRef} />
                 {messages.length === 0 ? (
                   <div className="flex h-full flex-col items-center justify-center p-4 text-center">
@@ -192,7 +219,11 @@ export const ChatProvider = ({ session }: { session: Session }) => {
                   </div>
                 ) : (
                   <>
-                    <MessagesMap session={session} messages={messages} />
+                    <MessagesMap
+                      session={session}
+                      messages={messages}
+                      products={products}
+                    />
                     {hasMore && (
                       <div
                         className="w-full text-center text-sm text-muted-foreground"

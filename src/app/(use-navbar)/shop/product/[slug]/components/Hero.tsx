@@ -1,5 +1,6 @@
 "use client";
 
+import { sendProductInfo } from "@/actions/chat";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,8 @@ import { useCart } from "@/hooks/use-cart";
 import { cn, formatRupiah } from "@/lib/utils";
 import { CartItem } from "@/types/cart";
 import { Prisma } from "@prisma/client";
+import { ChatBubbleIcon } from "@radix-ui/react-icons";
+import { Session } from "next-auth";
 import Image from "next/image";
 import { FC, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -23,10 +26,11 @@ type Product = Prisma.ProductGetPayload<{
   include: { variants: true; category: { select: { name: true } } };
 }>;
 
-export const Hero: FC<{ product: Product; hasCustomCart: boolean }> = ({
-  product,
-  hasCustomCart,
-}) => {
+export const Hero: FC<{
+  product: Product;
+  hasCustomCart: boolean;
+  session: Session | null | undefined;
+}> = ({ product, hasCustomCart, session }) => {
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants.find((variant) => variant.stock > 0),
   );
@@ -63,6 +67,16 @@ export const Hero: FC<{ product: Product; hasCustomCart: boolean }> = ({
       setQuantity(maxStock);
     }
   }, [maxStock, quantity]);
+
+  const handleChat = async () => {
+    try {
+      if (!session || !session.user) return console.error("unauthorized!");
+
+      await sendProductInfo(product.id, session.user.id);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <SectionContainer id="hero">
@@ -157,36 +171,41 @@ export const Hero: FC<{ product: Product; hasCustomCart: boolean }> = ({
                 </SelectContent>
               </Select>
             </div>
-            <Button
-              variant={"default"}
-              className="w-full"
-              disabled={maxStock === 0 || loading || hasCustomCart}
-              onClick={async () => {
-                setLoading(true);
-                const loadingToast = toast.loading("Loading...");
+            <div className="flex w-full items-center gap-1">
+              <Button className="aspect-square" onClick={handleChat}>
+                <ChatBubbleIcon />
+              </Button>
+              <Button
+                variant={"default"}
+                className="w-full"
+                disabled={maxStock === 0 || loading || hasCustomCart}
+                onClick={async () => {
+                  setLoading(true);
+                  const loadingToast = toast.loading("Loading...");
 
-                const cartItem: Omit<CartItem, "id"> = {
-                  name: product.name,
-                  photo: product.photos[0],
-                  categoryName: product.category.name,
-                  pricePerItem: product.price ?? selectedVariant!.price,
-                  quantity,
-                  productId: product.id,
-                  variantId: selectedVariant?.id,
-                  variantName: selectedVariant?.name,
-                };
+                  const cartItem: Omit<CartItem, "id"> = {
+                    name: product.name,
+                    photo: product.photos[0],
+                    categoryName: product.category.name,
+                    pricePerItem: product.price ?? selectedVariant!.price,
+                    quantity,
+                    productId: product.id,
+                    variantId: selectedVariant?.id,
+                    variantName: selectedVariant?.name,
+                  };
 
-                await addItem(cartItem);
+                  await addItem(cartItem);
 
-                setLoading(false);
-                toast.success("Berhasil menambahkan produk!", {
-                  id: loadingToast,
-                });
-                return location.reload();
-              }}
-            >
-              {maxStock === 0 ? "Sold Out" : "Masukkan Keranjang"}
-            </Button>
+                  setLoading(false);
+                  toast.success("Berhasil menambahkan produk!", {
+                    id: loadingToast,
+                  });
+                  return location.reload();
+                }}
+              >
+                {maxStock === 0 ? "Sold Out" : "Masukkan Keranjang"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

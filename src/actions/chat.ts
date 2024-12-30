@@ -116,6 +116,32 @@ export const sendFile = async (
   }
 };
 
+export const sendProductInfo = async (
+  productId: string,
+  customerId: string,
+): Promise<ActionResponse<PostgrestSingleResponse<null>>> => {
+  const session = await getServerSession();
+  if (!session?.user) return ActionResponses.unauthorized();
+  try {
+    const client = await supabase();
+
+    const res = await client.from("messages").insert({
+      customer_id: customerId,
+      sender_id: session.user.id,
+      created_at: new Date(
+        new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }),
+      ).toISOString(),
+      product_id: productId,
+    });
+    if (res.error) throw new Error("Failed to send message");
+
+    return ActionResponses.success(res);
+  } catch (error) {
+    console.error(error);
+    return ActionResponses.serverError("Failed to send message");
+  }
+};
+
 export const getChatUsers = async (
   userIds: string[],
 ): Promise<ActionResponse<ChatUser[]>> => {

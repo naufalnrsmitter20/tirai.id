@@ -45,7 +45,7 @@ export default async function ProductDetail({
 
   return (
     <PageContainer>
-      <Hero product={product} hasCustomCart={hasCustomCart} />
+      <Hero product={product} hasCustomCart={hasCustomCart} session={session} />
       <Keunggulan />
       {others.length > 0 && (
         <Others title={"Mungkin Anda juga Suka"} products={others} />

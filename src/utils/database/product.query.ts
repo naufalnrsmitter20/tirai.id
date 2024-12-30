@@ -104,3 +104,25 @@ export const findProductById = async (id: string) => {
     },
   });
 };
+
+export const findProductInById = async (ids: string[]) => {
+  return await prisma.product.findMany({
+    where: {
+      id: {
+        in: ids,
+      },
+    },
+    select: {
+      slug: true,
+      id: true,
+      name: true,
+      category: {
+        select: {
+          name: true,
+        },
+      },
+      photos: true,
+      stock: true,
+    },
+  });
+};
