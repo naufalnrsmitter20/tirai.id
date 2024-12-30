@@ -51,6 +51,7 @@
     "@types/nodemailer": "^6.4.17",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
+    "cheerio": "^1.0.0",
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^2.2.0",
     "clsx": "^2.1.1",

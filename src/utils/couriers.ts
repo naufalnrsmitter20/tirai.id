@@ -1,4 +1,7 @@
+import { LocationData } from "@/actions/shippingPrice/locationData";
+import { Service } from "@/actions/shippingPrice/scraper";
 import { BinderbyteApiResponse } from "@/types/courier";
+import axios from "axios";
 
 type GetCarriersProps = {
   originCity: string;
@@ -12,27 +15,17 @@ export const getCouriers = async ({
   weightInKg,
 }: GetCarriersProps) => {
   try {
-    const COST_CHECK_URL = `${process.env.NEXT_PUBLIC_APP_URL}/api/shipment/cost?originCity=${originCity.toLowerCase()}&destinationCity=${destinationCity.toLowerCase()}&weightInKg=${weightInKg}`;
+    const COST_CHECK_URL = `${
+      process.env.NEXT_PUBLIC_APP_URL
+    }/api/shipment/cost-v2?originCity=${originCity.toLowerCase()}&destinationCity=${destinationCity.toLowerCase()}&weightInKg=${weightInKg}`;
 
-    const res = await fetch(COST_CHECK_URL);
-    const courierCosts: BinderbyteApiResponse<{
-      summary: {
-        courier: string[];
-        origin: string;
-        destination: string;
-        weight: string;
-      };
-      costs: {
-        code: string;
-        name: string;
-        service: string;
-        type: string;
-        price: string;
-        estimated: string;
-      }[];
-    }> = await res.json();
+    const res = await axios.get(COST_CHECK_URL);
+    const courierCosts: {
+      destinationLocation: LocationData;
+      costs: Service[];
+    } | null = res.data;
 
-    return courierCosts.data;
+    return courierCosts;
   } catch (error) {
     console.log(error);
     return;

@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Body2, Body3, H3, H4 } from "@/components/ui/text";
 import { formatRupiah } from "@/lib/utils";
 import { CartItem, CustomRequestItem } from "@/types/cart";
-import { Courier } from "@/types/courier";
 import { ProductWithVariant } from "@/types/entityRelations";
 import { calculateCartWeight } from "@/utils/calculate-cart-weight";
 import { ShippingAddress } from "@prisma/client";
@@ -19,6 +18,7 @@ import { AddressSelector } from "./AddressSelector";
 import { Details } from "./Details";
 import { ProductCard } from "./ProductCard";
 import { Button } from "@/components/ui/button";
+import { Service } from "@/actions/shippingPrice/scraper";
 
 const CourierSelector = dynamic(() => import("./CourierSelector"), {
   ssr: false,
@@ -31,7 +31,7 @@ export const CheckoutForm: FC<{
   customRequest: CustomRequestItem | undefined; // Will be defined if the cart type is "custom"
 }> = ({ addresses, cartItems, customRequest, products }) => {
   const [selectedAddressId, setSelectedAddressId] = useState<string>();
-  const [selectedCourier, setSelectedCourier] = useState<Courier>();
+  const [selectedCourier, setSelectedCourier] = useState<Service>();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 

@@ -9,11 +9,11 @@ import { buildShipmentAddressString } from "@/utils/build-shipment-address-strin
 import { generateToken } from "@/utils/random-string";
 import { addDays, addMinutes } from "date-fns";
 import { createTransactionInvoice } from "./midtrans";
-import { Courier } from "@/types/courier";
 import { getCostByCourierCode } from "@/utils/couriers";
 import { calculateCartWeight } from "@/utils/calculate-cart-weight";
 import { updateCart } from "./cart";
 import { revalidatePath } from "next/cache";
+import { Service } from "./shippingPrice/scraper";
 
 interface CartObject {
   cartItems?: CartItem[];
@@ -23,7 +23,7 @@ interface CartObject {
 export const upsertCheckout = async (
   cart: CartObject,
   shipmentAddressId?: string,
-  courier?: Courier,
+  courier?: Service,
 ): Promise<ActionResponse<CreateInvoiceSuccessResponse>> => {
   const session = await getServerSession();
 
