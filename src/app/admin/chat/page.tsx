@@ -1,8 +1,8 @@
 import { H1 } from "@/components/ui/text";
-import supabase from "@/lib/supabase";
-import { ChatInterface } from "./components/Chat";
 import { Message } from "@/hooks/use-message";
+import supabase from "@/lib/supabase";
 import { findUserInById } from "@/utils/database/user.query";
+import { ChatInterface } from "./components/Chat";
 
 export default async function AdminChatPage() {
   const database = await supabase();

@@ -5,18 +5,22 @@ import { strDateToEpoch } from "@/lib/utils";
 import { Session } from "next-auth";
 import React from "react";
 import { DateSeparator } from "./DateSpearator";
-import { ChatUser } from "@/types/entityRelations";
+import { ChatProduct, ChatUser } from "@/types/entityRelations";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ProductMessageCard } from "./ProductMessage";
+import moment from "moment-timezone";
 
 export const MessagesMap = ({
   messages,
   session,
   participants,
+  products,
 }: {
   messages: Message[];
   session: Session;
   participants?: ChatUser[];
+  products: ChatProduct[];
 }) => {
   const renderMessage = (message: Message, isUser: boolean) => {
     const baseClasses = "flex w-full gap-2 px-2 py-1";
@@ -24,6 +28,11 @@ export const MessagesMap = ({
       baseClasses,
       isUser ? "flex-row-reverse" : "flex-row",
     );
+    const date = moment(message.created_at + "Z")
+      .tz("Asia/Jakarta")
+      .toDate();
+
+    const product = products.find((i) => i.id === message.product_id);
 
     return (
       <div className={messageWrapperClasses}>
@@ -42,9 +51,13 @@ export const MessagesMap = ({
 
         {/* Message Content */}
         <div
-          className={cn("max-w-[80%]", isUser ? "items-end" : "items-start")}
+          className={cn(
+            "min-w-[35%] max-w-[70%] sm:min-w-[25%] sm:max-w-[50%]",
+            isUser ? "items-end" : "items-start",
+          )}
         >
-          {message.file_url ? (
+          {/* Message with file */}
+          {(message.file_url || (message.file_url && message.content)) && (
             <FileMessageCard
               message={message}
               participants={participants}
@@ -56,20 +69,35 @@ export const MessagesMap = ({
                   : "bg-secondary-100 text-gray-900",
               )}
             />
-          ) : (
+          )}
+
+          {/* Message with text only */}
+          {message.content && !(message.file_url || message.product_id) && (
             <MessageCard
               message={message}
               participants={participants}
               isUser={isUser}
             />
           )}
+
+          {/* Message with product */}
+          {product &&
+            message.product_id &&
+            !(message.file_url || message.content) && (
+              <ProductMessageCard
+                isUser={isUser}
+                message={message}
+                product={product}
+                participants={participants}
+              />
+            )}
           <div
             className={cn(
               "mt-1 text-xs text-gray-500",
               isUser ? "text-right" : "text-left",
             )}
           >
-            {new Date(message.created_at).toLocaleTimeString([], {
+            {date.toLocaleTimeString([], {
               hour: "2-digit",
               minute: "2-digit",
             })}

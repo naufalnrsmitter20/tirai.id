@@ -3,11 +3,15 @@
 import prisma from "@/lib/prisma";
 import { ActionResponse, ActionResponses } from "@/lib/actions";
 import { PaginatedResult } from "@/lib/paginator";
-import { ProductWithCategoryReviewsVariants } from "@/types/entityRelations";
+import {
+  ChatProduct,
+  ProductWithCategoryReviewsVariants,
+} from "@/types/entityRelations";
 import {
   createProduct,
   deleteProduct,
   findProductById,
+  findProductInById,
   findProducts,
   updateProduct,
 } from "@/utils/database/product.query";
@@ -169,5 +173,18 @@ export const removeProduct = async (id: string) => {
   } catch (error) {
     console.log((error as Error).message);
     return ActionResponses.serverError("Failed to delete Product");
+  }
+};
+
+export const findProductByIds = async (
+  ids: string[],
+): Promise<ActionResponse<ChatProduct[]>> => {
+  try {
+    const res = await findProductInById(ids);
+
+    return ActionResponses.success(res);
+  } catch (error) {
+    console.log((error as Error).message);
+    return ActionResponses.serverError("Failed to get Products");
   }
 };

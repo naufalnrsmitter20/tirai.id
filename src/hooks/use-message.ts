@@ -1,5 +1,5 @@
 import { Database } from "@/types/chat.types";
-import { ChatUser } from "@/types/entityRelations";
+import { ChatProduct, ChatUser } from "@/types/entityRelations";
 import { useState } from "react";
 
 export type Message = Database["public"]["Tables"]["messages"]["Row"];
@@ -13,6 +13,7 @@ const useMessage = () => {
     undefined,
   );
   const [participants, setParticipants] = useState<ChatUser[]>([]);
+  const [products, setProducts] = useState<ChatProduct[]>([]);
 
   const states = {
     hasMore,
@@ -24,6 +25,11 @@ const useMessage = () => {
     setHasMore,
     participants,
     setParticipants,
+    products,
+    setProducts,
+    addProduct: (products: ChatProduct[]) => {
+      setProducts((prev) => [...prev, ...products]);
+    },
     addParticipant: (user: ChatUser[]) => {
       setParticipants((prev) => [...prev, ...user]);
     },
