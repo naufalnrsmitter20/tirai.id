@@ -48,6 +48,7 @@ export const ChatInterface = ({
   const [file, setFile] = useState<File | undefined | null>(null);
   const { data: session } = useSession();
   const [isFocused, setFocus] = useState<boolean>();
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const { ref, inView } = useInView();
   const isMobile = useIsMobile(390);
@@ -121,7 +122,6 @@ export const ChatInterface = ({
                   addProduct(product.data ?? []);
                   addMessage(message);
                   scrollToBottom();
-                  return;
                 });
               }
               addMessage(message);
@@ -152,6 +152,18 @@ export const ChatInterface = ({
     }
   }, [activeChat]);
 
+  const sendNotification = () => {
+    if (audioRef?.current) {
+      audioRef.current.play();
+    }
+    if (Notification.permission === "granted") {
+      new Notification("You have a new notification!", {
+        body: "New customer message",
+        icon: "/assets/logo.png",
+      });
+    }
+  };
+
   useEffect(() => {
     client
       .channel("public:users")
@@ -159,6 +171,13 @@ export const ChatInterface = ({
         "postgres_changes",
         { event: "*", schema: "public", table: "messages" },
         (payload) => {
+          const message = payload.new as Message;
+
+          if (message.customer_id === message.sender_id) {
+            sendNotification();
+          }
+
+          sendNotification();
           setFilteredConvo((prev) => {
             const list = prev;
             const index = list.findIndex(
@@ -177,6 +196,15 @@ export const ChatInterface = ({
     window.addEventListener("blur", () => {
       setFocus(false);
     });
+
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          console.log("Permission granted");
+        }
+      });
+    }
+
     return () => {
       window.removeEventListener("focus", () => {
         setFocus(true);
@@ -350,6 +378,9 @@ export const ChatInterface = ({
           />
         )}
       </div>
+      <audio ref={audioRef} src="/notification.mp3" preload="auto">
+        <track kind="captions" />
+      </audio>
     </>
   );
 };

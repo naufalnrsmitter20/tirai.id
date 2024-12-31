@@ -34,6 +34,7 @@ export const ChatProvider = ({ session }: { session: Session }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [file, setFile] = useState<File | null | undefined>();
   const [isFocused, setFocus] = useState<boolean>();
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const handleReadMessage = async (activeChat: string) => {
     if (
@@ -46,6 +47,18 @@ export const ChatProvider = ({ session }: { session: Session }) => {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const sendNotification = () => {
+    if (audioRef?.current) {
+      audioRef.current.play();
+    }
+    if (Notification.permission === "granted") {
+      new Notification("You have a new notification!", {
+        body: "New incoming message",
+        icon: "/assets/logo.png",
+      });
+    }
   };
 
   useEffect(() => {
@@ -61,6 +74,11 @@ export const ChatProvider = ({ session }: { session: Session }) => {
         },
         (payload) => {
           const message = payload.new as Message;
+
+          if (message.sender_id !== session.user?.id) {
+            sendNotification();
+          }
+
           if (message.customer_id === session.user?.id) {
             if (
               !products.find((i) => i.id === message.product_id) &&
@@ -106,6 +124,14 @@ export const ChatProvider = ({ session }: { session: Session }) => {
     window.addEventListener("blur", () => {
       setFocus(false);
     });
+
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          console.log("Permission granted");
+        }
+      });
+    }
     return () => {
       window.removeEventListener("focus", () => {
         setFocus(true);
@@ -247,6 +273,9 @@ export const ChatProvider = ({ session }: { session: Session }) => {
           </Card>
         </div>
       )}
+      <audio ref={audioRef} src="/notification.mp3" preload="auto">
+        <track kind="captions" />
+      </audio>
     </>
   );
 };
