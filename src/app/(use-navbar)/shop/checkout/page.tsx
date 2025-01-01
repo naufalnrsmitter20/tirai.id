@@ -6,6 +6,7 @@ import { Cart } from "@/types/cart";
 import { notFound, redirect } from "next/navigation";
 import { CheckoutForm } from "./components/CheckoutForm";
 import { isCustomCart } from "@/lib/utils";
+import { findDiscountByRole } from "@/utils/database/discount.query";
 
 export default async function Checkout() {
   const session = await getServerSession();
@@ -75,6 +76,8 @@ export default async function Checkout() {
       ? await prisma.customRequest.findUnique({ where: { id: cart.item?.id } })
       : undefined;
 
+  const discount = await findDiscountByRole(session.user.role);
+
   return (
     <PageContainer className="flex h-[90vh] px-4 text-black">
       <CheckoutForm
@@ -89,6 +92,7 @@ export default async function Checkout() {
               }
             : undefined
         }
+        discount={discount}
       />
     </PageContainer>
   );

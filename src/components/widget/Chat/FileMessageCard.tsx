@@ -1,24 +1,21 @@
 import { Body3, Body5 } from "@/components/ui/text";
 import { Message } from "@/hooks/use-message";
 import { cn } from "@/lib/utils";
+import { ChatUser } from "@/types/entityRelations";
 import { CheckCheck, FileText } from "lucide-react";
 import Image from "next/image";
-import moment from "moment-timezone";
-import { ChatUser } from "@/types/entityRelations";
 
 export const FileMessageCard = ({
   message,
   isUser,
   participants,
+  className,
 }: {
   message: Message;
   isUser: boolean;
   participants?: ChatUser[];
+  className?: string;
 }) => {
-  const date = moment(message.created_at + "Z").tz("Asia/Jakarta");
-  const hour = date.hour().toString();
-  const minute = date.minute().toString();
-
   return (
     <>
       {isUser ? (
@@ -26,6 +23,7 @@ export const FileMessageCard = ({
           key={message.id}
           className={cn(
             "relative ms-auto min-w-[20%] max-w-[70%] rounded-lg bg-green-500 px-2 py-1 text-white",
+            className,
           )}
         >
           {message.file_url?.endsWith("pdf") ? (
@@ -52,7 +50,6 @@ export const FileMessageCard = ({
               {message.content}
             </Body3>
             <div className="absolute bottom-0 right-0 flex items-end gap-[2px] p-1">
-              <Body5 className="text-[10px]">{`${hour.length < 2 ? `0${hour}` : hour}:${minute.length < 2 ? `0${minute}` : minute}`}</Body5>
               <CheckCheck
                 size={12}
                 className={cn(
@@ -113,9 +110,6 @@ export const FileMessageCard = ({
             <Body3 className="mb-4 mt-1 text-wrap break-words">
               {message.content}
             </Body3>
-            <div className="absolute bottom-0 right-0 flex items-end gap-[2px] p-1">
-              <Body5 className="text-[9px]">{`${hour.length < 2 ? `0${hour}` : hour}:${minute.length < 2 ? `0${minute}` : minute}`}</Body5>
-            </div>
           </div>
         </figure>
       )}

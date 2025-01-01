@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Settings, Palette } from "lucide-react";
 import FabricIcon from "@/components/svg-tsxIcon/fabricIcon";
-import { Prisma } from "@prisma/client";
+import { Discount, Prisma } from "@prisma/client";
 import Image from "next/image";
 import {
   Tooltip,
@@ -44,7 +44,8 @@ export const Form: FC<{
   bahans: Bahans[];
   addresses: ShippingAddress[];
   user: Session["user"];
-}> = ({ models, bahans, addresses, user }) => {
+  discount?: Discount | null;
+}> = ({ models, bahans, addresses, user, discount }) => {
   const [dimensions, setDimensions] = useState({ length: 0, width: 0 });
   const [selectedMaterial, setSelectedMaterial] = useState<Bahans | null>(null);
   const [estimatedPrice, setEstimatedPrice] = useState(0);
@@ -57,9 +58,11 @@ export const Form: FC<{
     length: number,
     width: number,
     materialPrice: number,
+    discount?: Discount | null,
   ) => {
     const area = length * width;
-    return area * materialPrice;
+    const brute = area * materialPrice;
+    return brute - (brute * (discount?.discount_in_percent || 0)) / 100;
   };
 
   const handleMaterialChange = (value: string) => {
@@ -70,6 +73,7 @@ export const Form: FC<{
         dimensions.length,
         dimensions.width,
         user?.role === "SUPPLIER" ? material.supplier_price : material.price,
+        discount,
       );
       setEstimatedPrice(price);
     }
@@ -91,6 +95,7 @@ export const Form: FC<{
         newDimensions.length,
         newDimensions.width,
         selectedMaterial.price,
+        discount,
       );
       setEstimatedPrice(price);
     }
@@ -332,7 +337,9 @@ export const Form: FC<{
                 {estimatedPrice > 0 && (
                   <div className="rounded-lg bg-muted p-4">
                     <p className="text-lg font-semibold">
-                      Perkiraan Harga:{" "}
+                      Perkiraan Harga{" "}
+                      {discount && `(Diskon ${discount.discount_in_percent}%)`}{" "}
+                      :{" "}
                       <span className="text-primary">
                         Rp {estimatedPrice.toLocaleString("id-ID")}
                       </span>

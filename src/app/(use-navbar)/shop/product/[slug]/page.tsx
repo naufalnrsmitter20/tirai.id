@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { Hero } from "./components/Hero";
 import { Keunggulan } from "./components/Keunggulan";
 import { Others } from "./components/Others";
+import { findDiscountByRole } from "@/utils/database/discount.query";
 
 export default async function ProductDetail({
   params,
@@ -46,9 +47,19 @@ export default async function ProductDetail({
     isCustomCart(cart.json_content) &&
     cart.json_content.item !== undefined;
 
+  const discount =
+    session && session.user
+      ? await findDiscountByRole(session?.user?.role!)
+      : null;
+
   return (
     <PageContainer>
-      <Hero product={product} hasCustomCart={hasCustomCart} />
+      <Hero
+        product={product}
+        hasCustomCart={hasCustomCart}
+        session={session}
+        discount={discount}
+      />
       <Keunggulan />
       {others.length > 0 && (
         <Others title={"Mungkin Anda juga Suka"} products={others} />

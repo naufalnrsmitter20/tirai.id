@@ -3,11 +3,15 @@
 import prisma from "@/lib/prisma";
 import { ActionResponse, ActionResponses } from "@/lib/actions";
 import { PaginatedResult } from "@/lib/paginator";
-import { ProductWithCategoryReviewsVariants } from "@/types/entityRelations";
+import {
+  ChatProduct,
+  ProductWithCategoryReviewsVariants,
+} from "@/types/entityRelations";
 import {
   createProduct,
   deleteProduct,
   findProductById,
+  findProductInById,
   findProducts,
   updateProduct,
 } from "@/utils/database/product.query";
@@ -25,6 +29,7 @@ interface UpsertProductData {
   price?: number;
   weight?: number;
   photos?: FormData;
+  is_vat: boolean;
 }
 
 export const getProducts = async (
@@ -89,6 +94,7 @@ export const upsertProduct = async ({
         stock: data.stock,
         weight: data.weight,
         is_published: true,
+        is_vat: data.is_vat,
       });
 
       return ActionResponses.success("Success Create Product");
@@ -107,9 +113,11 @@ export const upsertProduct = async ({
         price: data.price,
         stock: data.stock,
         weight: data.weight,
+        is_vat: data.is_vat,
       },
     );
 
+    revalidatePath("/", "layout");
     return ActionResponses.success("Success Update Product");
   } catch (error) {
     console.log(error);
@@ -150,7 +158,8 @@ export const changeProductPublishedStatus = async (
         is_published: status,
       },
     );
-    revalidatePath("/admin/shop/product");
+
+    revalidatePath("/", "layout");
     return ActionResponses.success("Success Update Product");
   } catch (error) {
     console.log((error as Error).message);
@@ -161,10 +170,24 @@ export const changeProductPublishedStatus = async (
 export const removeProduct = async (id: string) => {
   try {
     await deleteProduct({ id });
-    revalidatePath("/admin/shop/product");
+
+    revalidatePath("/", "layout");
     return ActionResponses.success("Success delete Product");
   } catch (error) {
     console.log((error as Error).message);
     return ActionResponses.serverError("Failed to delete Product");
+  }
+};
+
+export const findProductByIds = async (
+  ids: string[],
+): Promise<ActionResponse<ChatProduct[]>> => {
+  try {
+    const res = await findProductInById(ids);
+
+    return ActionResponses.success(res);
+  } catch (error) {
+    console.log((error as Error).message);
+    return ActionResponses.serverError("Failed to get Products");
   }
 };

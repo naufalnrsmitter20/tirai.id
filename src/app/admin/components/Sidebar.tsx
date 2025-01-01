@@ -62,6 +62,7 @@ const BASE_SIDEBAR_ITEMS: SidebarItem[] = [
     children: [
       { title: "Category", url: "/admin/shop/category" },
       { title: "Product", url: "/admin/shop/product" },
+      { title: "Discount", url: "/admin/shop/discount" },
     ],
   },
   {

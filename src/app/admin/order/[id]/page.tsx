@@ -18,6 +18,10 @@ export default async function OrderDetail({
 
   if (!order) return notFound();
 
+  const realTotalPrice = order.items.reduce((acc, i) => {
+    return (acc += (i.product?.price ?? i.variant?.price ?? 0) * i.quantity);
+  }, 0);
+
   return (
     <div className="flex w-full flex-col gap-4 text-black">
       <div className="flex w-full justify-center">
@@ -152,7 +156,46 @@ export default async function OrderDetail({
           <div className="flex w-full items-center justify-between">
             <Body2>Total Barang ({order.items.length} Barang)</Body2>
             <Body3>
-              {formatRupiah(order.total_price - order.shipping_price)}
+              {!order.items[0].custom_request
+                ? formatRupiah(realTotalPrice)
+                : formatRupiah(
+                    order.total_price -
+                      order.shipping_price -
+                      (order.total_price -
+                        order.shipping_price -
+                        (order.total_price - order.shipping_price) / 1.11),
+                  )}
+            </Body3>
+          </div>
+          {!order.items[0].custom_request && (
+            <div className="flex w-full items-center justify-between">
+              <Body2>
+                Total Diskon (
+                {Math.round(
+                  ((realTotalPrice -
+                    (order.total_price - order.shipping_price) / 1.11) /
+                    realTotalPrice) *
+                    100,
+                )}
+                %)
+              </Body2>
+              <Body3>
+                -
+                {formatRupiah(
+                  realTotalPrice -
+                    (order.total_price - order.shipping_price) / 1.11,
+                )}
+              </Body3>
+            </div>
+          )}
+          <div className="flex w-full items-center justify-between">
+            <Body2>PPN (11%)</Body2>
+            <Body3>
+              {formatRupiah(
+                order.total_price -
+                  order.shipping_price -
+                  (order.total_price - order.shipping_price) / 1.11,
+              )}
             </Body3>
           </div>
           <div className="flex w-full items-center justify-between">

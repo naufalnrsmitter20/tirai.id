@@ -97,3 +97,18 @@ export type OrderWithItemsProductsPaymentShipment = Prisma.OrderGetPayload<{
     shipment: true;
   };
 }>;
+
+export type ChatProduct = Prisma.ProductGetPayload<{
+  select: {
+    id: true;
+    name: true;
+    slug: true;
+    category: {
+      select: {
+        name: true;
+      };
+    };
+    photos: true;
+    stock: true;
+  };
+}>;

@@ -13,7 +13,7 @@ import { DialogBaseProps } from "@/types/dialog";
 import { OrderWithPayment } from "@/types/order";
 import Image from "next/image";
 import Link from "next/link";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { ConfirmFinishButton } from "./ConfirmFinishButton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { CreditCard, Package, Palette, Ruler } from "lucide-react";
@@ -21,6 +21,15 @@ import { CreditCard, Package, Palette, Ruler } from "lucide-react";
 export const OrderDetailDialog: FC<
   DialogBaseProps & { order: OrderWithPayment }
 > = ({ open, setIsOpen, order }) => {
+  const realTotalPrice = useMemo(
+    () =>
+      order.items.reduce((sum, i) => {
+        return (sum +=
+          i.quantity * (i.product?.price ?? i.variant?.price ?? 0));
+      }, 0),
+    [order.items],
+  );
+
   return (
     <Dialog open={open} onOpenChange={setIsOpen}>
       <DialogContent>
@@ -217,7 +226,46 @@ export const OrderDetailDialog: FC<
               <div className="flex w-full items-center justify-between">
                 <Body2>Total Barang ({order.items.length} Barang)</Body2>
                 <Body3>
-                  {formatRupiah(order.total_price - order.shipping_price)}
+                  {!order.items[0].custom_request
+                    ? formatRupiah(realTotalPrice)
+                    : formatRupiah(
+                        order.total_price -
+                          order.shipping_price -
+                          (order.total_price -
+                            order.shipping_price -
+                            (order.total_price - order.shipping_price) / 1.11),
+                      )}
+                </Body3>
+              </div>
+              {!order.items[0].custom_request && (
+                <div className="flex w-full items-center justify-between">
+                  <Body2>
+                    Total Diskon (
+                    {Math.round(
+                      ((realTotalPrice -
+                        (order.total_price - order.shipping_price) / 1.11) /
+                        realTotalPrice) *
+                        100,
+                    )}
+                    %)
+                  </Body2>
+                  <Body3>
+                    -
+                    {formatRupiah(
+                      realTotalPrice -
+                        (order.total_price - order.shipping_price) / 1.11,
+                    )}
+                  </Body3>
+                </div>
+              )}
+              <div className="flex w-full items-center justify-between">
+                <Body2>PPN (11%)</Body2>
+                <Body3>
+                  {formatRupiah(
+                    order.total_price -
+                      order.shipping_price -
+                      (order.total_price - order.shipping_price) / 1.11,
+                  )}
                 </Body3>
               </div>
               <div className="flex w-full items-center justify-between">

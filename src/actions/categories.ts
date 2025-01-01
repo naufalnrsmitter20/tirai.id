@@ -40,7 +40,7 @@ export const upsertCategory = async (data: {
 
     await updateCategory({ id }, { name, slug });
 
-    revalidatePath("/admin/shop/category");
+    revalidatePath("/", "layout");
     return ActionResponses.success({
       message: "Category updated successfully",
     });
@@ -66,7 +66,7 @@ export const removeCategory = async (id: string) => {
       });
 
     await deleteCategory({ id });
-    revalidatePath("/admin/shop/category");
+    revalidatePath("/", "layout");
     return ActionResponses.success({
       message: "Category deleted successfully",
     });

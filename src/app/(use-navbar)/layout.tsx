@@ -16,7 +16,7 @@ export default async function UseNavbarLayout({
       <Navbar />
       <PageContainer className="relative pt-[5.375rem]">
         {children}
-        {session && session.user && <ChatProvider session={session} />}
+        {session?.user && <ChatProvider session={session} />}
       </PageContainer>
       <Footer />
     </>

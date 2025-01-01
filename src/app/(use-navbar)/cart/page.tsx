@@ -5,9 +5,15 @@ import prisma from "@/lib/prisma";
 import { isCustomCart, isReadyStockCart } from "@/lib/utils";
 import { CartItems } from "./components/Cart";
 import { EmptyCart } from "./components/EmptyCart";
+import { findDiscountByRole } from "@/utils/database/discount.query";
 
 export default async function CartPage() {
   const session = await getServerSession();
+
+  const discount =
+    session && session.user
+      ? await findDiscountByRole(session.user.role)
+      : null;
 
   const cart = session?.user?.id
     ? await prisma.cart.findUnique({
@@ -59,6 +65,7 @@ export default async function CartPage() {
               }
             : null
         }
+        discount={discount}
       />
     </PageContainer>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { sendProductInfo } from "@/actions/chat";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -10,11 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Body3, H3, H4, H5 } from "@/components/ui/text";
+import { Body3, Body5, H3, H4, H5 } from "@/components/ui/text";
 import { useCart } from "@/hooks/use-cart";
 import { cn, formatRupiah } from "@/lib/utils";
 import { CartItem } from "@/types/cart";
-import { Prisma } from "@prisma/client";
+import { Discount, Prisma } from "@prisma/client";
+import { ChatBubbleIcon } from "@radix-ui/react-icons";
+import { Session } from "next-auth";
 import Image from "next/image";
 import { FC, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -23,10 +26,12 @@ type Product = Prisma.ProductGetPayload<{
   include: { variants: true; category: { select: { name: true } } };
 }>;
 
-export const Hero: FC<{ product: Product; hasCustomCart: boolean }> = ({
-  product,
-  hasCustomCart,
-}) => {
+export const Hero: FC<{
+  product: Product;
+  hasCustomCart: boolean;
+  session: Session | null | undefined;
+  discount?: Discount | null;
+}> = ({ product, hasCustomCart, session, discount }) => {
   const [selectedVariant, setSelectedVariant] = useState(
     product.variants.find((variant) => variant.stock > 0),
   );
@@ -52,9 +57,22 @@ export const Hero: FC<{ product: Product; hasCustomCart: boolean }> = ({
       product.stock === null ? selectedVariant?.stock || 0 : product.stock,
     [product.stock, selectedVariant],
   );
+
+  const originalPrice = useMemo(
+    () => (!product.price ? selectedVariant?.price || 0 : product.price),
+    [product.price, selectedVariant],
+  );
+
   const price = useMemo(
     () =>
-      product.price === null ? selectedVariant?.price || 0 : product.price,
+      discount
+        ? product.price === null
+          ? (selectedVariant?.price || 0) -
+            (selectedVariant?.price || 0) * (discount.discount_in_percent / 100)
+          : product.price - product.price * (discount.discount_in_percent / 100)
+        : product.price === null
+          ? selectedVariant?.price || 0
+          : product.price,
     [product.price, selectedVariant],
   );
 
@@ -63,6 +81,16 @@ export const Hero: FC<{ product: Product; hasCustomCart: boolean }> = ({
       setQuantity(maxStock);
     }
   }, [maxStock, quantity]);
+
+  const handleChat = async () => {
+    try {
+      if (!session || !session.user) return console.error("unauthorized!");
+
+      await sendProductInfo(product.id, session.user.id);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   return (
     <SectionContainer id="hero">
@@ -127,7 +155,21 @@ export const Hero: FC<{ product: Product; hasCustomCart: boolean }> = ({
               </div>
             </div>
           )}
-          <H4 className="mt-12 text-black">{formatRupiah(price)}</H4>
+          {discount ? (
+            <div className="text-black">
+              <H4 className="mt-12 text-black">{formatRupiah(price)}</H4>
+              <span className="inline-flex items-center gap-2">
+                <Body3 className="line-through">
+                  {formatRupiah(originalPrice)}
+                </Body3>
+                <Body5 className="rounded-md bg-red-200 px-[4px] py-[1px] font-semibold text-red-500">
+                  {discount.discount_in_percent}%
+                </Body5>
+              </span>
+            </div>
+          ) : (
+            <H4 className="mt-12 text-black">{formatRupiah(price)}</H4>
+          )}
           <div className="mt-3 flex w-full flex-col items-center gap-2">
             <div className="flex w-full flex-col">
               <Label className="mb-2 text-black">Kuantitas</Label>
@@ -157,36 +199,41 @@ export const Hero: FC<{ product: Product; hasCustomCart: boolean }> = ({
                 </SelectContent>
               </Select>
             </div>
-            <Button
-              variant={"default"}
-              className="w-full"
-              disabled={maxStock === 0 || loading || hasCustomCart}
-              onClick={async () => {
-                setLoading(true);
-                const loadingToast = toast.loading("Loading...");
+            <div className="flex w-full items-center gap-1">
+              <Button className="aspect-square" onClick={handleChat}>
+                <ChatBubbleIcon />
+              </Button>
+              <Button
+                variant={"default"}
+                className="w-full"
+                disabled={maxStock === 0 || loading || hasCustomCart}
+                onClick={async () => {
+                  setLoading(true);
+                  const loadingToast = toast.loading("Loading...");
 
-                const cartItem: Omit<CartItem, "id"> = {
-                  name: product.name,
-                  photo: product.photos[0],
-                  categoryName: product.category.name,
-                  pricePerItem: product.price ?? selectedVariant!.price,
-                  quantity,
-                  productId: product.id,
-                  variantId: selectedVariant?.id,
-                  variantName: selectedVariant?.name,
-                };
+                  const cartItem: Omit<CartItem, "id"> = {
+                    name: product.name,
+                    photo: product.photos[0],
+                    categoryName: product.category.name,
+                    pricePerItem: product.price ?? selectedVariant!.price,
+                    quantity,
+                    productId: product.id,
+                    variantId: selectedVariant?.id,
+                    variantName: selectedVariant?.name,
+                  };
 
-                await addItem(cartItem);
+                  await addItem(cartItem);
 
-                setLoading(false);
-                toast.success("Berhasil menambahkan produk!", {
-                  id: loadingToast,
-                });
-                return location.reload();
-              }}
-            >
-              {maxStock === 0 ? "Sold Out" : "Masukkan Keranjang"}
-            </Button>
+                  setLoading(false);
+                  toast.success("Berhasil menambahkan produk!", {
+                    id: loadingToast,
+                  });
+                  return location.reload();
+                }}
+              >
+                {maxStock === 0 ? "Sold Out" : "Masukkan Keranjang"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

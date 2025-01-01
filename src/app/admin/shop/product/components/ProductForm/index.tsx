@@ -30,6 +30,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { PhotosPreview } from "./PhotosPreview";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export const ProductForm = ({
   updateData,
@@ -71,6 +72,7 @@ export const ProductForm = ({
         slug: z.string().min(1, "Deskripsi wajib diisi."),
         category: z.string().min(1, "Kategori wajib diisi."),
         price: z.string().optional(),
+        is_vat: z.boolean(),
         stock: z.string().optional(),
         weight: z.string().optional(),
         photos: updateData
@@ -109,6 +111,7 @@ export const ProductForm = ({
       price: updateData?.price?.toString() || "",
       stock: updateData?.stock?.toString() || "",
       weight: updateData?.weight?.toString() || "",
+      is_vat: updateData?.is_vat || false,
     },
     schema: upsertProductSchema,
   });
@@ -122,8 +125,17 @@ export const ProductForm = ({
       updateData ? "Memperbarui produk..." : "Menambahkan produk...",
     );
 
-    const { category, description, name, slug, photos, price, stock, weight } =
-      values;
+    const {
+      category,
+      description,
+      name,
+      slug,
+      photos,
+      price,
+      stock,
+      weight,
+      is_vat,
+    } = values;
 
     try {
       const photosData = new FormData();
@@ -144,6 +156,7 @@ export const ProductForm = ({
           stock: stock ? parseNumberInput(stock) : undefined,
           weight: weight ? parseNumberInput(weight) : undefined,
           photos: photos ? photosData : undefined,
+          is_vat,
         },
       });
 
@@ -305,6 +318,28 @@ export const ProductForm = ({
                     field.onChange(formattedValue);
                   }}
                   placeholder="Masukkan harga"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="is_vat"
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-1">
+              <FormLabel htmlFor="is_vat">Kenakan PPN (11%)</FormLabel>
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  name={field.name}
+                  onCheckedChange={(check) => {
+                    form.setValue("is_vat", check as boolean);
+                  }}
+                  ref={field.ref}
+                  onBlur={field.onBlur}
+                  id="is_vat"
                 />
               </FormControl>
               <FormMessage />

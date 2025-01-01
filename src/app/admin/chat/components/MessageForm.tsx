@@ -26,7 +26,7 @@ export const MessageForm = ({
     }
   };
   return (
-    <div className="absolute bottom-0 z-10 flex h-[70px] w-full items-center gap-2 border border-t border-t-neutral-200 bg-white px-2 py-1">
+    <div className="absolute bottom-0 z-10 flex h-[70px] w-full items-center gap-2 border border-t border-t-neutral-200 bg-white px-2 py-0">
       <div className="!aspect-square h-[50px]">
         <label
           htmlFor="fileUpload"

@@ -15,6 +15,7 @@ import { MessagesMap } from "@/components/widget/Chat/MessagesMap";
 import { SendFileDialog } from "@/components/widget/Chat/dialog/SendFileDialog";
 import { MessageForm } from "./MessageForm";
 import { SearchBar } from "./SearchBar";
+import { findProductByIds } from "@/actions/products";
 
 export const ChatInterface = ({
   conversation,
@@ -36,6 +37,9 @@ export const ChatInterface = ({
     participants,
     setParticipants,
     addParticipant,
+    addProduct,
+    products,
+    setProducts,
   } = useMessage();
 
   const [filteredConvo, setFilteredConvo] = useState<Message[]>(conversation);
@@ -44,6 +48,7 @@ export const ChatInterface = ({
   const [file, setFile] = useState<File | undefined | null>(null);
   const { data: session } = useSession();
   const [isFocused, setFocus] = useState<boolean>();
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const { ref, inView } = useInView();
   const isMobile = useIsMobile(390);
@@ -76,9 +81,19 @@ export const ChatInterface = ({
         getChatUsers(userIds).then((i) => {
           setParticipants(i.data ?? []);
         });
-        setMessages(res);
-        if (messages.length < count) setHasMore(true);
-        else setHasMore(false);
+        const productIds =
+          (
+            res.map((i) => {
+              if (i.product_id) return i.product_id;
+            }) as string[]
+          ).filter((i) => Boolean(i)) ?? [];
+
+        findProductByIds([...new Set(productIds)]).then((products) => {
+          setProducts(products.data ?? []);
+          setMessages(res);
+          if (messages.length < count) setHasMore(true);
+          else setHasMore(false);
+        });
       });
       client
         .channel(activeChat)
@@ -97,6 +112,16 @@ export const ChatInterface = ({
               ) {
                 getChatUsers([message.sender_id]).then((i) => {
                   addParticipant(i.data ?? []);
+                });
+              }
+              if (
+                !products.find((i) => i.id === message.product_id) &&
+                message.product_id
+              ) {
+                findProductByIds([message.product_id]).then((product) => {
+                  addProduct(product.data ?? []);
+                  addMessage(message);
+                  scrollToBottom();
                 });
               }
               addMessage(message);
@@ -127,6 +152,18 @@ export const ChatInterface = ({
     }
   }, [activeChat]);
 
+  const sendNotification = () => {
+    if (audioRef?.current) {
+      audioRef.current.play();
+    }
+    if (Notification.permission === "granted") {
+      new Notification("You have a new notification!", {
+        body: "New customer message",
+        icon: "/assets/logo.png",
+      });
+    }
+  };
+
   useEffect(() => {
     client
       .channel("public:users")
@@ -134,6 +171,11 @@ export const ChatInterface = ({
         "postgres_changes",
         { event: "*", schema: "public", table: "messages" },
         (payload) => {
+          const message = payload.new as Message;
+
+          if (message.customer_id === message.sender_id) {
+            sendNotification();
+          }
           setFilteredConvo((prev) => {
             const list = prev;
             const index = list.findIndex(
@@ -152,6 +194,15 @@ export const ChatInterface = ({
     window.addEventListener("blur", () => {
       setFocus(false);
     });
+
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          console.log("Permission granted");
+        }
+      });
+    }
+
     return () => {
       window.removeEventListener("focus", () => {
         setFocus(true);
@@ -233,9 +284,10 @@ export const ChatInterface = ({
                   {recipients.find((j) => j.id === activeChat)?.name}
                 </Body2>
               </div>
-              <div className="relative z-0 flex h-[455px] min-h-max w-full flex-col-reverse gap-y-1 overflow-y-scroll px-4 pt-5">
+              <div className="relative z-0 flex h-[455px] w-full flex-col-reverse gap-y-1 overflow-y-scroll px-4 pt-5">
                 <div ref={messagesEndRef} />
                 <MessagesMap
+                  products={products}
                   messages={messages}
                   session={session}
                   participants={participants}
@@ -296,7 +348,11 @@ export const ChatInterface = ({
             </div>
             <div className="relative z-0 flex h-[90%] min-h-max w-full flex-col-reverse gap-y-1 overflow-y-scroll px-4 pb-[72px] pt-5">
               <div ref={messagesEndRef} />
-              <MessagesMap messages={messages} session={session} />
+              <MessagesMap
+                products={products}
+                messages={messages}
+                session={session}
+              />
               {messages.length > 0 && isMobile && hasMore && (
                 <div className="w-full text-black" ref={ref}>
                   Loading...
@@ -320,6 +376,9 @@ export const ChatInterface = ({
           />
         )}
       </div>
+      <audio ref={audioRef} src="/notification.mp3" preload="auto">
+        <track kind="captions" />
+      </audio>
     </>
   );
 };

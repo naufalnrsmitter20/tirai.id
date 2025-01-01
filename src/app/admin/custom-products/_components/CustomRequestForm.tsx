@@ -26,6 +26,7 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Courier {
   code: string;
@@ -56,6 +57,7 @@ const customRequestSchema = z.object({
     .min(1, "Nomor penerima wajib diisi")
     .regex(/^(?:\+62|62|0)[2-9]\d{7,14}$/, "Nomor telepon tidak valid"),
   carrier_code: z.string().min(1, "Kurir wajib dipilih"),
+  is_vat: z.boolean(),
 });
 
 type CustomRequestFormValues = z.infer<typeof customRequestSchema>;
@@ -79,6 +81,7 @@ export default function CustomRequestForm({
       carrier_code: updateData.carrier_code || "",
       recipient_name: updateData.recipient_name,
       recipient_phone_number: updateData.recipient_phone_number,
+      is_vat: updateData.is_vat ?? false,
     },
     schema: customRequestSchema,
   });
@@ -121,7 +124,7 @@ export default function CustomRequestForm({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="max-w-screen-lg space-y-8"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <div className="space-y-8">
             <FormField
               control={form.control}
@@ -162,7 +165,7 @@ export default function CustomRequestForm({
                       <Input
                         type="color"
                         {...field}
-                        className="w-14 p-1 h-10"
+                        className="h-10 w-14 p-1"
                       />
                       <Input
                         {...field}
@@ -219,6 +222,28 @@ export default function CustomRequestForm({
                       value={field.value}
                       onChange={(e) => field.onChange(Number(e.target.value))}
                       placeholder="Masukkan harga"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="is_vat"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1">
+                  <FormLabel htmlFor="is_vat">Kenakan PPN (11%)</FormLabel>
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      name={field.name}
+                      onCheckedChange={(check) => {
+                        form.setValue("is_vat", check as boolean);
+                      }}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      id="is_vat"
                     />
                   </FormControl>
                   <FormMessage />

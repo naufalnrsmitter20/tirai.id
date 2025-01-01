@@ -9,6 +9,7 @@ import { Ban } from "lucide-react";
 import { Body3, H1 } from "@/components/ui/text";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { findDiscountByRole } from "@/utils/database/discount.query";
 
 export default async function Page() {
   const session = await getServerSession();
@@ -52,6 +53,8 @@ export default async function Page() {
     prisma.cart.findUnique({ where: { user_id: session.user.id } }),
   ]);
 
+  const discount = await findDiscountByRole(session.user.role);
+
   if (
     cart &&
     ((isReadyStockCart(cart.json_content) &&
@@ -94,6 +97,7 @@ export default async function Page() {
         bahans={bahans}
         addresses={addresses}
         user={session.user}
+        discount={discount}
       />
     </PageContainer>
   );

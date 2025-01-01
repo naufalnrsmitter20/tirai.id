@@ -15,41 +15,52 @@ import { DefaultArgs } from "@prisma/client/runtime/library";
 import { addDays, addMinutes } from "date-fns";
 import { updateCart } from "./cart";
 import { createTransactionInvoice } from "./midtrans";
+import { getCostByCourierCode } from "@/utils/couriers";
+import { calculateCartWeight } from "@/utils/calculate-cart-weight";
+import { updateCart } from "./cart";
+import { revalidatePath } from "next/cache";
+import { Service } from "./shippingPrice/scraper";
+import { findDiscountByRole } from "@/utils/database/discount.query";
 
-// Helper Functions
-const formatPhoneNumber = (phone?: string) => {
-  if (!phone) return phone;
-  return phone.startsWith("0") ? phone.slice(1) : phone;
-};
+interface CartObject {
+  cartItems?: CartItem[];
+  customRequest?: CustomRequestItem;
+}
 
-const generateInvoiceNumber = () => {
-  const prefix = process.env.APP_ENV === "production" ? "TRX" : "DEV";
-  return `${prefix}-${generateToken(12)}`;
-};
-
-const handleStandardCheckout = async (
-  prisma: Omit<
-    PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
-    "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
-  >,
+export const upsertCheckout = async (
   cart: CartObject,
-  userId: string,
-  shipmentAddressId: string,
-  courier: Courier,
+  shipmentAddressId?: string,
+  courier?: Service,
 ): Promise<ActionResponse<CreateInvoiceSuccessResponse>> => {
-  // Step 1: Fetch necessary data
-  const [user, products, shipmentAddress] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-    }),
-    prisma.product.findMany({
-      where: { id: { in: cart.cartItems!.map((i) => i.productId) } },
-      include: { variants: true },
-    }),
-    prisma.shippingAddress.findUnique({
-      where: { id: shipmentAddressId },
-    }),
-  ]);
+  const session = await getServerSession();
+
+  const data = await prisma.$transaction(
+    async (prisma) => {
+      if (cart.cartItems && session?.user && shipmentAddressId && courier) {
+        const itemIds = cart.cartItems.map((i) => i.productId);
+
+        const user = await prisma.user.findUnique({
+          where: {
+            id: session.user.id,
+          },
+        });
+
+        const discount = await findDiscountByRole(session.user.role);
+
+        const products = await prisma.product.findMany({
+          where: {
+            id: {
+              in: itemIds,
+            },
+          },
+          include: {
+            variants: true,
+          },
+        });
+
+        const shipmentAddress = await prisma.shippingAddress.findUnique({
+          where: { id: shipmentAddressId },
+        });
 
   if (!shipmentAddress) {
     return ActionResponses.notFound("Alamat pengiriman tidak ditemukan!");
@@ -95,25 +106,37 @@ const handleStandardCheckout = async (
     },
   });
 
-  // Step 5: Process order items and update stock
-  let totalAmount = 0;
-  const itemDetails: ItemDetail[] = [];
+        let amount = 0;
+        let vat = 0;
+        const itemDetail: ItemDetail[] = [];
+        await prisma.orderItem.createMany({
+          data: cart.cartItems.map((item) => {
+            const product = products.find((j) => item.productId === j.id);
+            const variant = item.variantId
+              ? product?.variants.find((j) => item.variantId === j.id)
+              : null;
 
-  // Create order items one by one to maintain consistency
-  for (const item of cart.cartItems!) {
-    const product = products.find((p) => item.productId === p.id)!;
-    const variant = item.variantId
-      ? product.variants.find((v) => item.variantId === v.id)
-      : null;
+            const totalItemPrice =
+              item.quantity *
+              (item.variantId ? variant!.price : product!.price!);
 
-    const price = variant ? variant.price : product.price!;
-    totalAmount += item.quantity * price;
+            amount += totalItemPrice;
 
-    itemDetails.push({
-      description: product.name,
-      price,
-      quantity: item.quantity,
-    });
+            if (product?.is_vat) {
+              const discountItemPrice =
+                (totalItemPrice * (discount?.discount_in_percent ?? 0)) / 100;
+              vat +=
+                (item.quantity *
+                  (item.variantId ? variant!.price : product!.price!) -
+                  discountItemPrice) *
+                (11 / 100);
+            }
+
+            itemDetail.push({
+              description: product!.name,
+              price: item.variantId ? variant!.price : product!.price!,
+              quantity: item.quantity,
+            });
 
     // Create order item
     await prisma.orderItem.create({
@@ -138,41 +161,46 @@ const handleStandardCheckout = async (
     }
   }
 
-  // Step 6: Update order total
-  await prisma.order.update({
-    where: { id: order.id },
-    data: { total_price: totalAmount + shipmentCost },
-  });
+        const discountPrice =
+          (amount * (discount?.discount_in_percent ?? 0)) / 100;
 
-  // Step 7: Create invoice
-  const result = await createTransactionInvoice({
-    customer_details: {
-      email: user?.email,
-      name: shipmentAddress.recipient_name,
-      id: user?.id,
-      phone: formatPhoneNumber(shipmentAddress.recipient_phone_number),
-    },
-    payment_link: {
-      enabled_payments: [
-        "bca_va",
-        "gopay",
-        "permata_va",
-        "echannel",
-        "other_qris",
-      ],
-    },
-    order_id: order.id,
-    due_date: addMinutes(new Date(), 10).toISOString(),
-    invoice_date: new Date().toISOString(),
-    invoice_number: generateInvoiceNumber(),
-    item_details: itemDetails,
-    payment_type: "payment_link",
-    amount: {
-      vat: "0",
-      discount: "0",
-      shipping: shipmentCost.toString(),
-    },
-  });
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { total_price: amount - discountPrice + shipmentCost + vat },
+        });
+
+        const result = await createTransactionInvoice({
+          customer_details: {
+            email: user?.email,
+            name: shipmentAddress.recipient_name,
+            id: user?.id,
+            phone: shipmentAddress.recipient_phone_number?.startsWith("0")
+              ? shipmentAddress.recipient_phone_number.slice(1, 0)
+              : shipmentAddress.recipient_phone_number,
+          },
+          payment_link: {
+            enabled_payments: [
+              "bca_va",
+              "gopay",
+              "permata_va",
+              "echannel",
+              "other_qris",
+            ],
+          },
+          order_id: order.id,
+          due_date: addMinutes(new Date(), 10).toISOString(),
+          invoice_date: new Date().toISOString(),
+          invoice_number: `${
+            process.env.APP_ENV === "production" ? "TRX" : "DEV"
+          }-${generateToken(12)}`,
+          item_details: itemDetail,
+          payment_type: "payment_link",
+          amount: {
+            vat: vat.toString(),
+            discount: discountPrice.toString(),
+            shipping: shipmentCost.toString(),
+          },
+        });
 
   if (!result.success || result.error || !result.data) {
     return ActionResponses.serverError();
@@ -223,17 +251,25 @@ const handleCustomCheckout = async (
     return ActionResponses.serverError("Order has not been approved!");
   }
 
-  // Step 2: Create order
-  const order = await prisma.order.create({
-    data: {
-      shipping_address: customRequest.address,
-      status: "UNPAID",
-      user_id: userId,
-      phone_number: customRequest.recipient_phone_number,
-      total_price: customRequest.shipping_price + customRequest.price,
-      shipping_price: customRequest.shipping_price,
-    },
-  });
+        const user = await prisma.user.findUnique({
+          where: {
+            id: session.user.id,
+          },
+        });
+
+        const vat = customRequest.is_vat ? (customRequest.price * 11) / 100 : 0;
+
+        const order = await prisma.order.create({
+          data: {
+            shipping_address: customRequest.address,
+            status: "UNPAID",
+            user_id: session.user.id,
+            phone_number: customRequest.recipient_phone_number,
+            total_price:
+              customRequest.shipping_price + customRequest.price + vat,
+            shipping_price: customRequest.shipping_price,
+          },
+        });
 
   // Step 3: Create shipment and order item
   await prisma.shipment.create({
@@ -253,41 +289,38 @@ const handleCustomCheckout = async (
     },
   });
 
-  // Step 4: Create invoice
-  const result = await createTransactionInvoice({
-    customer_details: {
-      email: user?.email,
-      name: customRequest.recipient_name,
-      id: user?.id,
-      phone: formatPhoneNumber(customRequest.recipient_phone_number),
-    },
-    payment_link: {
-      enabled_payments: [
-        "bca_va",
-        "gopay",
-        "permata_va",
-        "echannel",
-        "other_qris",
-      ],
-    },
-    order_id: order.id,
-    due_date: addMinutes(new Date(), 10).toISOString(),
-    invoice_date: new Date().toISOString(),
-    invoice_number: generateInvoiceNumber(),
-    item_details: [
-      {
-        description: `${customRequest.model} ${customRequest.material} ${customRequest.color} (Custom Product)`,
-        price: customRequest.price,
-        quantity: 1,
-      },
-    ],
-    payment_type: "payment_link",
-    amount: {
-      vat: "0",
-      discount: "0",
-      shipping: customRequest.shipping_price.toString(),
-    },
-  });
+        const result = await createTransactionInvoice({
+          customer_details: {
+            email: user?.email,
+            name: customRequest.recipient_name,
+            id: user?.id,
+            phone: customRequest.recipient_phone_number?.startsWith("0")
+              ? customRequest.recipient_phone_number.slice(1, 0)
+              : customRequest.recipient_phone_number,
+          },
+          payment_link: {
+            enabled_payments: [
+              "bca_va",
+              "gopay",
+              "permata_va",
+              "echannel",
+              "other_qris",
+            ],
+          },
+          order_id: order.id,
+          due_date: addMinutes(new Date(), 10).toISOString(),
+          invoice_date: new Date().toISOString(),
+          invoice_number: `${
+            process.env.NODE_ENV === "production" ? "TRX" : "DEV"
+          }-${generateToken(12)}`,
+          item_details: itemDetail,
+          payment_type: "payment_link",
+          amount: {
+            vat: customRequest.is_vat ? vat.toString() : "0",
+            discount: "0",
+            shipping: customRequest.shipping_price.toString(),
+          },
+        });
 
   if (!result.success || result.error || !result.data) {
     return ActionResponses.serverError();
@@ -346,4 +379,9 @@ export const upsertCheckout = async (
       timeout: 20000,
     },
   );
+
+  revalidatePath("/admin/order");
+  revalidatePath("/account/order-history");
+
+  return data;
 };

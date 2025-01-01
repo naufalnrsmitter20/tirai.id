@@ -1,5 +1,6 @@
 "use client";
 
+import { Service } from "@/actions/shippingPrice/scraper";
 import {
   Select,
   SelectContent,
@@ -22,10 +23,10 @@ const CourierSelector = ({
 }: {
   address: ShippingAddress;
   weightInKg: number;
-  courier: Courier | undefined;
-  setCourier: Dispatch<SetStateAction<Courier | undefined>>;
+  courier: Service | undefined;
+  setCourier: Dispatch<SetStateAction<Service | undefined>>;
 }) => {
-  const [couriers, setCouriers] = useState<Courier[]>();
+  const [couriers, setCouriers] = useState<Service[]>();
 
   useEffect(() => {
     const init = async () => {
@@ -72,7 +73,8 @@ const CourierSelector = ({
                   key={c.code + "-" + c.service}
                   value={c.code + "-" + c.service}
                 >
-                  {c.name} - {c.service} ({formatRupiah(Number(c.price))})
+                  {c.name} - {c.service} ({formatRupiah(c.price)}){" "}
+                  {c.note ? `\n(${c.note})` : ""}
                 </SelectItem>
               ))}
             </SelectContent>

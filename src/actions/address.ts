@@ -3,6 +3,7 @@
 import { ActionResponse, ActionResponses } from "@/lib/actions";
 import { getServerSession } from "@/lib/next-auth";
 import prisma from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export const upsertAddress = async (
   data: {
@@ -28,6 +29,7 @@ export const upsertAddress = async (
       return ActionResponses.success({ message: "Success" });
     }
 
+    revalidatePath("/", "layout");
     await prisma.shippingAddress.create({
       data: { ...data, user: { connect: { id: session.user.id } } },
     });
