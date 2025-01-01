@@ -82,7 +82,7 @@ model Product {
   is_published Boolean  @default(false)
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
-  is_vat       Boolean?
+  is_vat       Boolean
 
   category    ProductCategory  @relation(fields: [category_id], references: [id])
   category_id String
@@ -147,6 +147,7 @@ model CustomRequest {
   price          Float
   shipping_price Float?
   carrier_code   String?
+  is_vat         Boolean @default(false)
 
   address                String
   recipient_phone_number String
