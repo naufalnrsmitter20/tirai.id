@@ -8,7 +8,7 @@ import { Body2, Body3, H1, H2, H3, H4 } from "@/components/ui/text";
 import { useCart } from "@/hooks/use-cart";
 import { formatRupiah } from "@/lib/utils";
 import { CustomRequestItem } from "@/types/cart";
-import { Prisma } from "@prisma/client";
+import { Discount, Prisma } from "@prisma/client";
 import { CreditCard, Package, Palette, Ruler } from "lucide-react";
 import { useRouter } from "next-nprogress-bar";
 import { FC, useEffect, useState } from "react";
@@ -18,7 +18,8 @@ import { ItemCard } from "./ItemCard";
 export const CartItems: FC<{
   products: Prisma.ProductGetPayload<{ include: { variants: true } }>[] | null;
   customRequest: CustomRequestItem | null;
-}> = ({ products, customRequest }) => {
+  discount?: Discount | null;
+}> = ({ products, customRequest, discount }) => {
   const { cart } = useCart();
   const [quantities, setQuantities] = useState<
     {
@@ -114,6 +115,7 @@ export const CartItems: FC<{
                         <CreditCard className="h-4 w-4 text-gray-500" />
                         <span>Harga:</span>
                       </div>
+
                       <span>{formatRupiah(price)}</span>
                     </div>
 
@@ -197,6 +199,7 @@ export const CartItems: FC<{
                   product={products?.find(
                     (product) => product.id === item.productId,
                   )}
+                  discount={discount}
                 />
               ))}
             </div>
@@ -208,13 +211,33 @@ export const CartItems: FC<{
               {quantities && cart && (
                 <Body3 className="font-medium text-black">
                   {formatRupiah(
-                    quantities.reduce(
-                      (prev, curr) =>
-                        prev +
-                        cart.find((item) => item.id === curr.id)!.pricePerItem *
-                          curr.quantity,
-                      0,
-                    ),
+                    discount
+                      ? quantities.reduce(
+                          (prev, curr) =>
+                            prev +
+                            cart.find((item) => item.id === curr.id)!
+                              .pricePerItem *
+                              curr.quantity,
+                          0,
+                        ) -
+                          (quantities.reduce(
+                            (prev, curr) =>
+                              prev +
+                              cart.find((item) => item.id === curr.id)!
+                                .pricePerItem *
+                                curr.quantity,
+                            0,
+                          ) *
+                            discount?.discount_in_percent) /
+                            100
+                      : quantities.reduce(
+                          (prev, curr) =>
+                            prev +
+                            cart.find((item) => item.id === curr.id)!
+                              .pricePerItem *
+                              curr.quantity,
+                          0,
+                        ),
                   )}
                 </Body3>
               )}

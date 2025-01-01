@@ -29,6 +29,7 @@ interface UpsertProductData {
   price?: number;
   weight?: number;
   photos?: FormData;
+  is_vat: boolean;
 }
 
 export const getProducts = async (
@@ -93,6 +94,7 @@ export const upsertProduct = async ({
         stock: data.stock,
         weight: data.weight,
         is_published: true,
+        is_vat: data.is_vat,
       });
 
       return ActionResponses.success("Success Create Product");
@@ -111,6 +113,7 @@ export const upsertProduct = async ({
         price: data.price,
         stock: data.stock,
         weight: data.weight,
+        is_vat: data.is_vat,
       },
     );
 

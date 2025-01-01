@@ -5,7 +5,7 @@ import { Body1 } from "@/components/ui/text";
 import { PageSelector } from "@/components/widget/PageSelector";
 import { PaginatedResult } from "@/lib/paginator";
 import { ProductCatalog } from "@/types/entityRelations";
-import { ProductCategory } from "@prisma/client";
+import { Discount, ProductCategory } from "@prisma/client";
 import { FC, useState } from "react";
 import { Filter } from "./Filter";
 import { ProductCard } from "./ProductCard";
@@ -16,7 +16,8 @@ import { cn } from "@/lib/utils";
 export const ProductList: FC<{
   categories: ProductCategory[];
   paginatedProducts: PaginatedResult<ProductCatalog>;
-}> = ({ paginatedProducts, categories: availableCategories }) => {
+  discount?: Discount;
+}> = ({ paginatedProducts, categories: availableCategories, discount }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -46,7 +47,11 @@ export const ProductList: FC<{
           <div className="w-full">
             <div className="grid w-full grid-cols-1 gap-x-4 gap-y-8 md:grid-cols-2 lg:grid-cols-3">
               {paginatedProducts.data.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  discount={discount}
+                />
               ))}
             </div>
             <PageSelector meta={paginatedProducts.meta} />

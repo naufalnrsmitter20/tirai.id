@@ -8,7 +8,7 @@ import { formatRupiah } from "@/lib/utils";
 import { CartItem, CustomRequestItem } from "@/types/cart";
 import { ProductWithVariant } from "@/types/entityRelations";
 import { calculateCartWeight } from "@/utils/calculate-cart-weight";
-import { ShippingAddress } from "@prisma/client";
+import { Discount, ShippingAddress } from "@prisma/client";
 import { CreditCard, Package, Palette, Ruler } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -29,7 +29,8 @@ export const CheckoutForm: FC<{
   cartItems: CartItem[] | undefined; // Will be defined if the cart type is "ready-stock"
   products: ProductWithVariant[] | undefined; // Will be defined if the cart type is "ready-stock"
   customRequest: CustomRequestItem | undefined; // Will be defined if the cart type is "custom"
-}> = ({ addresses, cartItems, customRequest, products }) => {
+  discount?: Discount | null;
+}> = ({ addresses, cartItems, customRequest, products, discount }) => {
   const [selectedAddressId, setSelectedAddressId] = useState<string>();
   const [selectedCourier, setSelectedCourier] = useState<Service>();
   const [loading, setLoading] = useState(false);
@@ -66,8 +67,17 @@ export const CheckoutForm: FC<{
   };
 
   if (customRequest !== undefined) {
-    const { id, material, model, color, width, height, price, shipping_price } =
-      customRequest;
+    const {
+      id,
+      material,
+      model,
+      color,
+      width,
+      height,
+      price,
+      shipping_price,
+      is_vat,
+    } = customRequest;
 
     return (
       <SectionContainer id="checkout">
@@ -153,6 +163,14 @@ export const CheckoutForm: FC<{
                 <Body3 className="text-black">Subtotal (Kustom)</Body3>
                 <Body3 className="text-black">{formatRupiah(price)}</Body3>
               </div>
+              {is_vat && (
+                <div className="flex flex-row justify-between">
+                  <Body3 className="text-black">PPN (11%)</Body3>
+                  <Body3 className="text-black">
+                    {formatRupiah((price * 11) / 100)}
+                  </Body3>
+                </div>
+              )}
               <div className="flex flex-row justify-between">
                 <Body3 className="text-black">Shipping</Body3>
                 <Body3 className="neutral-500 text-black">
@@ -162,7 +180,9 @@ export const CheckoutForm: FC<{
               <div className="mt-2 flex flex-row justify-between">
                 <H3 className="text-black">Total</H3>
                 <H3 className="text-black">
-                  {formatRupiah(shipping_price! + price)}
+                  {formatRupiah(
+                    shipping_price! + price + (is_vat ? (price * 11) / 100 : 0),
+                  )}
                 </H3>
               </div>
             </div>
@@ -226,6 +246,7 @@ export const CheckoutForm: FC<{
             shippingPrice={
               selectedCourier ? Number(selectedCourier.price) : undefined
             }
+            discount={discount}
           />
         )}
       </div>

@@ -42,6 +42,8 @@ export const Navbar: FC = () => {
 
             {status === "authenticated" &&
               session.user?.role !== "CUSTOMER" &&
+              session.user?.role !== "AFFILIATE" &&
+              session.user?.role !== "AGENT" &&
               session.user?.role !== "SUPPLIER" && (
                 <Link
                   href={"/admin"}
@@ -55,6 +57,8 @@ export const Navbar: FC = () => {
               )}
             {status === "authenticated" &&
               (session.user?.role === "CUSTOMER" ||
+                session.user?.role === "AFFILIATE" ||
+                session.user?.role === "AGENT" ||
                 session.user?.role === "SUPPLIER") && (
                 <div className="ml-6 flex items-center gap-x-2">
                   <Link

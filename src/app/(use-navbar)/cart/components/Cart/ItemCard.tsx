@@ -5,11 +5,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Body3, Body4, H3 } from "@/components/ui/text";
+import { Body3, Body4, Body5, H3 } from "@/components/ui/text";
 import { useCart } from "@/hooks/use-cart";
 import { cn, formatRupiah } from "@/lib/utils";
 import { CartItem } from "@/types/cart";
-import { Prisma } from "@prisma/client";
+import { Discount, Prisma } from "@prisma/client";
 import { Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -23,7 +23,8 @@ export const ItemCard: FC<{
     SetStateAction<{ id: string; quantity: number }[] | undefined>
   >;
   product?: Prisma.ProductGetPayload<{ include: { variants: true } }>;
-}> = ({ item, quantities, setQuantities, product }) => {
+  discount?: Discount | null;
+}> = ({ item, quantities, setQuantities, product, discount }) => {
   const { editItem, removeItem } = useCart();
 
   const itemVariant = useMemo(
@@ -123,9 +124,26 @@ export const ItemCard: FC<{
           </div>
         </div>
         <div className="flex h-full flex-col items-end justify-between">
-          <Body3 className="mb-4 text-black">
-            {formatRupiah(quantity * item.pricePerItem)}
-          </Body3>
+          {discount ? (
+            <div className="mb-4">
+              <Body3 className="text-primary-500">
+                {formatRupiah(
+                  quantity * item.pricePerItem -
+                    (quantity *
+                      item.pricePerItem *
+                      discount.discount_in_percent) /
+                      100,
+                )}
+              </Body3>
+              <Body4 className="text-black line-through">
+                {formatRupiah(quantity * item.pricePerItem)}
+              </Body4>
+            </div>
+          ) : (
+            <Body3 className="mb-4 text-black">
+              {formatRupiah(quantity * item.pricePerItem)}
+            </Body3>
+          )}
           <Body3 className="text-destructive">Barang Invalid</Body3>
         </div>
       </div>
@@ -166,9 +184,26 @@ export const ItemCard: FC<{
           </div>
         </div>
         <div className="flex h-full flex-col items-end justify-between">
-          <Body3 className="mb-4 text-black">
-            {formatRupiah(quantity * item.pricePerItem)}
-          </Body3>
+          {discount ? (
+            <div className="mb-4">
+              <Body3 className="text-primary-500">
+                {formatRupiah(
+                  quantity * item.pricePerItem -
+                    (quantity *
+                      item.pricePerItem *
+                      discount.discount_in_percent) /
+                      100,
+                )}
+              </Body3>
+              <Body4 className="text-black line-through">
+                {formatRupiah(quantity * item.pricePerItem)}
+              </Body4>
+            </div>
+          ) : (
+            <Body3 className="mb-4 text-black">
+              {formatRupiah(quantity * item.pricePerItem)}
+            </Body3>
+          )}
           <Body3 className="text-destructive">Stok Habis</Body3>
         </div>
       </div>
@@ -204,9 +239,26 @@ export const ItemCard: FC<{
         </div>
       </div>
       <div className="flex h-full flex-col items-end justify-between">
-        <Body3 className="mb-4 text-black">
-          {formatRupiah(quantity * item.pricePerItem)}
-        </Body3>
+        {discount ? (
+          <div className="mb-4">
+            <Body3 className="text-primary-500">
+              {formatRupiah(
+                quantity * item.pricePerItem -
+                  (quantity *
+                    item.pricePerItem *
+                    discount.discount_in_percent) /
+                    100,
+              )}
+            </Body3>
+            <Body4 className="text-black line-through">
+              {formatRupiah(quantity * item.pricePerItem)}
+            </Body4>
+          </div>
+        ) : (
+          <Body3 className="mb-4 text-black">
+            {formatRupiah(quantity * item.pricePerItem)}
+          </Body3>
+        )}
         <div className="flex items-center gap-x-4">
           <Select
             onValueChange={(value) => {

@@ -14,6 +14,7 @@ import { calculateCartWeight } from "@/utils/calculate-cart-weight";
 import { updateCart } from "./cart";
 import { revalidatePath } from "next/cache";
 import { Service } from "./shippingPrice/scraper";
+import { findDiscountByRole } from "@/utils/database/discount.query";
 
 interface CartObject {
   cartItems?: CartItem[];
@@ -37,6 +38,8 @@ export const upsertCheckout = async (
             id: session.user.id,
           },
         });
+
+        const discount = await findDiscountByRole(session.user.role);
 
         const products = await prisma.product.findMany({
           where: {
@@ -93,6 +96,7 @@ export const upsertCheckout = async (
         });
 
         let amount = 0;
+        let vat = 0;
         const itemDetail: ItemDetail[] = [];
         await prisma.orderItem.createMany({
           data: cart.cartItems.map((item) => {
@@ -101,9 +105,21 @@ export const upsertCheckout = async (
               ? product?.variants.find((j) => item.variantId === j.id)
               : null;
 
-            amount +=
+            const totalItemPrice =
               item.quantity *
               (item.variantId ? variant!.price : product!.price!);
+
+            amount += totalItemPrice;
+
+            if (product?.is_vat) {
+              const discountItemPrice =
+                (totalItemPrice * (discount?.discount_in_percent ?? 0)) / 100;
+              vat +=
+                (item.quantity *
+                  (item.variantId ? variant!.price : product!.price!) -
+                  discountItemPrice) *
+                (11 / 100);
+            }
 
             itemDetail.push({
               description: product!.name,
@@ -139,9 +155,12 @@ export const upsertCheckout = async (
           });
         });
 
+        const discountPrice =
+          (amount * (discount?.discount_in_percent ?? 0)) / 100;
+
         await prisma.order.update({
           where: { id: order.id },
-          data: { total_price: amount + shipmentCost },
+          data: { total_price: amount - discountPrice + shipmentCost + vat },
         });
 
         const result = await createTransactionInvoice({
@@ -171,8 +190,8 @@ export const upsertCheckout = async (
           item_details: itemDetail,
           payment_type: "payment_link",
           amount: {
-            vat: "0",
-            discount: "0",
+            vat: vat.toString(),
+            discount: discountPrice.toString(),
             shipping: shipmentCost.toString(),
           },
         });
@@ -223,13 +242,16 @@ export const upsertCheckout = async (
           },
         });
 
+        const vat = customRequest.is_vat ? (customRequest.price * 11) / 100 : 0;
+
         const order = await prisma.order.create({
           data: {
             shipping_address: customRequest.address,
             status: "UNPAID",
             user_id: session.user.id,
             phone_number: customRequest.recipient_phone_number,
-            total_price: customRequest.shipping_price + customRequest.price,
+            total_price:
+              customRequest.shipping_price + customRequest.price + vat,
             shipping_price: customRequest.shipping_price,
           },
         });
@@ -285,7 +307,7 @@ export const upsertCheckout = async (
           item_details: itemDetail,
           payment_type: "payment_link",
           amount: {
-            vat: "0",
+            vat: customRequest.is_vat ? vat.toString() : "0",
             discount: "0",
             shipping: customRequest.shipping_price.toString(),
           },

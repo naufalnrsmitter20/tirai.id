@@ -14,6 +14,7 @@ export type CustomRequestItem = {
   height: string;
   price: number;
   shipping_price?: number;
+  is_vat: boolean;
 };
 
 export type CartItem = {

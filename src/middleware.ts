@@ -29,7 +29,11 @@ export default withAuth(
 
     if (
       (pathname.startsWith("/auth") && token) ||
-      (pathname.startsWith("/admin") && token?.role === "CUSTOMER") ||
+      (pathname.startsWith("/admin") &&
+        (token?.role === "CUSTOMER" ||
+          token?.role === "AGENT" ||
+          token?.role === "AFFILIATE" ||
+          token?.role === "SUPPLIER")) ||
       (pathname.startsWith("/admin/user") && token?.role !== "SUPERADMIN") ||
       (pathname.startsWith("/admin/chat") && token?.role !== "SALES")
     ) {
