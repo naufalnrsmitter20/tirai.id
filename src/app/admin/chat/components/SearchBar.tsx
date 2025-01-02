@@ -40,12 +40,16 @@ export const SearchBar = ({
               )}
             >
               <div className="inline-flex !aspect-square h-[30px] items-center justify-center rounded-full bg-purple-400 text-white">
-                {recipients
-                  .find((j) => j.id === i.customer_id)
-                  ?.name[0].toUpperCase()}
+                {recipients.find((j) => j.id === i.customer_id)
+                  ? recipients
+                      .find((j) => j.id === i.customer_id)
+                      ?.name[0].toUpperCase()
+                  : "D"}
               </div>
-              <div className="text-black text-start">
-                {recipients.find((j) => j.id === i.customer_id)?.name}
+              <div className="text-start text-black">
+                {recipients.find((j) => j.id === i.customer_id)
+                  ? recipients.find((j) => j.id === i.customer_id)?.name
+                  : "Deleted User"}
               </div>
               {i.sender_id !== session?.user?.id && !i.is_read && (
                 <div className="absolute right-0 top-1/2 me-6 aspect-square w-2 -translate-y-1/2 rounded-full bg-blue-700" />

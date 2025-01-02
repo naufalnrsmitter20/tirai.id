@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { ChatUser } from "@/types/entityRelations";
 import { CheckCheck, FileText } from "lucide-react";
 import Image from "next/image";
+import { useEffect } from "react";
 
 export const FileMessageCard = ({
   message,
@@ -81,7 +82,6 @@ export const FileMessageCard = ({
               -1 && (
               <Body5 className="absolute -top-5 left-0 text-nowrap text-black">
                 {participants &&
-                  participants.findIndex((i) => i.id === message.sender_id) &&
                   participants[
                     participants.findIndex((i) => i.id === message.sender_id)
                   ].name}

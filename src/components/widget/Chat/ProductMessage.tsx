@@ -6,6 +6,7 @@ import { ChatProduct, ChatUser } from "@/types/entityRelations";
 import { CheckCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect } from "react";
 
 export const ProductMessageCard = ({
   message,
@@ -87,10 +88,9 @@ export const ProductMessageCard = ({
               -1 && (
               <Body5 className="absolute -top-5 left-0 text-nowrap text-black">
                 {participants &&
-                  participants.findIndex((i) => i.id === message.sender_id) &&
                   participants[
                     participants.findIndex((i) => i.id === message.sender_id)
-                  ].name}
+                  ].id}
               </Body5>
             )}
           <div className="flex h-auto w-full items-center justify-center gap-x-2">

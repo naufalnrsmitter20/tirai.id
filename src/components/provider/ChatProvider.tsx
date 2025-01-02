@@ -1,6 +1,6 @@
 "use client";
 
-import { findChatById, setReadMessage } from "@/actions/chat";
+import { findChatById, getChatUsers, setReadMessage } from "@/actions/chat";
 import { Message, useMessage } from "@/hooks/use-message";
 import { supabaseBrowser } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,9 @@ export const ChatProvider = ({ session }: { session: Session }) => {
     products,
     setProducts,
     addProduct,
+    participants,
+    setParticipants,
+    addParticipant,
   } = useMessage();
   const { inView, ref } = useInView();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -86,10 +89,11 @@ export const ChatProvider = ({ session }: { session: Session }) => {
             ) {
               findProductByIds([message.product_id]).then((product) => {
                 addProduct(product.data ?? []);
-                addMessage(message);
-                scrollToBottom();
-                setOpen(true);
-                return;
+              });
+            }
+            if (!participants.find((i) => i.id === message.sender_id)) {
+              getChatUsers([message.sender_id]).then((user) => {
+                addParticipant(user.data ?? []);
               });
             }
             addMessage(message);
@@ -154,6 +158,13 @@ export const ChatProvider = ({ session }: { session: Session }) => {
           }) as string[]
         ).filter((i) => Boolean(i)) ?? [];
 
+      const userIds = res.map((i) => i.sender_id);
+
+      getChatUsers(userIds).then((users) => {
+        console.log(users.data ?? []);
+        setParticipants(users.data ?? []);
+      });
+
       findProductByIds([...new Set(productIds)]).then((products) => {
         setProducts(products.data ?? []);
         setMessages(res);
@@ -169,6 +180,25 @@ export const ChatProvider = ({ session }: { session: Session }) => {
       findChatById(session.user?.id!, page).then((res) => {
         const messagesRes = res.data?.data ?? [];
         const count = res.data?.count ?? 0;
+        const productIds = messagesRes.map((i) => {
+          if (i.product_id && !products.find((j) => j.id === i.product_id))
+            return i.product_id;
+        }) as string[];
+        const userIds = messagesRes.map((i) => {
+          if (!participants.find((j) => j.id === i.sender_id))
+            return i.sender_id;
+        }) as string[];
+
+        if (productIds.length > 0) {
+          findProductByIds(productIds).then((product) => {
+            addProduct(product.data ?? []);
+          });
+        }
+        if (userIds.length > 0) {
+          getChatUsers(userIds).then((user) => {
+            addParticipant(user.data ?? []);
+          });
+        }
         setMessages((prev) => [...prev, ...messagesRes]);
         if (messages.length < count) {
           setHasMore(true);
@@ -251,6 +281,7 @@ export const ChatProvider = ({ session }: { session: Session }) => {
                       session={session}
                       messages={messages}
                       products={products}
+                      participants={participants}
                     />
                     {hasMore && (
                       <div

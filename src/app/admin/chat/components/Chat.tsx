@@ -120,8 +120,11 @@ export const ChatInterface = ({
               ) {
                 findProductByIds([message.product_id]).then((product) => {
                   addProduct(product.data ?? []);
-                  addMessage(message);
-                  scrollToBottom();
+                });
+              }
+              if (!participants.find((i) => i.id === message.sender_id)) {
+                getChatUsers([message.sender_id]).then((user) => {
+                  addParticipant(user.data ?? []);
                 });
               }
               addMessage(message);
@@ -231,6 +234,25 @@ export const ChatInterface = ({
       findChatById(activeChat, page).then((res) => {
         const messagesRes = res.data?.data ?? [];
         const count = res.data?.count ?? 0;
+        const productIds = messagesRes.map((i) => {
+          if (i.product_id && !products.find((j) => j.id === i.product_id))
+            return i.product_id;
+        }) as string[];
+        const userIds = messagesRes.map((i) => {
+          if (!participants.find((j) => j.id === i.sender_id))
+            return i.sender_id;
+        }) as string[];
+
+        if (productIds.length > 0) {
+          findProductByIds(productIds).then((product) => {
+            addProduct(product.data ?? []);
+          });
+        }
+        if (userIds.length > 0) {
+          getChatUsers(userIds).then((user) => {
+            addParticipant(user.data ?? []);
+          });
+        }
         setMessages((prev) => [...prev, ...messagesRes]);
         if (messages.length < count) {
           setHasMore(true);
@@ -276,12 +298,16 @@ export const ChatInterface = ({
             <div className="relative h-full w-full">
               <div className="inline-flex h-16 w-full items-center gap-2 border-b border-b-neutral-200 bg-white px-4 py-3">
                 <div className="inline-flex aspect-square h-full items-center justify-center rounded-full bg-purple-400 text-white">
-                  {recipients
-                    .find((j) => j.id === activeChat)
-                    ?.name[0].toUpperCase()}
+                  {recipients.find((j) => j.id === activeChat)
+                    ? recipients
+                        .find((j) => j.id === activeChat)
+                        ?.name[0].toUpperCase()
+                    : "D"}
                 </div>
                 <Body2 className="text-black">
-                  {recipients.find((j) => j.id === activeChat)?.name}
+                  {recipients.find((j) => j.id === activeChat)
+                    ? recipients.find((j) => j.id === activeChat)?.name
+                    : "Deleted User"}
                 </Body2>
               </div>
               <div className="relative z-0 flex h-[455px] w-full flex-col-reverse gap-y-1 overflow-y-scroll px-4 pt-5">
@@ -338,12 +364,16 @@ export const ChatInterface = ({
                 <ArrowLeft className="text-black" />
               </Button>
               <div className="inline-flex aspect-square h-full items-center justify-center rounded-full bg-purple-400 text-white">
-                {recipients
-                  .find((j) => j.id === activeChat)
-                  ?.name[0].toUpperCase()}
+                {recipients.find((j) => j.id === activeChat)
+                  ? recipients
+                      .find((j) => j.id === activeChat)
+                      ?.name[0].toUpperCase()
+                  : "D"}
               </div>
               <Body2 className="text-black">
-                {recipients.find((j) => j.id === activeChat)?.name}
+                {recipients.find((j) => j.id === activeChat)
+                  ? recipients.find((j) => j.id === activeChat)?.name
+                  : "Deleted User"}
               </Body2>
             </div>
             <div className="relative z-0 flex h-[90%] min-h-max w-full flex-col-reverse gap-y-1 overflow-y-scroll px-4 pb-[72px] pt-5">
