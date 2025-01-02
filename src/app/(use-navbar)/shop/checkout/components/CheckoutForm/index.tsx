@@ -211,7 +211,7 @@ export const CheckoutForm: FC<{
   return (
     <SectionContainer id="checkout">
       <div className="flex w-full flex-col items-start justify-between gap-x-6 lg:flex-row">
-        <div className="mb-6 flex h-full w-full flex-col items-start">
+        <div className="mb-6 flex h-full max-h-[30rem] w-full flex-col items-start overflow-y-scroll pr-4">
           {cartItems && products && (
             <div className="flex w-full flex-col gap-y-8">
               <AddressSelector

@@ -5,12 +5,15 @@ import { getServerSession } from "@/lib/next-auth";
 import prisma from "@/lib/prisma";
 import { formatPhoneNumber, generateInvoiceNumber } from "@/lib/utils";
 import { CartItem, CustomRequestItem } from "@/types/cart";
+import { ProductWithVariant } from "@/types/entityRelations";
 import { CreateInvoiceSuccessResponse, ItemDetail } from "@/types/midtrans";
 import { buildShipmentAddressString } from "@/utils/build-shipment-address-string";
 import { calculateCartWeight } from "@/utils/calculate-cart-weight";
+import { calculateOrderAmounts, validateCartItems } from "@/utils/checkout";
 import { getCostByCourierCode } from "@/utils/couriers";
 import { findDiscountByRole } from "@/utils/database/discount.query";
-import { Role } from "@prisma/client";
+import { Prisma, PrismaClient, Role } from "@prisma/client";
+import { DefaultArgs } from "@prisma/client/runtime/library";
 import { addDays, addMinutes } from "date-fns";
 import { updateCart } from "./cart";
 import { createTransactionInvoice } from "./midtrans";
@@ -21,6 +24,60 @@ interface CartObject {
   customRequest?: CustomRequestItem;
 }
 
+const BATCH_SIZE = 2; // Process items in smaller batches
+
+const processBatch = async (
+  tx: Omit<
+    PrismaClient<Prisma.PrismaClientOptions, never, DefaultArgs>,
+    "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+  >,
+  items: CartItem[],
+  products: ProductWithVariant[],
+  orderId: string,
+) => {
+  await Promise.all(
+    items.map(async (item) => {
+      const product = products.find((p) => p.id === item.productId);
+      const variant = item.variantId
+        ? product?.variants.find((v) => v.id === item.variantId)
+        : undefined;
+
+      const operations = [];
+
+      // Create order item
+      operations.push(
+        tx.orderItem.create({
+          data: {
+            order_id: orderId,
+            product_id: item.productId,
+            variant_id: variant?.id,
+            quantity: item.quantity,
+          },
+        }),
+      );
+
+      // Update inventory
+      if (variant) {
+        operations.push(
+          tx.productVariant.update({
+            where: { id: variant.id },
+            data: { stock: { decrement: item.quantity } },
+          }),
+        );
+      } else {
+        operations.push(
+          tx.product.update({
+            where: { id: product?.id },
+            data: { stock: { decrement: item.quantity } },
+          }),
+        );
+      }
+
+      await Promise.all(operations);
+    }),
+  );
+};
+
 const handleStandardCheckout = async (
   cartItems: CartItem[],
   shipmentAddressId: string,
@@ -28,29 +85,24 @@ const handleStandardCheckout = async (
   userId: string,
   userRole: Role,
 ): Promise<ActionResponse<CreateInvoiceSuccessResponse>> => {
-  const itemIds = cartItems.map((item) => item.productId);
-
   const [discount, products, shipmentAddress] = await Promise.all([
     findDiscountByRole(userRole),
     prisma.product.findMany({
-      where: { id: { in: itemIds } },
+      where: { id: { in: cartItems.map((item) => item.productId) } },
       include: { variants: true },
     }),
     prisma.shippingAddress.findUnique({ where: { id: shipmentAddressId } }),
   ]);
 
   if (!shipmentAddress) {
-    return ActionResponses.notFound("Alamat pengiriman tidak ditemukan!");
+    return ActionResponses.notFound("Shipping address not found!");
   }
 
   const shipmentCost = await getCostByCourierCode({
     courierCode: courier.code,
     service: courier.service,
     originCity: process.env.NEXT_PUBLIC_ORIGIN_CITY as string,
-    destinationCity:
-      shipmentAddress.city.split(" ").length > 1
-        ? shipmentAddress.city.split(" ")[1]
-        : shipmentAddress.city,
+    destinationCity: shipmentAddress.city.split(" ")[1] || shipmentAddress.city,
     weightInKg: calculateCartWeight(products, cartItems),
   });
 
@@ -58,141 +110,103 @@ const handleStandardCheckout = async (
     return ActionResponses.serverError();
   }
 
-  return await prisma.$transaction(async (tx) => {
-    // Validate stock atomically
-    for (const item of cartItems) {
-      const product = products.find((p) => p.id === item.productId);
-      const variant = item.variantId
-        ? product?.variants.find((v) => v.id === item.variantId)
-        : undefined;
+  // Calculate amounts outside transaction
+  const { amount, vat, discountPrice, itemDetails } = calculateOrderAmounts(
+    cartItems,
+    products,
+    shipmentCost,
+    discount ?? undefined,
+  );
 
-      const availableStock = variant ? variant.stock : product?.stock;
-      if (!availableStock || item.quantity > availableStock) {
-        return ActionResponses.error({
-          code: "CONFLICT",
-          message: `Stok tidak mencukupi untuk ${item.name}. Diminta: ${item.quantity}. Tersedia: ${availableStock}`,
-        });
-      }
-    }
+  // Process in transaction with batching
+  return await prisma.$transaction(
+    async (tx) => {
+      // Validate stock first
+      await validateCartItems(cartItems, products);
 
-    // Create the order
-    const order = await tx.order.create({
-      data: {
-        shipping_address: buildShipmentAddressString(shipmentAddress),
-        status: "UNPAID",
-        user_id: userId,
-        shipping_price: shipmentCost,
-        phone_number: formatPhoneNumber(shipmentAddress.recipient_phone_number),
-        total_price: 0,
-      },
-    });
-
-    await tx.shipment.create({
-      data: {
-        carrier: courier.code,
-        estimated_finish_time: addDays(new Date(), 5),
-        status: "PENDING",
-        order_id: order.id,
-      },
-    });
-
-    let amount = 0;
-    let vat = 0;
-    const itemDetails: ItemDetail[] = [];
-
-    for (const item of cartItems) {
-      const product = products.find((p) => p.id === item.productId);
-      const variant = item.variantId
-        ? product?.variants.find((v) => v.id === item.variantId)
-        : undefined;
-
-      const totalItemPrice =
-        item.quantity * (variant ? variant.price : (product?.price ?? 0));
-
-      amount += totalItemPrice;
-
-      if (product?.is_vat) {
-        const discountItemPrice =
-          (totalItemPrice * (discount?.discount_in_percent ?? 0)) / 100;
-        vat += (totalItemPrice - discountItemPrice) * 0.11;
-      }
-
-      itemDetails.push({
-        description: product!.name,
-        price: variant ? variant.price : product!.price!,
-        quantity: item.quantity,
+      const order = await tx.order.create({
+        data: {
+          shipping_address: buildShipmentAddressString(shipmentAddress),
+          status: "UNPAID",
+          user_id: userId,
+          shipping_price: shipmentCost,
+          phone_number: formatPhoneNumber(
+            shipmentAddress.recipient_phone_number,
+          ),
+          total_price: amount - discountPrice + shipmentCost + vat,
+        },
       });
 
-      if (variant) {
-        await tx.productVariant.update({
-          where: { id: variant.id },
-          data: { stock: { decrement: item.quantity } },
-        });
-      } else {
-        await tx.product.update({
-          where: { id: product?.id },
-          data: { stock: { decrement: item.quantity } },
-        });
+      await tx.shipment.create({
+        data: {
+          carrier: courier.code,
+          estimated_finish_time: addDays(new Date(), 5),
+          status: "PENDING",
+          order_id: order.id,
+        },
+      });
+
+      // Process inventory updates in batches
+      for (let i = 0; i < cartItems.length; i += BATCH_SIZE) {
+        const batch = cartItems.slice(i, i + BATCH_SIZE);
+        await processBatch(tx, batch, products, order.id);
       }
-    }
 
-    const discountPrice = (amount * (discount?.discount_in_percent ?? 0)) / 100;
-
-    await tx.order.update({
-      where: { id: order.id },
-      data: { total_price: amount - discountPrice + shipmentCost + vat },
-    });
-
-    const result = await createTransactionInvoice({
-      customer_details: {
-        name: shipmentAddress.recipient_name,
-        id: userId,
-        phone: formatPhoneNumber(shipmentAddress.recipient_phone_number),
-      },
-      payment_link: {
-        enabled_payments: [
-          "bca_va",
-          "gopay",
-          "permata_va",
-          "echannel",
-          "other_qris",
-        ],
-      },
-      order_id: order.id,
-      due_date: addMinutes(new Date(), 10).toISOString(),
-      invoice_date: new Date().toISOString(),
-      invoice_number: generateInvoiceNumber(),
-      item_details: itemDetails,
-      payment_type: "payment_link",
-      amount: {
-        vat: vat.toString(),
-        discount: discountPrice.toString(),
-        shipping: shipmentCost.toString(),
-      },
-    });
-
-    if (!result.success || result.error || !result.data) {
-      console.log(result.error);
-      return ActionResponses.serverError();
-    }
-
-    await tx.order.update({
-      where: { id: order.id },
-      data: { invoice_link: result.data.pdf_url },
-    });
-
-    await tx.payment.create({
-      data: {
+      const result = await createTransactionInvoice({
+        customer_details: {
+          name: shipmentAddress.recipient_name,
+          id: userId,
+          phone: formatPhoneNumber(shipmentAddress.recipient_phone_number),
+        },
+        payment_link: {
+          enabled_payments: [
+            "bca_va",
+            "gopay",
+            "permata_va",
+            "echannel",
+            "other_qris",
+          ],
+        },
         order_id: order.id,
-        status: "PENDING",
-        transaction_id: result.data.id,
-      },
-    });
+        due_date: addMinutes(new Date(), 10).toISOString(),
+        invoice_date: new Date().toISOString(),
+        invoice_number: generateInvoiceNumber(),
+        item_details: itemDetails,
+        payment_type: "payment_link",
+        amount: {
+          // TODO: Fix the gross_amount not match itemDetails
+          vat: "0",
+          discount: "0",
+          shipping: shipmentCost.toString(),
+        },
+      });
 
-    await updateCart({ type: "ready-stock", items: [] });
+      if (!result.success || result.error || !result.data) {
+        throw new Error(result.error?.message || "Invoice creation failed");
+      }
 
-    return ActionResponses.success(result.data);
-  });
+      await Promise.all([
+        tx.order.update({
+          where: { id: order.id },
+          data: { invoice_link: result.data.pdf_url },
+        }),
+        tx.payment.create({
+          data: {
+            order_id: order.id,
+            status: "PENDING",
+            transaction_id: result.data.id,
+          },
+        }),
+      ]);
+
+      await updateCart({ type: "ready-stock", items: [] });
+      return ActionResponses.success(result.data);
+    },
+    {
+      timeout: 5000,
+      isolationLevel: "Serializable",
+    },
+  );
 };
 
 const handleCustomRequestCheckout = async (

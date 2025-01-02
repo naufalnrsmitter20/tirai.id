@@ -135,7 +135,8 @@ export const OrderDetailDialog: FC<
               <div className="flex justify-between text-sm">
                 <span>Total Barang ({order.items.length} Barang)</span>
                 <span>
-                  {!order.items[0].custom_request
+                  {order.items.length > 0 &&
+                  order.items[0].custom_request === undefined
                     ? formatRupiah(realTotalPrice)
                     : formatRupiah(
                         order.total_price -
@@ -147,7 +148,7 @@ export const OrderDetailDialog: FC<
                 </span>
               </div>
 
-              {!order.items[0].custom_request && (
+              {order.items.length > 0 && !order.items[0].custom_request && (
                 <div className="flex justify-between text-sm">
                   <span>
                     Diskon (
