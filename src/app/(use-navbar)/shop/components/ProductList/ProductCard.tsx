@@ -10,6 +10,17 @@ export const ProductCard: FC<{
   product: ProductCatalog;
   discount?: Discount;
 }> = ({ product, discount }) => {
+  const finalPrice =
+    product.price ||
+    (product.variants.length > 0
+      ? product.variants.sort((a, b) => a.price - b.price)[0].price
+      : 0);
+
+  const discountedPrice =
+    discount && finalPrice
+      ? finalPrice - finalPrice * (discount.discount_in_percent / 100)
+      : finalPrice;
+
   return (
     <Link href={`/shop/product/${product.slug}`} className="group block w-full">
       <div className="relative h-fit w-full">
@@ -35,41 +46,19 @@ export const ProductCard: FC<{
       <Body3 className="mb-3 line-clamp-1 justify-start text-neutral-500">
         {product.description}
       </Body3>
-      {(product.price || product.variants.length > 0) &&
-        (discount ? (
-          <div>
-            <H5 className="justify-start text-primary-500">
-              {formatRupiah(
-                product.price
-                  ? product.price -
-                      product.price * (discount.discount_in_percent / 100)
-                  : product.variants.sort((a, b) => a.price - b.price)[0]
-                      .price -
-                      product.variants.sort((a, b) => a.price - b.price)[0]
-                        .price *
-                        (discount.discount_in_percent / 100),
-              )}{" "}
-            </H5>
-            <span className="inline-flex items-center gap-1">
-              <Body3 className="justify-start text-black !line-through">
-                {formatRupiah(
-                  product.price ||
-                    product.variants.sort((a, b) => a.price - b.price)[0].price,
-                )}{" "}
-              </Body3>
-              <Body4 className="font-semibold text-red-500">
-                {Math.round(discount.discount_in_percent)}%
-              </Body4>
-            </span>
-          </div>
-        ) : (
-          <H5 className="justify-start text-black">
-            {formatRupiah(
-              product.price ||
-                product.variants.sort((a, b) => a.price - b.price)[0].price,
-            )}{" "}
-          </H5>
-        ))}
+      <H5 className="justify-start text-black">
+        {formatRupiah(discountedPrice)}{" "}
+      </H5>
+      {discount && (
+        <span className="inline-flex items-center gap-1">
+          <Body3 className="justify-start text-black !line-through">
+            {formatRupiah(finalPrice)}{" "}
+          </Body3>
+          <Body4 className="font-semibold text-red-500">
+            {Math.round(discount.discount_in_percent)}%
+          </Body4>
+        </span>
+      )}
     </Link>
   );
 };

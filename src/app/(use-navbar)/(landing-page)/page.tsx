@@ -1,4 +1,5 @@
 import { CTA } from "@/components/widget/CTA";
+import prisma from "@/lib/prisma";
 import { About } from "./components/About";
 import { Custom } from "./components/Custom";
 import { Fabric } from "./components/Fabric";
@@ -7,7 +8,7 @@ import { ProductTypes } from "./components/ProductTypes";
 import { Products } from "./components/Products";
 import { Testimonies } from "./components/Testimonies";
 
-export default function Home() {
+export default async function Home() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "OnlineStore",
@@ -35,11 +36,46 @@ export default function Home() {
     },
   };
 
+  const [categories, products] = await prisma.$transaction([
+    prisma.productCategory.findMany({ take: 6 }),
+    prisma.product.findMany({
+      take: 4,
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        is_published: true,
+        stock: true,
+        price: true,
+        photos: true,
+        created_at: true,
+        updated_at: true,
+        variants: {
+          select: {
+            stock: true,
+            price: true,
+          },
+        },
+        reviews: {
+          select: {
+            rating: true,
+          },
+        },
+      },
+    }),
+  ]);
+
   return (
     <>
       <Hero />
-      <ProductTypes />
-      <Products />
+      <ProductTypes
+        categories={categories.map((category) => ({
+          title: category.name,
+          href: `/shop?categories=${category.id}`,
+        }))}
+      />
+      <Products products={products} />
       <Custom />
       <About />
       <Fabric />

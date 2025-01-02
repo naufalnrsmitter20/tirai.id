@@ -189,8 +189,7 @@ export const Hero: FC<{
                   {Array.from(
                     {
                       length:
-                        (maxStock > 30 ? 29 : maxStock) -
-                        (productInCart ? productInCart.quantity : 0),
+                        maxStock - (productInCart ? productInCart.quantity : 0),
                     },
                     (_, index) => index + 1,
                   ).map((sortOption) => (

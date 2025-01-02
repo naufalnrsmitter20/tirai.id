@@ -1,16 +1,16 @@
+import { getServerSession } from "@/lib/next-auth";
 import { paginator } from "@/lib/paginator";
 import prisma from "@/lib/prisma";
 import { ProductCatalog } from "@/types/entityRelations";
 import { findCategories } from "@/utils/database/category.query";
-import { Discount, Prisma } from "@prisma/client";
-import { Hero } from "./components/Hero";
-import { ProductList } from "./components/ProductList";
+import { findDiscountByRole } from "@/utils/database/discount.query";
 import {
   buildProductsQuery,
   sortProductsManually,
 } from "@/utils/process-shop-search-params";
-import { findDiscountByRole } from "@/utils/database/discount.query";
-import { getServerSession } from "@/lib/next-auth";
+import { Prisma } from "@prisma/client";
+import { Hero } from "./components/Hero";
+import { ProductList } from "./components/ProductList";
 
 const paginate = paginator({ perPage: 10 });
 
@@ -69,7 +69,7 @@ export default async function Shop({
 
   const discount =
     session && session.user
-      ? await findDiscountByRole(session?.user?.role!)
+      ? await findDiscountByRole(session?.user?.role)
       : null;
 
   const categories = await findCategories();
