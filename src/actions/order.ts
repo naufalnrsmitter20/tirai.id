@@ -33,7 +33,7 @@ export const finishOrder = async (
     return ActionResponses.success({ message: "Order updated successfully" });
   } catch (error) {
     console.error(error);
-    return ActionResponses.serverError("Failed to upsert user");
+    return ActionResponses.serverError("Failed to finish order");
   }
 };
 
@@ -78,7 +78,7 @@ export const updateResi = async (
       },
       data: {
         tracking_id: trackingId,
-        status: "PENDING",
+        status: "SHIPPED",
       },
     });
 

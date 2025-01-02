@@ -1,15 +1,13 @@
-import prisma from "@/lib/prisma";
+import { buttonVariants } from "@/components/ui/button";
+import { Body3, H1 } from "@/components/ui/text";
+import { PageSelector } from "@/components/widget/PageSelector";
 import { getServerSession } from "@/lib/next-auth";
 import { paginator } from "@/lib/paginator";
+import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { PageContainer } from "@/components/layout/PageContainer";
-import { SectionContainer } from "@/components/layout/SectionContainer";
-import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
 import { MapPinHouse, User } from "lucide-react";
-import { Body3, H1 } from "@/components/ui/text";
+import Link from "next/link";
 import { OrderTable } from "./components/OrderTable";
-import { PageSelector } from "@/components/widget/PageSelector";
 
 const paginate = paginator({ perPage: 10 });
 
@@ -34,6 +32,7 @@ export default async function OrderHistory({
             product: true;
             variant: true;
             custom_request: true;
+            review: true;
           };
         };
       };
@@ -57,6 +56,7 @@ export default async function OrderHistory({
             product: true,
             variant: true,
             custom_request: true,
+            review: true,
           },
         },
       },
@@ -64,37 +64,33 @@ export default async function OrderHistory({
   );
 
   return (
-    <PageContainer>
-      <SectionContainer id="orders">
-        <div className="mx-auto w-full max-w-lg">
-          <div className="mb-6 flex w-full flex-col items-start justify-start">
-            <Link
-              href={"/account/address"}
-              className={buttonVariants({
-                variant: "link",
-              })}
-            >
-              <MapPinHouse />
-              Alamat
-            </Link>
-            <Link
-              href={"/account"}
-              className={buttonVariants({
-                variant: "link",
-              })}
-            >
-              <User />
-              Akun
-            </Link>
-          </div>
-          <H1 className="mb-2 w-full text-black">Riwayat Pesanan Anda</H1>
-          <Body3 className="mb-12 w-full text-neutral-500">
-            Tekan untuk melihat detail dari setiap pesanan
-          </Body3>
-          <OrderTable orders={paginatedOrders.data} />
-          <PageSelector meta={paginatedOrders.meta} />
-        </div>
-      </SectionContainer>
-    </PageContainer>
+    <>
+      <div className="mb-6 flex w-full flex-col items-start justify-start">
+        <Link
+          href={"/account/address"}
+          className={buttonVariants({
+            variant: "link",
+          })}
+        >
+          <MapPinHouse />
+          Alamat
+        </Link>
+        <Link
+          href={"/account"}
+          className={buttonVariants({
+            variant: "link",
+          })}
+        >
+          <User />
+          Akun
+        </Link>
+      </div>
+      <H1 className="mb-2 w-full text-black">Riwayat Pesanan Anda</H1>
+      <Body3 className="mb-12 w-full text-neutral-500">
+        Tekan untuk melihat detail dari setiap pesanan
+      </Body3>
+      <OrderTable orders={paginatedOrders.data} />
+      <PageSelector meta={paginatedOrders.meta} />
+    </>
   );
 }

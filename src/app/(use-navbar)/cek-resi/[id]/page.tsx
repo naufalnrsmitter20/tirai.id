@@ -1,8 +1,12 @@
-import { getShipmentStatus } from "@/utils/couriers";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Body3, H2, H3 } from "@/components/ui/text";
 import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
-import { Body2, Body3, Body5, H2, H3, H4, H5 } from "@/components/ui/text";
 import { formatDate } from "@/lib/utils";
+import { getShipmentStatus } from "@/utils/couriers";
+import { ArrowLeft, Clock, MapPin, TruckIcon } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
 export default async function OrderDetail({
   params,
@@ -23,49 +27,118 @@ export default async function OrderDetail({
   if (!shipmentStatus) return notFound();
 
   return (
-    <div className="flex min-h-[70vh] w-full items-center justify-center text-black">
-      <div className="w-[90%] rounded-lg bg-neutral-50 px-3 py-2 sm:w-[40%]">
-        <H2 className="mb-4">Cek Resi Pengiriman</H2>
-        <div className="mb-3 grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
-          <div className="h-[80px] w-full rounded-md bg-neutral-200 px-3 py-2">
-            <Body2>Nama Servis</Body2>
-            <H3>{shipmentStatus.summary.courier}</H3>
+    <div className="container mx-auto min-h-[70vh] max-w-3xl px-4 py-6">
+      <Card className="w-full">
+        <CardHeader>
+          <Link
+            className={buttonVariants({ variant: "link", size: "link" })}
+            href={"/account/order-history"}
+          >
+            <ArrowLeft /> Kembali
+          </Link>
+          <H2 className="font-bold">Cek Resi Pengiriman</H2>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Shipment Summary */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Card className="bg-slate-50">
+              <CardContent className="pt-6">
+                <div className="space-y-1">
+                  <span className="text-sm text-slate-500">Nama Servis</span>
+                  <Body3 className="text-lg font-semibold">
+                    {shipmentStatus.summary.courier}
+                  </Body3>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-50">
+              <CardContent className="pt-6">
+                <div className="space-y-1">
+                  <span className="text-sm text-slate-500">
+                    Tanggal Pengiriman
+                  </span>
+                  <Body3 className="text-lg font-semibold">
+                    {formatDate(new Date(shipmentStatus.summary.date))}
+                  </Body3>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          <div className="h-[80px] w-full rounded-md bg-neutral-200 px-3 py-2">
-            <Body2>Tanggal Pengiriman</Body2>
-            <H3>{formatDate(new Date(shipmentStatus.summary.date))}</H3>
+
+          {/* Shipping Details */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Card className="bg-slate-50">
+              <CardContent className="space-y-3 pt-6">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-slate-500" />
+                  <span className="text-sm text-slate-500">Dari</span>
+                </div>
+                <div className="space-y-1">
+                  <Body3 className="font-medium">
+                    {shipmentStatus.detail.shipper}
+                  </Body3>
+                  <Body3 className="text-sm text-slate-600">
+                    {shipmentStatus.detail.origin.length > 35
+                      ? `${shipmentStatus.detail.origin.substring(0, 35)}...`
+                      : shipmentStatus.detail.origin}
+                  </Body3>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-slate-50">
+              <CardContent className="space-y-3 pt-6">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-slate-500" />
+                  <span className="text-sm text-slate-500">Ke</span>
+                </div>
+                <div className="space-y-1">
+                  <Body3 className="font-medium">
+                    {shipmentStatus.detail.receiver}
+                  </Body3>
+                  <Body3 className="text-sm text-slate-600">
+                    {shipmentStatus.detail.destination.length > 35
+                      ? `${shipmentStatus.detail.destination.substring(0, 35)}...`
+                      : shipmentStatus.detail.destination}
+                  </Body3>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          <div className="h-[136px] w-full rounded-md bg-neutral-200 px-3 py-2">
-            <Body2 className="mb-1">Dari</Body2>
-            <H4>{shipmentStatus.detail.shipper}</H4>
-            <H5>
-              {shipmentStatus.detail.origin.length > 35
-                ? shipmentStatus.detail.origin.substring(0, 35)
-                : shipmentStatus.detail.origin}
-            </H5>
-          </div>
-          <div className="h-[136px] w-full rounded-md bg-neutral-200 px-3 py-2">
-            <Body2 className="mb-1">Ke</Body2>
-            <H4>{shipmentStatus.detail.receiver}</H4>
-            <H5>
-              {shipmentStatus.detail.destination.length > 35
-                ? shipmentStatus.detail.destination.substring(0, 35)
-                : shipmentStatus.detail.destination}
-            </H5>
-          </div>
-        </div>
-        <div className="w-full rounded-lg bg-neutral-50 px-3 py-2">
-          <H3 className="mb-1">Riwayat</H3>
-          <div className="flex w-full flex-col gap-2 rounded-md bg-white px-2 py-2">
-            {shipmentStatus.history.map((i) => (
-              <figure key={i.date} className="w-full">
-                <Body3>{i.desc}</Body3>
-                <Body5>{i.date}</Body5>
-              </figure>
-            ))}
-          </div>
-        </div>
-      </div>
+
+          {/* Tracking History */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-slate-500" />
+                <H3 className="font-semibold">Riwayat Pengiriman</H3>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {shipmentStatus.history.map((event, index) => (
+                  <div
+                    key={event.date}
+                    className="relative flex gap-4 pb-4 pl-6 last:pb-0"
+                  >
+                    {index !== shipmentStatus.history.length - 1 && (
+                      <div className="absolute left-[0.6rem] top-3 h-full w-px bg-slate-200" />
+                    )}
+                    <div className="absolute left-0 top-2 h-3 w-3 rounded-full bg-blue-500" />
+                    <div className="flex-1 space-y-1">
+                      <Body3 className="text-sm">{event.desc}</Body3>
+                      <Body3 className="text-xs text-slate-500">
+                        {event.date}
+                      </Body3>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
     </div>
   );
 }
