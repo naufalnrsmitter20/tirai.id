@@ -112,3 +112,7 @@ export type ChatProduct = Prisma.ProductGetPayload<{
     stock: true;
   };
 }>;
+
+export type ReviewWithOrderUser = Prisma.ReviewGetPayload<{
+  include: { order: { include: { user: true } } };
+}>;
