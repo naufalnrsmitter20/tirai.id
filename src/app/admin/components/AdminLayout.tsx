@@ -1,8 +1,12 @@
 "use client";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarProvider,
+  SidebarTrigger,
+  SidebarInset,
+} from "@/components/ui/sidebar";
 import { AdminSidebar } from "./Sidebar";
-import { SidebarInset } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
+
 export default function AdminLayout({
   children,
 }: {
@@ -11,7 +15,7 @@ export default function AdminLayout({
   const session = useSession();
 
   return (
-    <main className="flex h-screen w-full overflow-hidden bg-white">
+    <main className="flex h-screen w-full bg-white">
       <SidebarProvider>
         <AdminSidebar session={session.data} />
         <SidebarInset>
