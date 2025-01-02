@@ -1,6 +1,6 @@
 "use client";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "./Sidebar";
+import { AdminSidebar } from "./Sidebar";
 import { SidebarInset } from "@/components/ui/sidebar";
 import { useSession } from "next-auth/react";
 export default function AdminLayout({
@@ -13,7 +13,7 @@ export default function AdminLayout({
   return (
     <main className="flex h-screen w-full overflow-hidden bg-white">
       <SidebarProvider>
-        <AppSidebar session={session.data} />
+        <AdminSidebar session={session.data} />
         <SidebarInset>
           <SidebarTrigger className="m-2" />
           <div

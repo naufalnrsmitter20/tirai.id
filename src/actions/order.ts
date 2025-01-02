@@ -3,13 +3,15 @@
 import { ActionResponse, ActionResponses } from "@/lib/actions";
 import prisma from "@/lib/prisma";
 import { updateOrder } from "@/utils/database/order.query";
+import { OrderStatus } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export const confirmOrder = async (
   orderId: string,
+  status: OrderStatus,
 ): Promise<ActionResponse<{ message: string }>> => {
   try {
-    await updateOrder({ id: orderId }, { status: "PACKING" });
+    await updateOrder({ id: orderId }, { status });
 
     revalidatePath("/admin/order");
     revalidatePath("/account/order-history");

@@ -293,8 +293,10 @@ enum Role {
 enum OrderStatus {
   UNPAID // Belum dibayar
   PENDING // Sudah dibayar, belum diapprove sales
-  PACKING // sudah diapprove sales
-  SHIPPING // Order bersama kurir
+  APPROVED // Sudah diapprove sales
+  PRODUCING // Sudah diapprove production
+  PACKING // Sudah diapprove packaging
+  SHIPPING // Sudah input resi, order bersama kurir
   DELIVERED // Telah dikirim di alamat tujuan
   FINISHED // Telah selesai
   CANCELED // Dibatalkan (jika sebelum packing)

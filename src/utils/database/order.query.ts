@@ -21,7 +21,7 @@ export const findOrders = async (
   perPage = 6,
   page = 1,
   sort: "latest" | "popular",
-  filter?: Prisma.OrderWhereUniqueInput,
+  filter?: Prisma.OrderWhereInput,
 ) => {
   const paginate = paginator({ perPage });
   return await paginate<
@@ -44,8 +44,8 @@ export const findOrders = async (
         sort === "latest"
           ? { created_at: "desc" }
           : sort === "popular"
-          ? { reviews: { _count: "desc" } }
-          : undefined,
+            ? { reviews: { _count: "desc" } }
+            : undefined,
       include: {
         items: true,
         payment: true,
@@ -99,8 +99,8 @@ export const findOrdersCustom = async (
         sort === "latest"
           ? { created_at: "desc" }
           : sort === "popular"
-          ? { reviews: { _count: "desc" } }
-          : undefined,
+            ? { reviews: { _count: "desc" } }
+            : undefined,
       include: {
         items: { include: { custom_request: true } },
         payment: true,

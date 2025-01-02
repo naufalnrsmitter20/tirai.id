@@ -152,7 +152,7 @@ export const CartItems: FC<{
             </div>
             {shipping_price === undefined && (
               <Body3 className="mb-2 text-neutral-500">
-                Menunggu konfirasi dari admin (max. 1x24 jam)
+                Menunggu konfirmasi dari admin (max. 2x24 jam)
               </Body3>
             )}
             <Button

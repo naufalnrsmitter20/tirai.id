@@ -51,7 +51,7 @@ const BASE_SIDEBAR_ITEMS: SidebarItem[] = [
     url: "/admin/order",
     icon: Receipt,
     isActive: true,
-    requiredRole: ["ADMIN", "SALES", "SUPERADMIN"],
+    requiredRole: ["ADMIN", "SALES", "SUPERADMIN", "PRODUCTION", "PACKAGING"],
   },
   {
     title: "Shop",
@@ -111,7 +111,7 @@ const BASE_SIDEBAR_ITEMS: SidebarItem[] = [
   },
 ];
 
-export function AppSidebar({ session }: { session: Session | null }) {
+export function AdminSidebar({ session }: { session: Session | null }) {
   const sidebarItems = useMemo(() => {
     if (session?.user) {
       const userRole = session?.user?.role;
@@ -123,7 +123,7 @@ export function AppSidebar({ session }: { session: Session | null }) {
     } else {
       return [];
     }
-  }, [session?.user?.role]);
+  }, [session?.user]);
 
   return (
     <Sidebar collapsible="icon">

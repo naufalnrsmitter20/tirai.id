@@ -5,7 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Body3, Body4, Body5, H3 } from "@/components/ui/text";
+import { Body3, Body4, H3 } from "@/components/ui/text";
 import { useCart } from "@/hooks/use-cart";
 import { cn, formatRupiah } from "@/lib/utils";
 import { CartItem } from "@/types/cart";
@@ -300,7 +300,7 @@ export const ItemCard: FC<{
 
               await removeItem(item.id);
 
-              toast.success("Berhasil menambahkan produk!", {
+              toast.success("Berhasil menghapus barang dari keranjang!", {
                 id: loadingToast,
               });
               return location.reload();

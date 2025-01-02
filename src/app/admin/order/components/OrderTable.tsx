@@ -9,8 +9,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { DataTable } from "@/components/widget/DataTable";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatRupiah } from "@/lib/utils";
 import { OrderWithItemsPaymentShipment } from "@/types/entityRelations";
+import { OrderStatus, Role } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import {
   ArrowUpDown,
@@ -18,23 +19,25 @@ import {
   CircleHelp,
   MoreHorizontal,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next-nprogress-bar";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 export const OrderTable = ({
   orders,
+  role,
 }: {
   orders: OrderWithItemsPaymentShipment[];
+  role: Role;
 }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const handleConfirm = async (orderId: string) => {
+  const handleConfirm = async (orderId: string, status: OrderStatus) => {
     setLoading(true);
     const loadingId = toast.loading("Konfirmasi Order...");
 
-    await confirmOrder(orderId);
+    await confirmOrder(orderId, status);
     setLoading(false);
     return toast.success("Berhasil Konfirmasi Order", {
       id: loadingId,
@@ -60,6 +63,26 @@ export const OrderTable = ({
           );
         },
         cell: ({ row }) => <div>{row.original.id}</div>,
+        enableSorting: true,
+        enableColumnFilter: true,
+      },
+      {
+        id: "price",
+        accessorFn: (row) => row.total_price,
+        header: ({ column }) => {
+          return (
+            <Button
+              variant="ghost"
+              onClick={() =>
+                column.toggleSorting(column.getIsSorted() === "asc")
+              }
+            >
+              Harga
+              <ArrowUpDown size={16} />
+            </Button>
+          );
+        },
+        cell: ({ row }) => <div>{formatRupiah(row.original.total_price)}</div>,
         enableSorting: true,
         enableColumnFilter: true,
       },
@@ -135,16 +158,41 @@ export const OrderTable = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {row.original.payment?.status === "COMPLETED" &&
+                {role === "ADMIN" &&
+                  row.original.payment?.status === "COMPLETED" &&
                   row.original.status === "PENDING" && (
                     <DropdownMenuItem
                       onClick={async () => {
-                        await handleConfirm(row.original.id);
+                        await handleConfirm(row.original.id, "APPROVED");
                       }}
                       disabled={loading}
                     >
                       <CheckCircle />
                       <span>Konfirmasi</span>
+                    </DropdownMenuItem>
+                  )}
+                {role === "PRODUCTION" &&
+                  row.original.status === "APPROVED" && (
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        await handleConfirm(row.original.id, "PRODUCING");
+                      }}
+                      disabled={loading}
+                    >
+                      <CheckCircle />
+                      <span>Konfirmasi Produksi</span>
+                    </DropdownMenuItem>
+                  )}
+                {role === "PACKAGING" &&
+                  row.original.status === "PRODUCING" && (
+                    <DropdownMenuItem
+                      onClick={async () => {
+                        await handleConfirm(row.original.id, "PACKING");
+                      }}
+                      disabled={loading}
+                    >
+                      <CheckCircle />
+                      <span>Konfirmasi Packaging</span>
                     </DropdownMenuItem>
                   )}
                 <DropdownMenuItem
@@ -162,7 +210,7 @@ export const OrderTable = ({
         enableHiding: false,
       },
     ],
-    [router],
+    [loading, role, router],
   );
 
   return (

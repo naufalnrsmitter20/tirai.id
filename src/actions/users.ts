@@ -43,6 +43,7 @@ export const upsertUser = async ({
     if (!id) {
       await createUser({
         ...payload,
+        is_verified: true,
       });
       return ActionResponses.success({
         message: "User registered successfully",

@@ -1,7 +1,11 @@
-import { buttonVariants } from "@/components/ui/button";
-import { Body2, Body3, H2, H3, H5 } from "@/components/ui/text";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { getServerSession } from "@/lib/next-auth";
 import { formatDate, formatRupiah } from "@/lib/utils";
 import { findOrderById } from "@/utils/database/order.query";
+import { Calendar, FileText, TruckIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -15,199 +19,221 @@ export default async function OrderDetail({
 }>) {
   const { id } = await params;
   const order = await findOrderById(id);
+  const session = await getServerSession();
 
-  if (!order) return notFound();
+  if (
+    !order ||
+    (order.status === "APPROVED" &&
+      session?.user?.role !== "PRODUCTION" &&
+      session?.user?.role !== "SUPERADMIN") ||
+    (order.status === "PRODUCING" &&
+      session?.user?.role !== "PACKAGING" &&
+      session?.user?.role !== "SUPERADMIN")
+  )
+    return notFound();
 
   const realTotalPrice = order.items.reduce((acc, i) => {
     return (acc += (i.product?.price ?? i.variant?.price ?? 0) * i.quantity);
   }, 0);
 
   return (
-    <div className="flex w-full flex-col gap-4 text-black">
-      <div className="flex w-full justify-center">
-        <div className="w-[35vw] rounded-lg bg-white px-6 py-4 shadow-md">
-          <H2 className="mb-4 border-b pb-2">Detail Pesanan</H2>
-
-          <div className="space-y-3">
-            <div className="flex w-full items-center justify-between">
-              <Body2>Order ID</Body2>
-              <Body3>{order.id}</Body3>
-            </div>
-
-            {order.invoice_link && (
-              <div className="flex w-full items-center justify-between">
-                <Body2>Invoice</Body2>
-                <Link
-                  href={order.invoice_link}
-                  className={buttonVariants({ variant: "link" })}
-                >
-                  {order.payment?.transaction_id}
-                </Link>
+    <div className="container mx-auto max-w-4xl space-y-6 p-6">
+      {/* Order Summary Card */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold">Detail Pesanan</h2>
+            <p className="text-sm text-muted-foreground">Order #{order.id}</p>
+          </div>
+          <Badge
+            variant={order.status === "FINISHED" ? "default" : "secondary"}
+          >
+            {order.status}
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">
+                  Tanggal: {formatDate(order.created_at)}
+                </span>
               </div>
-            )}
-
-            <div className="flex w-full items-center justify-between">
-              <Body2>Tanggal Pesanan</Body2>
-              <Body3>{formatDate(order.created_at)}</Body3>
+              {order.invoice_link && (
+                <div className="flex items-center gap-2">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <Link
+                    href={order.invoice_link}
+                    className="text-sm text-blue-600 hover:underline"
+                  >
+                    Invoice #{order.payment?.transaction_id}
+                  </Link>
+                </div>
+              )}
             </div>
-
-            <div className="flex w-full items-center justify-between">
-              <Body2>Status Pesanan</Body2>
-              <Body3>{order.status}</Body3>
-            </div>
-
             {order.shipment && (
-              <div className="flex w-full items-center justify-between">
-                <Body2>Status Pengiriman</Body2>
-                <Body3>{order.shipment.status}</Body3>
+              <div className="flex items-center gap-2">
+                <TruckIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">
+                  Status Pengiriman: {order.shipment.status}
+                </span>
               </div>
             )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {order.status === "PENDING" && order.payment?.status === "COMPLETED" && (
-        <div className="flex w-full justify-center">
-          <ConfirmButton order={order} />
-        </div>
-      )}
+      <ConfirmButton order={order} role={session!.user!.role} />
 
-      <div className="flex w-full justify-center">
-        <div className="w-[35vw] rounded-lg bg-white px-6 py-4 shadow-md">
-          <H2 className="mb-4 border-b pb-2">Barang Pesanan</H2>
-
-          <div className="flex w-full flex-col gap-4">
-            {order.items.map((i) => (
-              <figure
-                className="flex w-full gap-4 rounded-xl bg-neutral-50 px-4 py-3"
-                key={i.id}
-              >
-                {i.custom_request ? (
-                  <div className="w-full space-y-2">
-                    <div className="flex justify-between">
-                      <H3>Custom Request</H3>
-                      <Body3 className="text-right">
-                        {formatRupiah(i.custom_request.price)}
-                      </Body3>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Body2 className="text-gray-600">Bahan</Body2>
-                        <Body3>{i.custom_request.material}</Body3>
+      {/* Order Items Card */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-xl font-semibold">Barang Pesanan</h3>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="max-h-[400px] pr-4">
+            <div className="space-y-4">
+              {order.items?.map((item) => (
+                <div key={item.id} className="rounded-lg border bg-card p-4">
+                  {item.custom_request ? (
+                    <div className="space-y-4">
+                      <div className="flex justify-between">
+                        <h4 className="font-semibold">Custom Request</h4>
+                        <span className="font-medium">
+                          {formatRupiah(item.custom_request.price)}
+                        </span>
                       </div>
-
-                      <div>
-                        <Body2 className="text-gray-600">Model</Body2>
-                        <Body3>{i.custom_request.model}</Body3>
-                      </div>
-
-                      <div>
-                        <Body2 className="text-gray-600">Warna</Body2>
-                        <Body3>{i.custom_request.color}</Body3>
-                      </div>
-
-                      <div>
-                        <Body2 className="text-gray-600">Ukuran</Body2>
-                        <Body3>
-                          {i.custom_request.width} x {i.custom_request.height}
-                        </Body3>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-muted-foreground">Bahan</p>
+                          <p>{item.custom_request.material}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Model</p>
+                          <p>{item.custom_request.model}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Warna</p>
+                          <p>{item.custom_request.color}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Ukuran</p>
+                          <p>
+                            {item.custom_request.width} x{" "}
+                            {item.custom_request.height}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ) : (
-                  <>
-                    <Image
-                      alt={i.product?.name || "Product Image"}
-                      src={i.product?.photos[0] || "/placeholder.png"}
-                      width={125}
-                      height={125}
-                      unoptimized
-                      className="aspect-square w-[125px] rounded-lg object-cover"
-                    />
-                    <div className="flex w-full items-center justify-between">
-                      <div>
-                        <H3>{i.product?.name}</H3>
-                        {i.variant && (
-                          <H5 className="text-gray-500">{i.variant.name}</H5>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <Body3>
-                          {i.quantity} x{" "}
-                          {formatRupiah(
-                            // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
-                            i.variant ? i.variant.price! : i.product?.price!,
+                  ) : (
+                    <div className="flex gap-4">
+                      <Image
+                        alt={item.product?.name || "Product Image"}
+                        src={item.product?.photos[0] || "/placeholder.png"}
+                        width={80}
+                        height={80}
+                        className="rounded-lg object-cover"
+                      />
+                      <div className="flex flex-1 justify-between">
+                        <div>
+                          <h4 className="font-semibold">
+                            {item.product?.name}
+                          </h4>
+                          {item.variant && (
+                            <p className="text-sm text-muted-foreground">
+                              {item.variant.name}
+                            </p>
                           )}
-                        </Body3>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm">
+                            {item.quantity} x{" "}
+                            {formatRupiah(
+                              item.variant
+                                ? item.variant.price
+                                : item.product!.price!,
+                            )}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </>
-                )}
-              </figure>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="flex w-full justify-center">
-        <div className="w-[35vw] rounded-lg bg-white px-6 py-4 shadow-md">
-          <H2 className="py-0">Total</H2>
-          <div className="flex w-full items-center justify-between">
-            <Body2>Total Barang ({order.items.length} Barang)</Body2>
-            <Body3>
-              {!order.items[0].custom_request
-                ? formatRupiah(realTotalPrice)
-                : formatRupiah(
-                    order.total_price -
-                      order.shipping_price -
-                      (order.total_price -
-                        order.shipping_price -
-                        (order.total_price - order.shipping_price) / 1.11),
                   )}
-            </Body3>
-          </div>
-          {!order.items[0].custom_request && (
-            <div className="flex w-full items-center justify-between">
-              <Body2>
-                Total Diskon (
-                {Math.round(
-                  ((realTotalPrice -
-                    (order.total_price - order.shipping_price) / 1.11) /
-                    realTotalPrice) *
-                    100,
-                )}
-                %)
-              </Body2>
-              <Body3>
-                -
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+        </CardContent>
+      </Card>
+
+      {/* Order Total Card */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-sm">
+                Total Barang ({order.items?.length} Barang)
+              </span>
+              <span className="font-medium">
+                {!order.items?.[0]?.custom_request
+                  ? formatRupiah(realTotalPrice)
+                  : formatRupiah(
+                      order.total_price -
+                        order.shipping_price -
+                        (order.total_price -
+                          order.shipping_price -
+                          (order.total_price - order.shipping_price) / 1.11),
+                    )}
+              </span>
+            </div>
+
+            {!order.items?.[0]?.custom_request && (
+              <div className="flex justify-between text-sm">
+                <span>
+                  Total Diskon (
+                  {Math.round(
+                    ((realTotalPrice -
+                      (order.total_price - order.shipping_price) / 1.11) /
+                      realTotalPrice) *
+                      100,
+                  )}
+                  %)
+                </span>
+                <span className="text-red-600">
+                  -
+                  {formatRupiah(
+                    realTotalPrice -
+                      (order.total_price - order.shipping_price) / 1.11,
+                  )}
+                </span>
+              </div>
+            )}
+
+            <div className="flex justify-between text-sm">
+              <span>PPN (11%)</span>
+              <span>
                 {formatRupiah(
-                  realTotalPrice -
+                  order.total_price -
+                    order.shipping_price -
                     (order.total_price - order.shipping_price) / 1.11,
                 )}
-              </Body3>
+              </span>
             </div>
-          )}
-          <div className="flex w-full items-center justify-between">
-            <Body2>PPN (11%)</Body2>
-            <Body3>
-              {formatRupiah(
-                order.total_price -
-                  order.shipping_price -
-                  (order.total_price - order.shipping_price) / 1.11,
-              )}
-            </Body3>
+
+            <div className="flex justify-between text-sm">
+              <span>Ongkos Kirim</span>
+              <span>{formatRupiah(order.shipping_price)}</span>
+            </div>
+
+            <Separator />
+
+            <div className="flex justify-between font-medium">
+              <span>Total Pembayaran</span>
+              <span className="text-lg">{formatRupiah(order.total_price)}</span>
+            </div>
           </div>
-          <div className="flex w-full items-center justify-between">
-            <Body2>Ongkos Kirim</Body2>
-            <Body3>{formatRupiah(order.shipping_price)}</Body3>
-          </div>
-          <div className="flex w-full items-center justify-between">
-            <Body2>Subtotal</Body2>
-            <Body3>{formatRupiah(order.total_price)}</Body3>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       <AWBForm order={order} />
     </div>

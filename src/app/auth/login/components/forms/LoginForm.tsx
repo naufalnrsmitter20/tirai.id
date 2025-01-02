@@ -16,6 +16,7 @@ import { useZodForm } from "@/hooks/use-zod-form";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next-nprogress-bar";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FC, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -36,6 +37,7 @@ export const LoginForm: FC = () => {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const { handleSubmit } = form;
 
@@ -82,7 +84,7 @@ export const LoginForm: FC = () => {
 
     toast.success("Berhasil Masuk!", { id: loadingToast });
     setLoading(false);
-    return router.push("/");
+    return router.push(searchParams.get("callbackUrl") ?? "/");
   });
 
   return (
