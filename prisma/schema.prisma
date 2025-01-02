@@ -286,6 +286,8 @@ enum Role {
   SUPERADMIN
   SALES
   CONTENTWRITER
+  PRODUCTION
+  PACKAGING
 }
 
 enum OrderStatus {
