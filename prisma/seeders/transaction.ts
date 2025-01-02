@@ -44,6 +44,41 @@ async function main() {
       password: await hash("salespassword", BCRYPT_ROUNDS),
       role: Role.SALES,
     },
+    {
+      name: "Affiliate User",
+      email: "affiliate@tirai.id",
+      is_verified: true,
+      password: await hash("affiliatepassword", BCRYPT_ROUNDS),
+      role: Role.AFFILIATE,
+    },
+    {
+      name: "Customer User",
+      email: "customer@tirai.id",
+      is_verified: true,
+      password: await hash("customerpassword", BCRYPT_ROUNDS),
+      role: Role.CUSTOMER,
+    },
+    {
+      name: "Agent User",
+      email: "agent@tirai.id",
+      is_verified: true,
+      password: await hash("agentpassword", BCRYPT_ROUNDS),
+      role: Role.AGENT,
+    },
+    {
+      name: "Packaging User",
+      email: "packaging@tirai.id",
+      is_verified: true,
+      password: await hash("packagingpassword", BCRYPT_ROUNDS),
+      role: Role.PACKAGING,
+    },
+    {
+      name: "Production User",
+      email: "production@tirai.id",
+      is_verified: true,
+      password: await hash("productionpassword", BCRYPT_ROUNDS),
+      role: Role.PRODUCTION,
+    },
   ];
 
   for (const user of users) {
@@ -87,6 +122,7 @@ async function main() {
       weight: 2.5,
       slug: "tirai-blackout-premium",
       is_published: true,
+      is_vat: true,
       category_id: await prisma.productCategory
         .findFirst({
           where: { slug: "tirai-blackout" },
@@ -101,6 +137,7 @@ async function main() {
       price: 250000,
       stock: 150,
       weight: 1.2,
+      is_vat: false,
       slug: "tirai-sheer-transparan",
       is_published: true,
       category_id: await prisma.productCategory
@@ -117,6 +154,7 @@ async function main() {
       price: 350000,
       stock: 75,
       weight: 3.0,
+      is_vat: true,
       slug: "gorden-dekoratif-motif-bunga",
       is_published: true,
       category_id: await prisma.productCategory
@@ -132,6 +170,7 @@ async function main() {
       price: 150000,
       stock: 200,
       weight: 1.5,
+      is_vat: false,
       slug: "rel-gorden-aluminium",
       is_published: true,
       category_id: await prisma.productCategory

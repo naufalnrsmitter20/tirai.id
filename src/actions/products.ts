@@ -26,7 +26,7 @@ interface UpsertProductData {
   name?: string;
   description?: string;
   stock?: number;
-  price?: number;
+  price?: number | null;
   weight?: number;
   photos?: FormData;
   is_vat: boolean;
