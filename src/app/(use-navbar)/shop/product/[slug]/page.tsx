@@ -2,13 +2,12 @@ import { PageContainer } from "@/components/layout/PageContainer";
 import { getServerSession } from "@/lib/next-auth";
 import prisma from "@/lib/prisma";
 import { isCustomCart } from "@/lib/utils";
+import { findDiscountByRole } from "@/utils/database/discount.query";
+import { findReviews } from "@/utils/database/review.query";
 import { notFound } from "next/navigation";
 import { Hero } from "./components/Hero";
 import { Keunggulan } from "./components/Keunggulan";
 import { Others } from "./components/Others";
-import { findDiscountByRole } from "@/utils/database/discount.query";
-import { findReviews } from "@/utils/database/review.query";
-import { SectionContainer } from "@/components/layout/SectionContainer";
 import { Reviews } from "./components/Reviews";
 
 export default async function ProductDetail({

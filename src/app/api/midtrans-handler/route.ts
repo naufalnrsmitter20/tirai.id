@@ -61,6 +61,15 @@ export async function POST(req: Request) {
         break;
       case "deny":
       case "expire":
+        await prisma.payment.update({
+          where: {
+            order_id: orderId,
+          },
+          data: {
+            status: "FAILED",
+          },
+        });
+        break;
       case "cancel": {
         const payment = await prisma.payment.update({
           where: {

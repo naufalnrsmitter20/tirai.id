@@ -6,7 +6,6 @@ import { ChatProduct, ChatUser } from "@/types/entityRelations";
 import { CheckCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
 
 export const ProductMessageCard = ({
   message,

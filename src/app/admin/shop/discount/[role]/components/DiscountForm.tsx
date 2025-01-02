@@ -4,7 +4,6 @@ import { upsertDiscount } from "@/actions/discount";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Body3 } from "@/components/ui/text";
-import { useToast } from "@/hooks/use-toast";
 import { Discount, Role } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

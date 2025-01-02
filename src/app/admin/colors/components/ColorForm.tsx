@@ -74,6 +74,7 @@ export default function ColorForm({ updateData }: ColorFormProps) {
         { id: loadingToast },
       );
       return router.push("/admin/colors");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       setLoading(false);
       return toast.error(

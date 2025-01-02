@@ -2,7 +2,6 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Body3, H3, H4, H5 } from "@/components/ui/text";
 import { ReviewWithOrderUser } from "@/types/entityRelations";
 import { Star } from "lucide-react";
 

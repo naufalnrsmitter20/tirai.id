@@ -1,12 +1,11 @@
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import { H2 } from "@/components/ui/text";
+import { PageSelector } from "@/components/widget/PageSelector";
 import prisma from "@/lib/prisma";
 import { findReviews } from "@/utils/database/review.query";
-import { Section } from "lucide-react";
 import { ReviewCard } from "../components/ReviewCard";
 import { ReviewFilter } from "./ReviewFilter";
-import { PageSelector } from "@/components/widget/PageSelector";
 
 export default async function ReviewsPage({
   params,
@@ -20,7 +19,7 @@ export default async function ReviewsPage({
 
   const filterRating = rating ? parseInt(rating) : undefined;
 
-  let page = currPage ? parseInt(currPage) : 1;
+  const page = currPage ? parseInt(currPage) : 1;
   const product = await prisma.product.findUnique({
     where: {
       slug,

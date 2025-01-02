@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { ChatUser } from "@/types/entityRelations";
 import { CheckCheck, FileText } from "lucide-react";
 import Image from "next/image";
-import { useEffect } from "react";
 
 export const FileMessageCard = ({
   message,

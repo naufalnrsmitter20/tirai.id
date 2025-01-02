@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/select";
 import { Body1, Body3 } from "@/components/ui/text";
 import { formatRupiah } from "@/lib/utils";
-import { Courier } from "@/types/courier";
 import { getCouriers } from "@/utils/couriers";
 import { ShippingAddress } from "@prisma/client";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";

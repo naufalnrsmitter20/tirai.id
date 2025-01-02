@@ -1,7 +1,7 @@
 import { paginator } from "@/lib/paginator";
 import prisma from "@/lib/prisma";
 import { ReviewWithOrderUser } from "@/types/entityRelations";
-import { Prisma, Review } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 export const createReview = async (data: Prisma.ReviewCreateInput) => {
   return await prisma.review.create({
