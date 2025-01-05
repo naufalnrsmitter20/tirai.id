@@ -17,6 +17,13 @@ async function main() {
       role: Role.CUSTOMER,
     },
     {
+      name: "Super Admin",
+      email: "superadmin@tirai.id",
+      is_verified: true,
+      password: await hash("superadminpassword", BCRYPT_ROUNDS),
+      role: Role.SUPERADMIN,
+    },
+    {
       name: "Alice Admin",
       email: "alice.admin@example.com",
       is_verified: true,
@@ -194,50 +201,50 @@ async function main() {
   }
 
   // Orders
-  const orders = [
-    {
-      total_price: 850000,
-      phone_number: "081234567890",
-      status: OrderStatus.FINISHED,
-      user_id: await prisma.user
-        .findFirst({
-          where: { email: "john.customer@example.com" },
-        })
-        .then((user) => user?.id || ""),
-    },
-    {
-      total_price: 350000,
-      phone_number: "081234567891",
-      status: OrderStatus.PACKING,
-      user_id: await prisma.user
-        .findFirst({
-          where: { email: "john.customer@example.com" },
-        })
-        .then((user) => user?.id || ""),
-    },
-    {
-      total_price: 500000,
-      phone_number: "081234567892",
-      status: OrderStatus.SHIPPING,
-      user_id: await prisma.user
-        .findFirst({
-          where: { email: "john.customer@example.com" },
-        })
-        .then((user) => user?.id || ""),
-    },
-  ];
+  // const orders = [
+  //   {
+  //     total_price: 850000,
+  //     phone_number: "081234567890",
+  //     status: OrderStatus.FINISHED,
+  //     user_id: await prisma.user
+  //       .findFirst({
+  //         where: { email: "john.customer@example.com" },
+  //       })
+  //       .then((user) => user?.id || ""),
+  //   },
+  //   {
+  //     total_price: 350000,
+  //     phone_number: "081234567891",
+  //     status: OrderStatus.PACKING,
+  //     user_id: await prisma.user
+  //       .findFirst({
+  //         where: { email: "john.customer@example.com" },
+  //       })
+  //       .then((user) => user?.id || ""),
+  //   },
+  //   {
+  //     total_price: 500000,
+  //     phone_number: "081234567892",
+  //     status: OrderStatus.SHIPPING,
+  //     user_id: await prisma.user
+  //       .findFirst({
+  //         where: { email: "john.customer@example.com" },
+  //       })
+  //       .then((user) => user?.id || ""),
+  //   },
+  // ];
 
-  for (const order of orders) {
-    await prisma.order.create({
-      data: {
-        ...order,
-        shipping_address: "",
-        created_at: new Date(),
-        updated_at: new Date(),
-        shipping_price: 0,
-      },
-    });
-  }
+  // for (const order of orders) {
+  //   await prisma.order.create({
+  //     data: {
+  //       ...order,
+  //       shipping_address: "",
+  //       created_at: new Date(),
+  //       updated_at: new Date(),
+  //       shipping_price: 0,
+  //     },
+  //   });
+  // }
 
   // Reviews
   // const reviews:Reviews = [

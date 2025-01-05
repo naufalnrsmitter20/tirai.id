@@ -46,8 +46,7 @@ export const upsertModel = async (
 
     await updateModel({ id }, payload);
 
-    revalidatePath("/admin/model");
-    revalidatePath("/shop/custom-product");
+    revalidatePath("/", "layout");
     return ActionResponses.success({
       message: "Model berhasil diperbarui",
     });
@@ -66,8 +65,7 @@ export const deleteModel = async (
 
     await deleteModelQuery({ id });
 
-    revalidatePath("/admin/model");
-    revalidatePath("/shop/custom-product");
+    revalidatePath("/", "layout");
     return ActionResponses.success({
       id,
       message: "Model berhasil dihapus",

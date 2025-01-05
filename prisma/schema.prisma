@@ -103,6 +103,8 @@ model Review {
   product_id    String
   product       Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
 
+  created_at DateTime @default(now())
+
   @@unique([order_item_id, order_id])
 }
 

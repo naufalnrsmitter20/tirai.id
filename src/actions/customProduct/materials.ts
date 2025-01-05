@@ -43,7 +43,7 @@ export const upsertMaterial = async (data: {
 
     await updateMaterial({ id }, payload);
 
-    revalidatePath("/admin/material");
+    revalidatePath("/", "layout");
     return ActionResponses.success({
       message: "Material updated successfully",
     });
@@ -62,7 +62,6 @@ export const deleteMaterial = async (
 
     await deleteMaterialQuery({ id });
 
-    revalidatePath("/admin/material");
     revalidatePath("/", "layout");
     return ActionResponses.success({ id });
   } catch (error) {

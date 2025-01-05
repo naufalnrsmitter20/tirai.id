@@ -61,6 +61,16 @@ export const AWBForm = ({
             </span>
           </div>
 
+          <div className="flex items-center justify-between rounded-lg bg-slate-50 p-4">
+            <div className="flex items-center gap-2">
+              <BoxIcon className="h-4 w-4 text-slate-600" />
+              <span className="text-sm font-medium">AWB</span>
+            </div>
+            <span className="text-sm font-semibold text-blue-600">
+              {order.shipment?.tracking_id}
+            </span>
+          </div>
+
           {/* Shipping Address */}
           <div className="rounded-lg bg-slate-50 p-4">
             <div className="flex items-start justify-between">

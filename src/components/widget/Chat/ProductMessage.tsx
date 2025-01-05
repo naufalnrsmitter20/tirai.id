@@ -89,7 +89,7 @@ export const ProductMessageCard = ({
                 {participants &&
                   participants[
                     participants.findIndex((i) => i.id === message.sender_id)
-                  ].id}
+                  ].name}
               </Body5>
             )}
           <div className="flex h-auto w-full items-center justify-center gap-x-2">

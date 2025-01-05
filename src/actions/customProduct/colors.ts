@@ -32,7 +32,7 @@ export const upsertColor = async (
       },
     });
 
-    revalidatePath("/admin/colors");
+    revalidatePath("/", "layout");
     return ActionResponses.success({
       message: "Color created successfully",
     });
@@ -46,8 +46,9 @@ export const upsertColor = async (
     },
   });
 
-  revalidatePath("/admin/colors");
-  revalidatePath("/shop/custom-product");
+  // revalidatePath("/admin/colors");
+  // revalidatePath("/shop/custom-product");
+  revalidatePath("/", "layout");
   return ActionResponses.success({
     message: "Color updated successfully",
   });
@@ -73,8 +74,9 @@ export const deleteColor = async (
       where: { id },
     });
 
-    revalidatePath("/admin/colors");
-    revalidatePath("/shop/custom-product");
+    // revalidatePath("/admin/colors");
+    // revalidatePath("/shop/custom-product");
+    revalidatePath("/", "layout");
     return ActionResponses.success({ id });
   } catch (error) {
     console.error(error);

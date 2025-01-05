@@ -14,7 +14,15 @@ export default async function OrderPage({
   const session = await getServerSession();
 
   const statusMap: { [key: string]: Prisma.OrderWhereInput } = {
-    ADMIN: { OR: [{ status: "PENDING" }, { status: "PACKING" }] }, // Admin approve n input resi
+    ADMIN: {
+      OR: [
+        { status: "PENDING" },
+        { status: "PACKING" },
+        { status: "SHIPPING" },
+        { status: "DELIVERED" },
+        { status: "FINISHED" },
+      ],
+    }, // Admin approve n input resi
     SUPERADMIN: {}, // Superadmin can see all orders
     PRODUCTION: { status: "APPROVED" }, // Production can confirm if the status is already approved by admin
     PACKAGING: { status: "PRODUCING" }, // Packaging can confir if the status is already confirmed by production
