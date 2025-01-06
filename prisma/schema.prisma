@@ -180,11 +180,11 @@ model Order {
   payment  Payment?
   shipment Shipment?
 
-  user             User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user             User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id          String
   shipping_address String
-  referal          Referal @relation(fields: [referal_id], references: [id])
-  referal_id       Int
+  referal          Referal? @relation(fields: [referal_id], references: [id])
+  referal_id       Int?
 }
 
 model Discount {
