@@ -179,11 +179,12 @@ model Order {
   items    OrderItem[]
   payment  Payment?
   shipment Shipment?
-  referal  Referal[]
 
-  user             User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user             User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_id          String
   shipping_address String
+  referal          Referal @relation(fields: [referal_id], references: [id])
+  referal_id       Int
 }
 
 model Discount {
@@ -273,7 +274,7 @@ model Referal {
   code                String  @unique
   fee_in_percent      Float
   discount_in_percent Float
-  order               Order[]
+  orders              Order[]
 }
 
 model SEO {
