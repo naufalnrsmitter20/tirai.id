@@ -41,56 +41,39 @@ export const ItemCard: FC<{
   );
 
   useEffect(() => {
-    const init = () => {
-      if (!product) return;
+    const updateQuantityWithStockLimits = () => {
+      if (!product || !quantities) return;
 
       const { stock, variants } = product;
+      let maxStock;
 
+      // Determine max stock based on product type
       if (stock !== null) {
-        setQuantities(
-          quantities?.map((q) => {
-            if (q.id === item.id) {
-              return { ...q, quantity: Math.min(item.quantity, stock) };
-            }
-
-            return q;
-          }),
-        );
-        return;
+        maxStock = stock;
+      } else {
+        const variant = variants.find(({ id }) => id === item.variantId);
+        maxStock = variant ? variant.stock : Infinity;
       }
 
-      const variant = variants.find(({ id }) => id === item.variantId);
-      if (variant) {
+      // Only update if current quantity exceeds stock
+      const currentQuantity = quantities.find(
+        (q) => q.id === item.id,
+      )?.quantity;
+      if (currentQuantity && currentQuantity > maxStock) {
         setQuantities(
-          quantities?.map((q) => {
+          quantities.map((q) => {
             if (q.id === item.id) {
-              return { ...q, quantity: Math.min(item.quantity, variant.stock) };
+              return { ...q, quantity: maxStock };
             }
-
-            return q;
-          }),
-        );
-      } else {
-        setQuantities(
-          quantities?.map((q) => {
-            if (q.id === item.id) {
-              return { ...q, quantity: item.quantity };
-            }
-
             return q;
           }),
         );
       }
     };
 
-    init();
+    updateQuantityWithStockLimits();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item, product]);
-
-  useEffect(() => {
-    editItem(item.id, { quantity });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [quantity, item.id]);
+  }, [product, item.id, quantities]);
 
   if (itemVariant === undefined && product === undefined) {
     return (
@@ -261,7 +244,7 @@ export const ItemCard: FC<{
         )}
         <div className="flex items-center gap-x-4">
           <Select
-            onValueChange={(value) => {
+            onValueChange={async (value) => {
               setQuantities(
                 quantities?.map((q) => {
                   if (q.id === item.id) {
@@ -274,7 +257,8 @@ export const ItemCard: FC<{
                   return q;
                 }),
               );
-              editItem(item.id, { quantity: Number(value) });
+
+              await editItem(item.id, { quantity: Number(value) });
             }}
             value={quantity.toString()}
           >

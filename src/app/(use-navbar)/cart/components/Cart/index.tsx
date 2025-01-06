@@ -9,7 +9,7 @@ import { useCart } from "@/hooks/use-cart";
 import { formatRupiah } from "@/lib/utils";
 import { CustomRequestItem } from "@/types/cart";
 import { Discount, Prisma } from "@prisma/client";
-import { CreditCard, Package, Palette, Ruler } from "lucide-react";
+import { CreditCard, Package, Ruler } from "lucide-react";
 import { useRouter } from "next-nprogress-bar";
 import { FC, useEffect, useState } from "react";
 import { EmptyCart } from "../EmptyCart";
@@ -31,7 +31,7 @@ export const CartItems: FC<{
   const router = useRouter();
 
   useEffect(() => {
-    if (cart !== undefined) {
+    if (cart !== undefined && quantities === undefined) {
       setQuantities(
         cart
           .filter((item) => {
@@ -49,7 +49,7 @@ export const CartItems: FC<{
           .map((item) => ({ id: item.id, quantity: item.quantity })),
       );
     }
-  }, [cart, products]);
+  }, [cart, products, quantities]);
 
   if (cart === undefined)
     return (
@@ -59,7 +59,7 @@ export const CartItems: FC<{
     );
 
   if (customRequest !== null) {
-    const { id, material, model, color, width, height, price, shipping_price } =
+    const { id, material, model, width, height, price, shipping_price } =
       customRequest;
 
     return (
@@ -83,20 +83,6 @@ export const CartItems: FC<{
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <Palette className="h-5 w-5 text-gray-500" />
-                      <span>Warna</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="h-6 w-6 rounded-full border border-gray-200"
-                        style={{ backgroundColor: color }}
-                      />
-                      <span className="text-sm text-gray-600">{color}</span>
-                    </div>
-                  </div>
-
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">
                       <Ruler className="h-5 w-5 text-gray-500" />

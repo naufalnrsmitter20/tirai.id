@@ -9,7 +9,6 @@ export type CustomRequestItem = {
   id: string;
   material: string;
   model: string;
-  color: string;
   width: string;
   height: string;
   price: number;
