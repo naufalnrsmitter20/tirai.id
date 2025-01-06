@@ -1,12 +1,36 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
-import prisma from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
-import { ActionResponses } from "@/lib/actions";
-import { createProductCustom } from "@/utils/database/customProduct.query";
-import { buildShipmentAddressString } from "@/utils/build-shipment-address-string";
 import { updateCart } from "@/actions/cart";
+import { ActionResponses } from "@/lib/actions";
+import prisma from "@/lib/prisma";
+import { isCustomCart } from "@/lib/utils";
+import { buildShipmentAddressString } from "@/utils/build-shipment-address-string";
+import { createProductCustom } from "@/utils/database/customProduct.query";
+import { Prisma } from "@prisma/client";
+import { revalidatePath } from "next/cache";
+
+interface CustomProductData {
+  width: string;
+  height: string;
+  material: string;
+  model: string;
+  price: number;
+  color: string;
+  recipient: {
+    name: string;
+    phoneNumber: string;
+  };
+  address: {
+    street: string;
+    village?: string;
+    district?: string;
+    city: string;
+    province: string;
+    postalCode: string;
+    additionalInfo?: string;
+  };
+  userId: string;
+}
 
 export const saveAddress = async (
   address: Prisma.ShippingAddressUncheckedCreateInput,
@@ -17,91 +41,126 @@ export const saveAddress = async (
   return newAddress;
 };
 
-export const addCustomProductByUser = async (data: FormData) => {
-  const width = data.get("width") as string;
-  const height = data.get("length") as string;
-  const material = data.get("material") as string;
-  const model = data.get("model") as string;
-  const price = parseFloat(data.get("price") as string);
-  const color = data.get("color") as string;
-  const recipientName = data.get("recipient_name") as string;
-  const recipientPhoneNumber = data.get("recipient_phone_number") as string;
-  const street = data.get("street") as string;
-  const village = data.get("village") as string;
-  const district = data.get("district") as string;
-  const city = data.get("city") as string;
-  const province = data.get("province") as string;
-  const postalCode = data.get("postal_code") as string;
-  const additionalInfo = data.get("additional_info") as string | null;
-  const userId = data.get("user_id") as string;
-
+const extractFormData = (data: FormData): CustomProductData | null => {
   try {
-    if (
-      !width ||
-      !height ||
-      !material ||
-      !model ||
-      !price ||
-      !color ||
-      !recipientName ||
-      !recipientPhoneNumber ||
-      !street ||
-      !city ||
-      !province ||
-      !postalCode
-    ) {
+    return {
+      width: data.get("width") as string,
+      height: data.get("length") as string,
+      material: data.get("material") as string,
+      model: data.get("model") as string,
+      price: parseFloat(data.get("price") as string),
+      color: data.get("color") as string,
+      recipient: {
+        name: data.get("recipient_name") as string,
+        phoneNumber: data.get("recipient_phone_number") as string,
+      },
+      address: {
+        street: data.get("street") as string,
+        village: data.get("village") as string,
+        district: data.get("district") as string,
+        city: data.get("city") as string,
+        province: data.get("province") as string,
+        postalCode: data.get("postal_code") as string,
+        additionalInfo: data.get("additional_info") as string,
+      },
+      userId: data.get("user_id") as string,
+    };
+  } catch (error) {
+    console.error("Error extracting form data:", error);
+    return null;
+  }
+};
+
+const validateCustomProductData = (data: CustomProductData): boolean => {
+  const requiredFields = [
+    data.width,
+    data.height,
+    data.material,
+    data.model,
+    data.price,
+    data.color,
+    data.recipient.name,
+    data.recipient.phoneNumber,
+    data.address.street,
+    data.address.city,
+    data.address.province,
+    data.address.postalCode,
+  ];
+
+  return requiredFields.every(
+    (field) => field !== undefined && field !== null && field !== "",
+  );
+};
+
+export const addCustomProductByUser = async (formData: FormData) => {
+  try {
+    const data = extractFormData(formData);
+
+    if (!data) {
+      return ActionResponses.serverError("Failed to process form data");
+    }
+
+    if (!validateCustomProductData(data)) {
       return ActionResponses.serverError("Missing required fields");
     }
 
     const address = buildShipmentAddressString({
-      additional_info: additionalInfo,
-      city,
+      additional_info: data.address.additionalInfo ?? null,
+      city: data.address.city,
       created_at: new Date(),
-      district,
+      district: data.address.district || "-",
       id: "",
       is_primary: false,
-      postal_code: postalCode,
-      province,
-      recipient_name: recipientName,
-      recipient_phone_number: recipientPhoneNumber,
-      street,
+      postal_code: data.address.postalCode,
+      province: data.address.province,
+      recipient_name: data.recipient.name,
+      recipient_phone_number: data.recipient.phoneNumber,
+      street: data.address.street,
       updated_at: new Date(),
       user_id: "",
-      village,
+      village: data.address.village || "-",
     });
 
     const productCustom = await createProductCustom({
-      width,
-      height,
-      color,
-      price,
-      material,
-      model,
+      width: data.width,
+      height: data.height,
+      price: data.price,
+      material: data.material,
+      model: data.model,
       address,
-      userId,
-      recipient_name: recipientName,
-      recipient_phone_number: recipientPhoneNumber,
+      userId: data.userId,
+      recipient_name: data.recipient.name,
+      recipient_phone_number: data.recipient.phoneNumber,
     });
 
     if (!productCustom) {
       return ActionResponses.serverError("Failed to create Product Custom");
     }
 
+    // Update the user's cart
+    const cart = await prisma.cart.findUnique({
+      where: { user_id: data.userId },
+    });
+    if (!cart) return ActionResponses.notFound("Cart is not found");
+
+    if (!isCustomCart(cart.json_content))
+      return ActionResponses.badRequest("Cart is not a custom request cart");
+
     await updateCart({
       type: "custom",
-      item: {
-        ...productCustom,
-        shipping_price: productCustom.shipping_price
-          ? productCustom.shipping_price
-          : undefined,
-      },
+      items: [
+        ...cart.json_content.items,
+        {
+          ...productCustom,
+          shipping_price: productCustom.shipping_price ?? undefined,
+        },
+      ],
     });
 
     revalidatePath("/");
-
     return ActionResponses.success(productCustom);
   } catch (error) {
-    console.log((error as Error).message);
+    console.error("Error creating custom product:", error);
     return ActionResponses.serverError("Failed to create Product Custom");
   }
 };

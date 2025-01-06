@@ -71,7 +71,7 @@ export default async function ProductDetail({
   const hasCustomCart =
     cart !== null &&
     isCustomCart(cart.json_content) &&
-    cart.json_content.item !== undefined;
+    cart.json_content.items.length > 0;
 
   const discount =
     session && session.user

@@ -22,7 +22,7 @@ import { Service } from "./shippingPrice/scraper";
 
 interface CartObject {
   cartItems?: CartItem[];
-  customRequest?: CustomRequestItem;
+  customRequests?: CustomRequestItem[];
 }
 
 const BATCH_SIZE = 2; // Process items in smaller batches

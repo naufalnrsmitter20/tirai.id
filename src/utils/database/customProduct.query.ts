@@ -7,6 +7,7 @@ export const createProductCustom = async (
 ) => {
   return await prisma.customRequest.create({ data });
 };
+
 export const updateProductCustom = async (
   where: Prisma.CustomRequestWhereUniqueInput,
   data: Prisma.CustomRequestUpdateInput,

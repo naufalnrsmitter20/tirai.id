@@ -1,29 +1,29 @@
 "use client";
 
-import { FC, useState } from "react";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Settings, Palette } from "lucide-react";
 import FabricIcon from "@/components/svg-tsxIcon/fabricIcon";
-import { Discount, Prisma } from "@prisma/client";
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
+import { Body3, H1 } from "@/components/ui/text";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { AddressSection, ShippingAddress } from "./Address";
+import { Discount, Prisma } from "@prisma/client";
+import { Settings } from "lucide-react";
 import { Session } from "next-auth";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { FC, useState } from "react";
 import { toast } from "sonner";
 import { addCustomProductByUser, saveAddress } from "../actions";
-import { useRouter } from "next/navigation";
-import { Body3, H1 } from "@/components/ui/text";
+import { AddressSection, ShippingAddress } from "./Address";
 
 export type Models = Prisma.ModelGetPayload<{
   select: { id: true; description: true; image: true; name: true };

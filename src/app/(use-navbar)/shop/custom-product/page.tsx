@@ -1,22 +1,22 @@
-import { getServerSession } from "@/lib/next-auth";
-import { Form } from "./components/Form";
-import prisma from "@/lib/prisma";
-import { notFound } from "next/navigation";
-import { isCustomCart, isReadyStockCart } from "@/lib/utils";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionContainer } from "@/components/layout/SectionContainer";
-import { Ban } from "lucide-react";
-import { Body3, H1 } from "@/components/ui/text";
-import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { Body3, H1 } from "@/components/ui/text";
+import { getServerSession } from "@/lib/next-auth";
+import prisma from "@/lib/prisma";
+import { isReadyStockCart } from "@/lib/utils";
 import { findDiscountByRole } from "@/utils/database/discount.query";
+import { Ban } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Form } from "./components/Form";
 
 export default async function Page() {
   const session = await getServerSession();
 
   if (!session?.user) return;
 
-  const [models, bahans, addresses, cart] = await prisma.$transaction([
+  const [models, materials, addresses, cart] = await prisma.$transaction([
     prisma.model.findMany({
       select: {
         id: true,
@@ -58,9 +58,8 @@ export default async function Page() {
 
   if (
     cart &&
-    ((isReadyStockCart(cart.json_content) &&
-      cart.json_content.items.length > 0) ||
-      (isCustomCart(cart.json_content) && cart.json_content.item))
+    isReadyStockCart(cart.json_content) &&
+    cart.json_content.items.length > 0
   ) {
     return (
       <PageContainer>
@@ -89,13 +88,13 @@ export default async function Page() {
     );
   }
 
-  if (models.length < 1 || bahans.length < 1) return notFound();
+  if (models.length < 1 || materials.length < 1) return notFound();
 
   return (
     <PageContainer>
       <Form
         models={models}
-        bahans={bahans}
+        bahans={materials}
         addresses={addresses}
         user={session.user}
         discount={discount}

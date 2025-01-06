@@ -72,7 +72,6 @@ export default function CustomRequestForm({
     defaultValues: {
       material: updateData.material,
       model: updateData.model,
-      color: updateData.color,
       width: updateData.width,
       height: updateData.height,
       price: updateData.price,

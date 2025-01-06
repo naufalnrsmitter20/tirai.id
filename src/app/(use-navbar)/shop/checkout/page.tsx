@@ -71,9 +71,11 @@ export default async function Checkout() {
     return redirect("/cart");
   }
 
-  const customRequest =
+  const customRequests =
     cart.type === "custom"
-      ? await prisma.customRequest.findUnique({ where: { id: cart.item?.id } })
+      ? await prisma.customRequest.findMany({
+          where: { id: { in: cart.items.map((c) => c.id) } },
+        })
       : undefined;
 
   const discount = await findDiscountByRole(session.user.role);
@@ -84,12 +86,18 @@ export default async function Checkout() {
         addresses={addresses}
         cartItems={cart.type === "ready-stock" ? cart.items : undefined}
         products={products}
-        customRequest={
-          customRequest
-            ? {
-                ...customRequest,
+        customRequests={
+          customRequests
+            ? customRequests.map((customRequest) => ({
+                id: customRequest.id,
+                width: customRequest.width,
+                height: customRequest.height,
+                is_vat: customRequest.is_vat,
+                material: customRequest.material,
+                model: customRequest.model,
+                price: customRequest.price,
                 shipping_price: customRequest.shipping_price ?? undefined,
-              }
+              }))
             : undefined
         }
         discount={discount}
