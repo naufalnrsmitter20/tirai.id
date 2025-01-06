@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteUserAction } from "@/actions/users";
+import { deleteReferalAction } from "@/actions/referals";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -50,7 +50,7 @@ export const ReferalTable: FC<{
         enableColumnFilter: true,
       },
       {
-        id: "Afiliator",
+        id: "afiliator",
         accessorFn: ({ user }) => user.name,
         header: ({ column }) => {
           return (
@@ -60,7 +60,7 @@ export const ReferalTable: FC<{
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
             >
-              Nama
+              Afiliator
               <ArrowUpDown size={16} />
             </Button>
           );
@@ -103,7 +103,7 @@ export const ReferalTable: FC<{
             </Button>
           );
         },
-        cell: ({ row }) => <div>{row.getValue("fee_in_percent")}</div>,
+        cell: ({ row }) => <div>{row.getValue("fee_in_percent")}%</div>,
         enableSorting: true,
         enableColumnFilter: true,
       },
@@ -145,7 +145,7 @@ export const ReferalTable: FC<{
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {
-                    router.push(`/admin/user/${row.original.id}`);
+                    router.push(`/admin/referal/${row.original.id}`);
                   }}
                 >
                   <Pencil />
@@ -153,14 +153,14 @@ export const ReferalTable: FC<{
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={async () => {
-                    // const data = { id: row.original.id };
-                    // const deleteUser = await deleteUserAction({ data });
-                    // if (!deleteUser) {
-                    //   toast.error("Gagal menghapus user");
-                    // }
-                    // toast.success("User berhasil dihapus");
-                    // router.refresh();
-                    // return deleteUser;
+                    const data = { id: row.original.id };
+                    const deleteReferal = await deleteReferalAction({ data });
+                    if (!deleteReferal) {
+                      toast.error("Gagal menghapus referal");
+                    }
+                    toast.success("Referal berhasil dihapus");
+                    router.refresh();
+                    return;
                   }}
                 >
                   <Trash />

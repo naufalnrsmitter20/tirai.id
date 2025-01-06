@@ -10,7 +10,7 @@ export const findReferals = async (
   const paginate = paginator({ perPage });
 
   return await paginate<Referal, Prisma.ReferalFindManyArgs>(
-    prisma.user,
+    prisma.referal,
     { page },
     args,
   );

@@ -1,9 +1,8 @@
 import { H1 } from "@/components/ui/text";
-import prisma from "@/lib/prisma";
-import { ReferalTable } from "./components/ReferalTable";
-import { findReferals } from "@/utils/database/referal.query";
-import { ReferalWithUser } from "@/types/entityRelations";
 import { PageSelector } from "@/components/widget/PageSelector";
+import { ReferalWithUser } from "@/types/entityRelations";
+import { findReferals } from "@/utils/database/referal.query";
+import { ReferalTable } from "./components/ReferalTable";
 
 export default async function ReferalPage({
   searchParams,

@@ -1,4 +1,3 @@
-import { findUser } from "@/utils/database/user.query";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ReferalForm from "../components/ReferalForm";

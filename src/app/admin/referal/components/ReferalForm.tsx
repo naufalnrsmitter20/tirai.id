@@ -1,6 +1,6 @@
 "use client";
 
-import { upsertUser } from "@/actions/users";
+import { upsertReferal } from "@/actions/referals";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -10,7 +10,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { formatPrice } from "@/utils/format-price";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -21,13 +20,13 @@ import {
 } from "@/components/ui/select";
 import { H2 } from "@/components/ui/text";
 import { useZodForm } from "@/hooks/use-zod-form";
-import { Role } from "@prisma/client";
+import { ReferalWithUser } from "@/types/entityRelations";
+import { formatPrice, parsePrice } from "@/utils/format-price";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next-nprogress-bar";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { ReferalWithUser } from "@/types/entityRelations";
 
 export default function ReferalForm({
   updateData,
@@ -45,7 +44,7 @@ export default function ReferalForm({
         discount_in_percent: z.string().min(1, "Komisi wajib diisi."),
         user_id: z.string().min(1, "Afiliator wajib diisi."),
       }),
-    [updateData],
+    [],
   );
   const [loading, setLoading] = useState(false);
   const form = useZodForm({
@@ -53,7 +52,7 @@ export default function ReferalForm({
       code: updateData?.code || "",
       fee_in_percent: updateData?.fee_in_percent.toString() || "",
       discount_in_percent: updateData?.fee_in_percent.toString() || "",
-      user_id: updateData?.fee_in_percent.toString() || "",
+      user_id: updateData?.user_id || "",
     },
     schema: upsertReferalSchema,
   });
@@ -62,44 +61,44 @@ export default function ReferalForm({
     setLoading(true);
 
     const loading = toast.loading(
-      updateData ? "Memperbarui user..." : "Menambahkan user...",
+      updateData ? "Memperbarui referal..." : "Menambahkan referal...",
     );
 
-    // try {
-    //   const upsertUserResult = await upsertUser({
-    //     data: {
-    //       id: updateData?.id,
-    //       email: values.email,
-    //       name: values.username,
-    //       password: values.password,
-    //       role: values.role || "CUSTOMER",
-    //     },
-    //   });
+    try {
+      const upsertUserResult = await upsertReferal({
+        data: {
+          id: updateData?.id,
+          code: values.code,
+          discount_in_percent: parsePrice(values.discount_in_percent),
+          fee_in_percent: parsePrice(values.fee_in_percent),
+          user_id: values.user_id,
+        },
+      });
 
-    //   if (!upsertUserResult.success) {
-    //     setLoading(false);
-    //     return toast.error(
-    //       updateData ? "Gagal memperbarui user!" : "Gagal menambahkan user!",
-    //       { id: loading },
-    //     );
-    //   }
+      if (!upsertUserResult.success) {
+        setLoading(false);
+        return toast.error(
+          updateData ? "Gagal memperbarui user!" : "Gagal menambahkan user!",
+          { id: loading },
+        );
+      }
 
-    //   setLoading(false);
-    //   toast.success(
-    //     updateData
-    //       ? "Berhasil memperbarui user!"
-    //       : "Berhasil menambahkan user!",
-    //     { id: loading },
-    //   );
-    //   return router.push("/admin/user");
-    //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    // } catch (e) {
-    //   setLoading(false);
-    //   return toast.error(
-    //     updateData ? "Gagal memperbarui user!" : "Gagal menambahkan user!",
-    //     { id: loading },
-    //   );
-    // }
+      setLoading(false);
+      toast.success(
+        updateData
+          ? "Berhasil memperbarui referal!"
+          : "Berhasil menambahkan referal!",
+        { id: loading },
+      );
+      return router.push("/admin/referal");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {
+      setLoading(false);
+      return toast.error(
+        updateData ? "Gagal memperbarui user!" : "Gagal menambahkan user!",
+        { id: loading },
+      );
+    }
   });
 
   return (
