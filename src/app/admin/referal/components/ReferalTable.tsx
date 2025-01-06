@@ -181,8 +181,8 @@ export const ReferalTable: FC<{
       data={referals}
       columns={columns}
       createPath="/admin/referal/add"
-      filterPlaceholder="Filter by afiliator"
-      columnSearch="afiliator"
+      filterPlaceholder="Filter by kode"
+      columnSearch="code"
     />
   );
 };
