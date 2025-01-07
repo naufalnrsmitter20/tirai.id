@@ -11,6 +11,7 @@ import { Role } from "@prisma/client";
 import {
   BookKey,
   Building,
+  Calculator,
   CircleGauge,
   Home,
   LogOut,
@@ -116,6 +117,13 @@ const BASE_SIDEBAR_ITEMS: SidebarItem[] = [
     icon: BookKey,
     isActive: false,
     requiredRole: ["SUPERADMIN", "ADMIN"],
+  },
+  {
+    title: "Kalkulator Harga",
+    url: "/admin/calculator",
+    icon: Calculator,
+    isActive: false,
+    requiredRole: ["ALL"],
   },
 ];
 

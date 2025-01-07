@@ -2,7 +2,6 @@
 
 import { SectionContainer } from "@/components/layout/SectionContainer";
 import FabricIcon from "@/components/svg-tsxIcon/fabricIcon";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,15 +14,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { formatRupiah } from "@/lib/utils";
 import { Discount, Prisma } from "@prisma/client";
 import { Settings } from "lucide-react";
-import { Session } from "next-auth";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { FC, useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
-import { addCustomProductByUser, saveAddress } from "../actions";
-import { AddressSection, ShippingAddress } from "./Address";
 
 export type Models = Prisma.ModelGetPayload<{
   select: { id: true; description: true; image: true; name: true };
@@ -43,16 +38,17 @@ export type Bahans = Prisma.MaterialGetPayload<{
 export const Form: FC<{
   models: Models[];
   bahans: Bahans[];
-  addresses: ShippingAddress[];
-  user: Session["user"];
-  discount?: Discount | null;
-}> = ({ models, bahans, addresses, user, discount }) => {
+  customerDiscount?: Discount | null;
+  supplierDiscount?: Discount | null;
+}> = ({ models, bahans, customerDiscount, supplierDiscount }) => {
   const [dimensions, setDimensions] = useState({ length: 0, width: 0 });
   const [selectedMaterial, setSelectedMaterial] = useState<Bahans | null>(null);
-  const [estimatedPrice, setEstimatedPrice] = useState(0);
+  const [price, setPrice] = useState({
+    customer: { original: 0, discounted: 0 },
+    supplier: { original: 0, discounted: 0 },
+  });
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const router = useRouter();
 
   const calculatePrice = useCallback(
     (
@@ -63,9 +59,12 @@ export const Form: FC<{
     ) => {
       const area = (length / 100) * (width / 100);
       const brute = (area < 1 ? 1 : area) * materialPrice;
-      return (
-        (brute - brute * (discount?.discount_in_percent || 0 / 100)) * quantity
-      );
+      return {
+        original: brute * quantity,
+        discounted:
+          (brute - brute * (discount?.discount_in_percent || 0 / 100)) *
+          quantity,
+      };
     },
     [quantity],
   );
@@ -73,46 +72,71 @@ export const Form: FC<{
   const handleMaterialChange = (value: string) => {
     const material = bahans.find((b) => b.name === value);
     setSelectedMaterial(material || null);
+
     if (material) {
-      const price = calculatePrice(
+      const customerPrice = calculatePrice(
         dimensions.length,
         dimensions.width,
-        user?.role === "SUPPLIER" ? material.supplier_price : material.price,
-        discount,
+        material.price,
+        customerDiscount,
       );
-      setEstimatedPrice(price);
+      const supplierPrice = calculatePrice(
+        dimensions.length,
+        dimensions.width,
+        material.supplier_price,
+        supplierDiscount,
+      );
+
+      setPrice({
+        customer: { ...customerPrice },
+        supplier: { ...supplierPrice },
+      });
     }
   };
 
   useEffect(() => {
     if (selectedMaterial) {
-      const price = calculatePrice(
+      const customerPrice = calculatePrice(
         dimensions.length,
         dimensions.width,
         selectedMaterial.price,
-        discount,
+        customerDiscount,
       );
-      setEstimatedPrice(price);
+      const supplierPrice = calculatePrice(
+        dimensions.length,
+        dimensions.width,
+        selectedMaterial.supplier_price,
+        supplierDiscount,
+      );
+
+      setPrice({
+        customer: { ...customerPrice },
+        supplier: { ...supplierPrice },
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    dimensions.length,
-    dimensions.width,
-    discount,
-    quantity,
-    selectedMaterial,
-  ]);
+  }, [dimensions.length, dimensions.width, quantity, selectedMaterial]);
 
   const handleModelChange = (value: string) => {
     setSelectedModel(value);
     if (selectedMaterial) {
-      const price = calculatePrice(
+      const customerPrice = calculatePrice(
         dimensions.length,
         dimensions.width,
         selectedMaterial.price,
-        discount,
+        customerDiscount,
       );
-      setEstimatedPrice(price);
+      const supplierPrice = calculatePrice(
+        dimensions.length,
+        dimensions.width,
+        selectedMaterial.supplier_price,
+        supplierDiscount,
+      );
+
+      setPrice({
+        customer: { ...customerPrice },
+        supplier: { ...supplierPrice },
+      });
     }
   };
 
@@ -124,65 +148,23 @@ export const Form: FC<{
     setDimensions(newDimensions);
 
     if (selectedMaterial) {
-      const price = calculatePrice(
-        newDimensions.length,
-        newDimensions.width,
+      const customerPrice = calculatePrice(
+        dimensions.length,
+        dimensions.width,
         selectedMaterial.price,
-        discount,
+        customerDiscount,
       );
-      setEstimatedPrice(price);
-    }
-  };
+      const supplierPrice = calculatePrice(
+        dimensions.length,
+        dimensions.width,
+        selectedMaterial.supplier_price,
+        supplierDiscount,
+      );
 
-  if (!user) return <></>;
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const toastId = toast.loading("Loading...");
-    const formElement = event.target as HTMLFormElement;
-    const formData = new FormData(formElement);
-    const userId = user.id;
-    formData.append("price", estimatedPrice.toString());
-    formData.append("user_id", user.id);
-
-    const addressType = formData.get("addressType") as string;
-
-    if (addressType === "new") {
-      const recipient_name = formData.get("recipient_name") as string;
-      const recipient_phone_number = formData.get(
-        "recipient_phone_number",
-      ) as string;
-      const street = formData.get("street") as string;
-      const village = formData.get("village") as string;
-      const district = formData.get("district") as string;
-      const city = formData.get("city") as string;
-      const province = formData.get("province") as string;
-      const postal_code = formData.get("postal_code") as string;
-      const additional_info = formData.get("additional_info") as string | null;
-
-      const data: Prisma.ShippingAddressUncheckedCreateInput = {
-        city,
-        district,
-        postal_code,
-        province,
-        recipient_name,
-        recipient_phone_number,
-        street,
-        user_id: userId,
-        village,
-        additional_info,
-      };
-
-      await saveAddress(data);
-    }
-
-    const action = await addCustomProductByUser(formData);
-
-    if (action.error) {
-      toast.error(action.error.message, { id: toastId });
-    } else {
-      toast.success("Sukses. Harap menunggu konfirmasi Admin", { id: toastId });
-      router.push("/cart");
+      setPrice({
+        customer: { ...customerPrice },
+        supplier: { ...supplierPrice },
+      });
     }
   };
 
@@ -197,7 +179,7 @@ export const Form: FC<{
           <Separator />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form className="space-y-8">
           <Card>
             <CardHeader className="flex flex-row items-center space-x-4">
               <Settings className="h-6 w-6" />
@@ -381,25 +363,45 @@ export const Form: FC<{
               </div>
             </CardContent>
           </Card>
-          <AddressSection addresses={addresses} />
           <Card>
             <CardContent className="pt-6">
               <div className="flex flex-col space-y-4">
-                {estimatedPrice > 0 && (
-                  <div className="rounded-lg bg-muted p-4">
-                    <p className="text-lg font-semibold">
-                      Perkiraan Harga{" "}
-                      {discount && `(Diskon ${discount.discount_in_percent}%)`}{" "}
-                      :{" "}
-                      <span className="text-primary">
-                        Rp {estimatedPrice.toLocaleString("id-ID")}
-                      </span>
-                    </p>
-                  </div>
-                )}
-                <Button type="submit" size="lg">
-                  Kirim Permintaan
-                </Button>
+                <div className="rounded-lg bg-muted p-4">
+                  <p className="text-lg font-semibold">
+                    Perkiraan Harga Original (Customer):{" "}
+                    <span className="text-primary">
+                      {formatRupiah(price.customer.original)}
+                    </span>
+                  </p>
+                  <p className="text-lg font-semibold">
+                    Perkiraan Harga{" "}
+                    {customerDiscount &&
+                      `(Diskon ${customerDiscount.discount_in_percent}%)`}{" "}
+                    (Customer):{" "}
+                    <span className="text-primary">
+                      {formatRupiah(price.customer.discounted)}
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col space-y-4">
+                <div className="rounded-lg bg-muted p-4">
+                  <p className="text-lg font-semibold">
+                    Perkiraan Harga Original (Supplier):{" "}
+                    <span className="text-primary">
+                      {formatRupiah(price.supplier.original)}
+                    </span>
+                  </p>
+                  <p className="text-lg font-semibold">
+                    Perkiraan Harga{" "}
+                    {customerDiscount &&
+                      `(Diskon ${customerDiscount.discount_in_percent}%)`}{" "}
+                    (Supplier):{" "}
+                    <span className="text-primary">
+                      {formatRupiah(price.supplier.discounted)}
+                    </span>
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
