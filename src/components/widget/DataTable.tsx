@@ -30,6 +30,7 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { ChevronDown, Plus } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { FC, useState } from "react";
 
@@ -53,6 +54,7 @@ export const DataTable: FC<DataTableProps<any>> = ({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const { data: session } = useSession();
 
   const table = useReactTable({
     data,
@@ -113,7 +115,7 @@ export const DataTable: FC<DataTableProps<any>> = ({
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
-          {createPath && (
+          {createPath && session?.user?.role !== "ADMIN" && (
             <Link
               href={createPath}
               className={buttonVariants({ variant: "default" })}

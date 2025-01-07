@@ -28,6 +28,21 @@ export default withAuth(
     }
 
     if (
+      pathname.startsWith("admin/shop/category/add") ||
+      pathname.startsWith("/admin/shop/product/add") ||
+      pathname.startsWith("/admin/user/add") ||
+      pathname.startsWith("/admin/seo/add") ||
+      pathname.startsWith("/admin/referal/add") ||
+      pathname.startsWith("/admin/material/add") ||
+      pathname.startsWith("/admin/model/add") ||
+      pathname.startsWith("/admin/article/add")
+    ) {
+      return NextResponse.rewrite(new URL("/unauthorized", req.url), {
+        status: 403,
+      });
+    }
+
+    if (
       (pathname.startsWith("/auth") && token) ||
       (pathname.startsWith("/admin") &&
         (token?.role === "CUSTOMER" ||
