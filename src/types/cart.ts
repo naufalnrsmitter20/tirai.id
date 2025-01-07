@@ -12,8 +12,9 @@ export type CustomRequestItem = {
   width: string;
   height: string;
   price: number;
-  shipping_price?: number;
+  shipping_price?: number | null;
   is_vat: boolean;
+  quantity: number; // Quantity of the item
 };
 
 export type CartItem = {

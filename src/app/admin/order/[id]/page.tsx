@@ -116,8 +116,8 @@ export default async function OrderDetail({
                         <div>
                           <p className="text-muted-foreground">Ukuran</p>
                           <p>
-                            {item.custom_request.width} x{" "}
-                            {item.custom_request.height}
+                            {item.custom_request.width}cm x{" "}
+                            {item.custom_request.height}cm
                           </p>
                         </div>
                       </div>

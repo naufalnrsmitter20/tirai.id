@@ -15,7 +15,7 @@ interface CustomProductData {
   material: string;
   model: string;
   price: number;
-  color: string;
+  quantity: number;
   recipient: {
     name: string;
     phoneNumber: string;
@@ -49,7 +49,7 @@ const extractFormData = (data: FormData): CustomProductData | null => {
       material: data.get("material") as string,
       model: data.get("model") as string,
       price: parseFloat(data.get("price") as string),
-      color: data.get("color") as string,
+      quantity: Number(data.get("quantity") as string),
       recipient: {
         name: data.get("recipient_name") as string,
         phoneNumber: data.get("recipient_phone_number") as string,
@@ -78,7 +78,7 @@ const validateCustomProductData = (data: CustomProductData): boolean => {
     data.material,
     data.model,
     data.price,
-    data.color,
+    data.quantity,
     data.recipient.name,
     data.recipient.phoneNumber,
     data.address.street,
@@ -131,6 +131,8 @@ export const addCustomProductByUser = async (formData: FormData) => {
       userId: data.userId,
       recipient_name: data.recipient.name,
       recipient_phone_number: data.recipient.phoneNumber,
+      quantity: data.quantity,
+      is_custom_carrier: false,
     });
 
     if (!productCustom) {
@@ -141,7 +143,19 @@ export const addCustomProductByUser = async (formData: FormData) => {
     const cart = await prisma.cart.findUnique({
       where: { user_id: data.userId },
     });
-    if (!cart) return ActionResponses.notFound("Cart is not found");
+    if (!cart || (cart.json_content as unknown as any).items.length === 0) {
+      await updateCart({
+        type: "custom",
+        items: [
+          {
+            ...productCustom,
+            shipping_price: productCustom.shipping_price ?? undefined,
+          },
+        ],
+      });
+      revalidatePath("/");
+      return ActionResponses.success(productCustom);
+    }
 
     if (!isCustomCart(cart.json_content))
       return ActionResponses.badRequest("Cart is not a custom request cart");

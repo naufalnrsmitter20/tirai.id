@@ -50,11 +50,15 @@ export const Details = ({
 
         const pricePerUnit = variant?.price ?? product.price ?? 0;
         const totalItemPrice = pricePerUnit * item.quantity;
-        const discountPrice = discount
+        let discountPrice = discount
           ? totalItemPrice * (discount.discount_in_percent / 100)
           : 0;
+        let referalDiscountPrice = 0;
+        if (referalDiscount)
+          referalDiscountPrice =
+            ((totalItemPrice - discountPrice) * referalDiscount) / 100;
         const vat = product.is_vat
-          ? (totalItemPrice - discountPrice) * (11 / 100)
+          ? (totalItemPrice - discountPrice - referalDiscountPrice) * (11 / 100)
           : 0;
 
         return {
@@ -65,10 +69,11 @@ export const Details = ({
           totalItemPrice,
           vat,
           discountPrice,
+          referalDiscountPrice,
         };
       })
       .filter(Boolean);
-  }, [cartItems, discount, products]);
+  }, [cartItems, discount, products, referalDiscount]);
 
   const productsPrice = useMemo(
     () =>
@@ -87,24 +92,26 @@ export const Details = ({
     );
   }, [detailedCartItems]);
 
-  const referalDiscountPrice = useMemo(() => {
-    return referalDiscount
-      ? productsPrice * (referalDiscount / 100)
-      : undefined;
-  }, [productsPrice, referalDiscount]);
+  const referalPrice = useMemo(() => {
+    return detailedCartItems.reduce(
+      (sum, item) => sum + item!.referalDiscountPrice,
+      0,
+    );
+  }, [detailedCartItems]);
 
   const totalPrice = useMemo(
     () =>
       productsPrice -
-      (discountPrice + (referalDiscountPrice || 0)) +
+      (discountPrice + referalPrice) +
       totalVat +
       (shippingPrice === undefined ? 0 : shippingPrice),
     [
       productsPrice,
       discountPrice,
-      referalDiscountPrice,
       totalVat,
       shippingPrice,
+      referalDiscount,
+      referalPrice,
     ],
   );
 
@@ -169,13 +176,13 @@ export const Details = ({
             </Body3>
           </div>
         )}
-        {referalDiscount && referalDiscountPrice && (
+        {referalDiscount && referalPrice && (
           <div className="flex flex-row justify-between">
             <Body3 className="text-black">
               Diskon Referal ({referalDiscount}%)
             </Body3>
             <Body3 className="text-green-500">
-              -{formatRupiah(referalDiscountPrice)}
+              -{formatRupiah(referalPrice)}
             </Body3>
           </div>
         )}

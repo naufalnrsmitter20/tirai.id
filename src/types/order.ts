@@ -18,3 +18,10 @@ export type OrderWithPayment = Prisma.OrderGetPayload<{
     };
   };
 }>;
+
+export type OrderWithAffiliatePayment = Prisma.OrderGetPayload<{
+  include: {
+    payment: true;
+    referal: true;
+  };
+}>;

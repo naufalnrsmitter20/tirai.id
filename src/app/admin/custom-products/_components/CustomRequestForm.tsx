@@ -41,7 +41,6 @@ interface CustomRequestFormProps {
 const customRequestSchema = z.object({
   material: z.string().min(1, "Material wajib diisi"),
   model: z.string().min(1, "Model wajib diisi"),
-  color: z.string().min(1, "Warna wajib diisi"),
   width: z.string().min(1, "Lebar wajib diisi"),
   height: z.string().min(1, "Tinggi wajib diisi"),
   price: z.number().min(0, "Harga tidak boleh negatif"),
@@ -58,6 +57,8 @@ const customRequestSchema = z.object({
     .regex(/^(?:\+62|62|0)[2-9]\d{7,14}$/, "Nomor telepon tidak valid"),
   carrier_code: z.string().min(1, "Kurir wajib dipilih"),
   is_vat: z.boolean(),
+  is_custom_carrier: z.boolean(),
+  quantity: z.number().min(1),
 });
 
 type CustomRequestFormValues = z.infer<typeof customRequestSchema>;
@@ -81,6 +82,8 @@ export default function CustomRequestForm({
       recipient_name: updateData.recipient_name,
       recipient_phone_number: updateData.recipient_phone_number,
       is_vat: updateData.is_vat ?? false,
+      is_custom_carrier: updateData.is_custom_carrier ?? false,
+      quantity: updateData.quantity,
     },
     schema: customRequestSchema,
   });
@@ -153,31 +156,6 @@ export default function CustomRequestForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Warna</FormLabel>
-                  <FormControl>
-                    <div className="flex gap-2">
-                      <Input
-                        type="color"
-                        {...field}
-                        className="h-10 w-14 p-1"
-                      />
-                      <Input
-                        {...field}
-                        placeholder="Kode warna"
-                        className="flex-1"
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -213,7 +191,7 @@ export default function CustomRequestForm({
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Harga</FormLabel>
+                  <FormLabel>Harga Satuan</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -249,8 +227,51 @@ export default function CustomRequestForm({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="quantity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total Batang</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      value={field.value}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      placeholder="Masukkan Jumlah"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           <div className="flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="is_custom_carrier"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-1">
+                  <FormLabel htmlFor="is_custom_carrier">
+                    Kurir Lainnya
+                  </FormLabel>
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      name={field.name}
+                      onCheckedChange={(check) => {
+                        form.setValue("is_custom_carrier", check as boolean);
+                      }}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      id="is_custom_carrier"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="shipping_price"
@@ -279,23 +300,27 @@ export default function CustomRequestForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nama Ekspedisi</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih kurir pengiriman" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {courierList.map((courier) => (
-                        <SelectItem key={courier.code} value={courier.code}>
-                          {courier.description}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  {form.watch("is_custom_carrier") ? (
+                    <Input {...field} placeholder="Masukkan Nama Kurir" />
+                  ) : (
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Pilih kurir pengiriman" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {courierList.map((courier) => (
+                          <SelectItem key={courier.code} value={courier.code}>
+                            {courier.description}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}

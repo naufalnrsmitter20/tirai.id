@@ -18,7 +18,8 @@ export default async function OrderDetail({
     where: { order_id: id },
   });
 
-  if (!shipment || !shipment.tracking_id) return notFound();
+  if (!shipment || !shipment.tracking_id || shipment.is_custom_carrier)
+    return notFound();
 
   const shipmentStatus = (
     await getShipmentStatus(shipment.carrier, shipment.tracking_id)

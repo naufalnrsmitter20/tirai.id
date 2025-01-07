@@ -6,6 +6,7 @@ import { isCustomCart, isReadyStockCart } from "@/lib/utils";
 import { CartItems } from "./components/Cart";
 import { EmptyCart } from "./components/EmptyCart";
 import { findDiscountByRole } from "@/utils/database/discount.query";
+import { findCustomRequests } from "@/utils/database/customRequest.query";
 
 export default async function CartPage() {
   const session = await getServerSession();
@@ -44,27 +45,16 @@ export default async function CartPage() {
 
   const customRequestCart =
     cart !== "not found" && isCustomCart(cart.json_content)
-      ? cart.json_content.item
+      ? await findCustomRequests({
+          id: { in: cart.json_content.items.map((i) => i.id) },
+        })
       : null;
-
-  const customRequest = customRequestCart
-    ? await prisma.customRequest.findUnique({
-        where: { id: customRequestCart.id },
-      })
-    : null;
 
   return (
     <PageContainer>
       <CartItems
         products={products}
-        customRequest={
-          customRequest
-            ? {
-                ...customRequest,
-                shipping_price: customRequest?.shipping_price ?? undefined,
-              }
-            : null
-        }
+        customRequests={customRequestCart ? customRequestCart : null}
         discount={discount}
       />
     </PageContainer>

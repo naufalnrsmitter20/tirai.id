@@ -97,6 +97,7 @@ export default async function Checkout() {
                 model: customRequest.model,
                 price: customRequest.price,
                 shipping_price: customRequest.shipping_price ?? undefined,
+                quantity: customRequest.quantity,
               }))
             : undefined
         }

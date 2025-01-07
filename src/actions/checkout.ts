@@ -261,14 +261,15 @@ const handleStandardCheckout = async (
 };
 
 const handleCustomRequestCheckout = async (
-  customRequestItem: CustomRequestItem,
+  customRequestItem: CustomRequestItem[],
   userId: string,
   referalCode?: string,
+  userRole?: Role,
 ): Promise<ActionResponse<CreateInvoiceSuccessResponse>> => {
   try {
     // Fetch the custom request and validate its existence and shipping details
-    const customRequest = await prisma.customRequest.findUnique({
-      where: { id: customRequestItem.id },
+    const customRequest = await prisma.customRequest.findMany({
+      where: { id: { in: customRequestItem.map((i) => i.id) } },
     });
 
     const referal = await prisma.referal.findUnique({
@@ -281,10 +282,12 @@ const handleCustomRequestCheckout = async (
       );
     }
 
+    const discount = await findDiscountByRole(userRole!);
+
     if (
       !customRequest ||
-      !customRequest.shipping_price ||
-      !customRequest.carrier_code
+      !customRequest.every((i) => Boolean(i.shipping_price)) ||
+      !customRequest.every((i) => Boolean(i.carrier_code))
     ) {
       return ActionResponses.serverError("Order has not been approved!");
     }
@@ -298,26 +301,62 @@ const handleCustomRequestCheckout = async (
       return ActionResponses.serverError("User not found!");
     }
 
-    // Calculate VAT if applicable
-    const vat = customRequest.is_vat ? (customRequest.price * 11) / 100 : 0;
+    // Prepare item details for the invoice
+    // TODO: Change this according to the new schema
+    let itemDetails: ItemDetail[] = [];
 
-    // Create an order entry
-    const totalPrice =
-      customRequest.shipping_price +
-      (customRequest.price -
-        (referal
-          ? customRequest.price * (referal.discount_in_percent / 100)
-          : customRequest.price)) +
-      vat;
+    const {
+      totalPrice,
+      totalVat,
+      totalShipping,
+      totalDiscount,
+      totalReferral,
+    } = customRequest.reduce(
+      (sum, i) => {
+        const totalPrice = i.quantity * i.price;
+
+        itemDetails.push({
+          description: `${i.model} ${i.material} (Custom Product)`,
+          price: i.price,
+          quantity: i.quantity,
+        });
+        sum.totalPrice += i.price * i.quantity;
+        sum.totalShipping += i.shipping_price ?? 0;
+
+        const discountPrice = discount?.discount_in_percent
+          ? totalPrice * (discount.discount_in_percent / 100)
+          : 0;
+
+        const referralDiscount = referal?.discount_in_percent
+          ? (totalPrice - discountPrice) * (referal.discount_in_percent / 100)
+          : 0;
+
+        sum.totalDiscount += discountPrice;
+        sum.totalReferral += referralDiscount;
+
+        if (i.is_vat)
+          sum.totalVat +=
+            ((totalPrice - (referralDiscount + discountPrice)) * 11) / 100;
+        return sum;
+      },
+      {
+        totalPrice: 0,
+        totalVat: 0,
+        totalShipping: 0,
+        totalReferral: 0,
+        totalDiscount: 0,
+      },
+    );
+
     const order = await prisma.order.create({
       data: {
         id: generateOrderId(),
-        shipping_address: customRequest.address,
+        shipping_address: customRequest[0].address,
         status: "UNPAID",
         user_id: userId,
-        phone_number: customRequest.recipient_phone_number,
-        total_price: totalPrice,
-        shipping_price: customRequest.shipping_price,
+        phone_number: customRequest[0].recipient_phone_number,
+        total_price: totalPrice - (totalDiscount + totalReferral) + totalVat,
+        shipping_price: totalShipping,
         referal_id: referal?.id,
       },
     });
@@ -325,39 +364,30 @@ const handleCustomRequestCheckout = async (
     // Create a shipment entry
     await prisma.shipment.create({
       data: {
-        carrier: customRequest.carrier_code,
+        carrier: customRequest[0].carrier_code!,
         estimated_finish_time: addDays(new Date(), 5),
         status: "PENDING",
         order_id: order.id,
+        is_custom_carrier: customRequest[0].is_custom_carrier,
       },
     });
 
-    // Prepare item details for the invoice
-    // TODO: Change this according to the new schema
-    const itemDetails: ItemDetail[] = [
-      {
-        description: `${customRequest.model} ${customRequest.material} (Custom Product)`,
-        price: customRequest.price,
-        quantity: customRequest.quantity,
-      },
-    ];
-
     // Create an order item entry
-    await prisma.orderItem.create({
-      data: {
-        quantity: 1,
-        custom_request_id: customRequest.id,
+    await prisma.orderItem.createMany({
+      data: customRequest.map((i) => ({
+        quantity: i.quantity,
+        custom_request_id: i.id,
         order_id: order.id,
-      },
+      })),
     });
 
     // Generate the transaction invoice
     const result = await createTransactionInvoice({
       customer_details: {
         email: user.email,
-        name: customRequest.recipient_name,
+        name: customRequest[0].recipient_name,
         id: user.id,
-        phone: formatPhoneNumber(customRequest.recipient_phone_number),
+        phone: formatPhoneNumber(customRequest[0].recipient_phone_number),
       },
       payment_link: {
         enabled_payments: [
@@ -375,13 +405,14 @@ const handleCustomRequestCheckout = async (
       item_details: itemDetails,
       payment_type: "payment_link",
       amount: {
-        vat: vat.toString(),
-        discount: "0",
-        shipping: customRequest.shipping_price.toString(),
+        vat: totalVat.toString(),
+        discount: (totalDiscount + totalReferral).toString(),
+        shipping: totalShipping.toString(),
       },
     });
 
     if (!result.success || result.error || !result.data) {
+      console.log(result);
       return ActionResponses.serverError(
         "Failed to create transaction invoice.",
       );
@@ -450,15 +481,16 @@ export const upsertCheckout = async (
       courier,
       session.user.id,
       session.user.role,
-      referalCode,
+      referalCode ?? "",
     );
   }
 
-  if (cart.customRequest) {
+  if (cart.customRequests) {
     return await handleCustomRequestCheckout(
-      cart.customRequest,
+      cart.customRequests,
       session.user.id,
-      referalCode,
+      referalCode ?? "",
+      session.user.role,
     );
   }
 

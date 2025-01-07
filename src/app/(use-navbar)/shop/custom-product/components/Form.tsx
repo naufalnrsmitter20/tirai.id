@@ -20,7 +20,7 @@ import { Settings } from "lucide-react";
 import { Session } from "next-auth";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { addCustomProductByUser, saveAddress } from "../actions";
 import { AddressSection, ShippingAddress } from "./Address";
@@ -51,6 +51,7 @@ export const Form: FC<{
   const [selectedMaterial, setSelectedMaterial] = useState<Bahans | null>(null);
   const [estimatedPrice, setEstimatedPrice] = useState(0);
   const [selectedModel, setSelectedModel] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState(1);
   const router = useRouter();
 
   if (!user) return <></>;
@@ -61,9 +62,11 @@ export const Form: FC<{
     materialPrice: number,
     discount?: Discount | null,
   ) => {
-    const area = length * width;
-    const brute = (area / 100 < 1 ? 1 : area / 100) * materialPrice;
-    return brute - (brute * (discount?.discount_in_percent || 0)) / 100;
+    const area = (length / 100) * (width / 100);
+    const brute = (area < 1 ? 1 : area) * materialPrice;
+    return (
+      (brute - brute * (discount?.discount_in_percent || 0 / 100)) * quantity
+    );
   };
 
   const handleMaterialChange = (value: string) => {
@@ -80,8 +83,29 @@ export const Form: FC<{
     }
   };
 
+  useEffect(() => {
+    if (selectedMaterial) {
+      const price = calculatePrice(
+        dimensions.length,
+        dimensions.width,
+        selectedMaterial.price,
+        discount,
+      );
+      setEstimatedPrice(price);
+    }
+  }, [quantity]);
+
   const handleModelChange = (value: string) => {
     setSelectedModel(value);
+    if (selectedMaterial) {
+      const price = calculatePrice(
+        dimensions.length,
+        dimensions.width,
+        selectedMaterial.price,
+        discount,
+      );
+      setEstimatedPrice(price);
+    }
   };
 
   const handleDimensionChange = (type: "length" | "width", value: number) => {
@@ -249,7 +273,7 @@ export const Form: FC<{
                     key={bahan.id}
                     className="flex items-center space-x-4 rounded-lg border p-4 hover:bg-muted"
                   >
-                    <div className="relative h-32 w-full overflow-hidden rounded-md">
+                    <div className="relative aspect-square h-32 overflow-hidden rounded-md">
                       <Image
                         src={bahan.image}
                         alt={bahan.name}
@@ -317,6 +341,31 @@ export const Form: FC<{
                         parseInt(e.target.value) || 0,
                       )
                     }
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center space-x-4">
+              <Settings className="h-6 w-6" />
+              <CardTitle>Jumlah Barang</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Input
+                    type="number"
+                    id="quantity"
+                    name="quantity"
+                    required
+                    defaultValue={1}
+                    onScroll={(e) => {
+                      e.preventDefault();
+                    }}
+                    placeholder="Jumlah barang yang akan dipesan"
+                    onChange={(e) => setQuantity(Number(e.target.value) ?? 1)}
                   />
                 </div>
               </div>

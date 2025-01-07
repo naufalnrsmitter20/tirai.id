@@ -105,21 +105,6 @@ const createColumns = (
     ),
   },
   {
-    accessorKey: "color",
-    header: "Warna",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={row.original.color}
-          className="h-6 w-6 cursor-pointer"
-          readOnly
-        />
-        <span>{row.original.color}</span>
-      </div>
-    ),
-  },
-  {
     accessorKey: "price",
     header: ({ column }) => (
       <Button
@@ -136,7 +121,7 @@ const createColumns = (
         {new Intl.NumberFormat("id-ID", {
           style: "currency",
           currency: "IDR",
-        }).format(row.original.price)}
+        }).format(row.original.price * row.original.quantity)}
       </div>
     ),
   },
