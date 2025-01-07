@@ -19,7 +19,7 @@ export const MessageCard = ({
         <figure
           key={message.id}
           className={cn(
-            "relative ms-auto w-fit rounded-lg bg-green-500 px-2 py-1 pe-6 text-white",
+            "relative ms-auto w-fit rounded-lg bg-primary-600 px-2 py-1 pe-6 text-white",
           )}
         >
           {message.content}
@@ -38,15 +38,15 @@ export const MessageCard = ({
         <figure
           key={message.id}
           className={cn(
-            "relative w-fit rounded-lg bg-neutral-400 px-2 py-1 pe-8 text-white",
+            "relative w-fit rounded-lg bg-neutral-100 px-2 py-1 pe-8 text-black",
             participants &&
               participants.findIndex((i) => i.id === message.sender_id) !==
                 -1 &&
               (participants[
                 participants.findIndex((i) => i.id === message.sender_id)
               ].role === "CUSTOMER"
-                ? "!bg-neutral-400"
-                : "!bg-[#6099FF]"),
+                ? "!bg-neutral-100"
+                : "!bg-green-500 text-white"),
           )}
         >
           {participants &&

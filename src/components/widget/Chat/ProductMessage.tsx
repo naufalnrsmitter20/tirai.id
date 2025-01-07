@@ -26,7 +26,7 @@ export const ProductMessageCard = ({
         <figure
           key={message.id}
           className={cn(
-            "relative ms-auto w-full rounded-lg bg-green-500 px-2 py-2 text-white",
+            "relative ms-auto w-full rounded-lg bg-primary-600 px-2 py-2 text-white",
             className,
           )}
         >
@@ -71,15 +71,15 @@ export const ProductMessageCard = ({
         <figure
           key={message.id}
           className={cn(
-            "relative mt-5 !w-full rounded-lg bg-neutral-400 px-2 py-2 text-white",
+            "relative mt-5 !w-full rounded-lg bg-neutral-100 px-2 py-2 text-white",
             participants &&
               participants.findIndex((i) => i.id === message.sender_id) !==
                 -1 &&
               (participants[
                 participants.findIndex((i) => i.id === message.sender_id)
               ].role === "CUSTOMER"
-                ? "!bg-neutral-400"
-                : "!bg-[#6099FF]"),
+                ? "!bg-neutral-100"
+                : "!bg-green-500 text-white"),
           )}
         >
           {participants &&
