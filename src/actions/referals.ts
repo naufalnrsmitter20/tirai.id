@@ -69,7 +69,7 @@ export const deleteReferalAction = async ({
   const { id } = data;
   try {
     await prisma.referal.delete({ where: { id } });
-    revalidatePath("/admin/referal");
+    revalidatePath("/", "layout");
     return ActionResponses.success({
       message: "Referral deleted successfully",
     });

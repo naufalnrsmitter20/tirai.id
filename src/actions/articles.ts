@@ -86,8 +86,8 @@ const buildArticleInput = ({
   published_at: publishedAt
     ? new Date(publishedAt)
     : isPublished
-    ? new Date()
-    : null,
+      ? new Date()
+      : null,
   cover_url: coverUrl,
 });
 
@@ -174,8 +174,7 @@ export const updateArticleStatus = async (
   try {
     await updateArticle({ id }, { is_published, published_at: new Date() });
 
-    revalidatePath("/article", "layout");
-    revalidatePath("/admin/article");
+    revalidatePath("/", "layout");
     return ActionResponses.success({ id });
   } catch (error) {
     console.log(error);
@@ -213,8 +212,7 @@ export const deleteArticle = async (
 
     await hardDeleteArticle({ id });
 
-    revalidatePath("/admin/article");
-    revalidatePath("/article", "layout");
+    revalidatePath("/", "layout");
     return ActionResponses.success({ id });
   } catch (error) {
     console.log(error);

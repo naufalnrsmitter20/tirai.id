@@ -171,7 +171,7 @@ export const addCustomProductByUser = async (formData: FormData) => {
       ],
     });
 
-    revalidatePath("/");
+    revalidatePath("/", "layout");
     return ActionResponses.success(productCustom);
   } catch (error) {
     console.error("Error creating custom product:", error);
