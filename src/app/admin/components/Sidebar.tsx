@@ -1,31 +1,31 @@
-import React, { useMemo } from "react";
-import {
-  CircleGauge,
-  Home,
-  MessageCircleMore,
-  Newspaper,
-  ShoppingCart,
-  SquarePen,
-  User2,
-  Building,
-  Receipt,
-  LogOut,
-  type LucideIcon,
-  BookKey,
-} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
+  SidebarGroup,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarGroup,
 } from "@/components/ui/sidebar";
+import { Role } from "@prisma/client";
+import {
+  BookKey,
+  Building,
+  CircleGauge,
+  Home,
+  LogOut,
+  MessageCircleMore,
+  Newspaper,
+  Receipt,
+  ShoppingCart,
+  SquarePen,
+  User2,
+  type LucideIcon,
+} from "lucide-react";
 import { Session } from "next-auth";
 import { signOut } from "next-auth/react";
+import { useMemo } from "react";
 import MenuItem from "./MenuItem";
-import { Role } from "@prisma/client";
 
 export type SidebarItem = {
   title: string;
@@ -85,7 +85,6 @@ const BASE_SIDEBAR_ITEMS: SidebarItem[] = [
     requiredRole: ["SALES", "ADMIN", "SUPERADMIN"],
     children: [
       { title: "Request", url: "/admin/custom-products" },
-      { title: "Warna", url: "/admin/colors" },
       { title: "Bahan", url: "/admin/material" },
       { title: "Model", url: "/admin/model" },
     ],

@@ -187,7 +187,7 @@ export const CategoryTable: FC<{
         enableHiding: false,
       },
     ],
-    [router],
+    [loading, router],
   );
 
   return (
