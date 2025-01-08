@@ -35,7 +35,7 @@ export default async function Calculator() {
     <PageContainer>
       <Form
         models={models}
-        bahans={materials}
+        materials={materials}
         customerDiscount={customerDiscount}
         supplierDiscount={supplierDiscount}
       />
