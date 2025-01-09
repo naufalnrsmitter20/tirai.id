@@ -132,6 +132,8 @@ model Material {
   supplier_price Float
   description    String?
   image          String
+
+  allowed_model Model[]
 }
 
 model Model {
@@ -139,6 +141,8 @@ model Model {
   name        String  @unique
   description String?
   image       String
+
+  materials Material[]
 }
 
 model CustomRequest {
