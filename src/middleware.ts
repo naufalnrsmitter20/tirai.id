@@ -1,61 +1,58 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
-// middleware is applied to all routes, use conditionals to select
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default withAuth(
   function middleware(req) {
     const { token } = req.nextauth;
     const { pathname } = req.nextUrl;
 
-    if (
-      (pathname.startsWith("/admin") && !token) ||
-      (pathname.startsWith("/shop/cart") && !token) ||
-      (pathname.startsWith("/shop/product") && !token) ||
-      (pathname.startsWith("/account") && !token) ||
-      (pathname.startsWith("/shop/custom-product") && !token) ||
-      (pathname.startsWith("/cek-resi") && !token)
-    ) {
-      return NextResponse.redirect(
-        new URL(`/auth/login?callbackUrl=${pathname}`, req.url),
-      );
+    // Helper function to redirect to login with callback URL
+    const redirectToLogin = (callbackUrl: string) =>
+      NextResponse.redirect(new URL(`/auth/login?callbackUrl=${callbackUrl}`, req.url));
+
+    // Routes requiring authentication
+    const authRequiredRoutes = [
+      "/admin",
+      "/shop/cart",
+      "/shop/product",
+      "/account",
+      "/shop/custom-product",
+      "/cek-resi",
+    ];
+
+    if (authRequiredRoutes.some((route) => pathname.startsWith(route)) && !token) {
+      return redirectToLogin(pathname);
     }
 
     if (pathname.startsWith("/shop/checkout") && !token) {
-      return NextResponse.redirect(
-        new URL(`/auth/login?callbackUrl=/cart`, req.url),
-      );
+      return redirectToLogin("/cart");
     }
 
-    if (
-      (pathname.startsWith("admin/shop/category/add") ||
-        pathname.startsWith("/admin/shop/product/add") ||
-        pathname.startsWith("/admin/user/add") ||
-        pathname.startsWith("/admin/seo/add") ||
-        pathname.startsWith("/admin/referal/add") ||
-        pathname.startsWith("/admin/material/add") ||
-        pathname.startsWith("/admin/model/add") ||
-        pathname.startsWith("/admin/article/add")) &&
-      token?.role !== "SUPERADMIN"
-    ) {
-      return NextResponse.rewrite(new URL("/unauthorized", req.url), {
-        status: 403,
-      });
+    // Admin-specific routes requiring SUPERADMIN role
+    const superAdminRoutes = [
+      "/admin/shop/category/add",
+      "/admin/shop/product/add",
+      "/admin/user/add",
+      "/admin/seo/add",
+      "/admin/referal/add",
+      "/admin/material/add",
+      "/admin/model/add",
+      "/admin/article/add",
+    ];
+
+    if (superAdminRoutes.some((route) => pathname.startsWith(route)) && token?.role !== "SUPERADMIN") {
+      return NextResponse.rewrite(new URL("/unauthorized", req.url), { status: 403 });
     }
 
+    // Role-based access control
     if (
       (pathname.startsWith("/auth") && token) ||
       (pathname.startsWith("/admin") &&
-        (token?.role === "CUSTOMER" ||
-          token?.role === "AGENT" ||
-          token?.role === "AFFILIATE" ||
-          token?.role === "SUPPLIER")) ||
+        ["CUSTOMER", "AGENT", "AFFILIATE", "SUPPLIER"].includes(token?.role)) ||
       (pathname.startsWith("/admin/user") && token?.role !== "SUPERADMIN") ||
       (pathname.startsWith("/admin/chat") && token?.role !== "SALES")
     ) {
-      return NextResponse.rewrite(new URL("/unauthorized", req.url), {
-        status: 403,
-      });
+      return NextResponse.rewrite(new URL("/unauthorized", req.url), { status: 403 });
     }
 
     return NextResponse.next();
@@ -64,5 +61,5 @@ export default withAuth(
     callbacks: {
       authorized: () => true,
     },
-  },
+  }
 );
