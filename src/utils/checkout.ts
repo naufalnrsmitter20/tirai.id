@@ -42,6 +42,8 @@ export const calculateOrderAmounts = (
   return { amount, vat, discountPrice, itemDetails, grossAmount };
 };
 
+// selamat pagi
+
 export const calculateCustomOrderAmounts = (
   customRequestItems: CustomRequestItem[],
   customRequests: CustomRequest[],
