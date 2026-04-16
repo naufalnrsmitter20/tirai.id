@@ -5,12 +5,10 @@ export default withAuth(
   function middleware(req) {
     const { token } = req.nextauth;
     const { pathname } = req.nextUrl;
-
+    
     // Helper function to redirect to login with callback URL
     const redirectToLogin = (callbackUrl: string) =>
-      NextResponse.redirect(
-        new URL(`/auth/login?callbackUrl=${callbackUrl}`, req.url),
-      );
+      NextResponse.redirect(new URL(`/auth/login?callbackUrl=${callbackUrl}`, req.url));
 
     // Routes requiring authentication
     const authRequiredRoutes = [
