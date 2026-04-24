@@ -45,15 +45,17 @@ export const sendMessage = async (
   try {
     const client = await supabase();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-   const res = await client.from("messages").insert({
-        customer_id: customerId,
-        sender_id: session?.user?.id!, // eslint-disable-line @typescript-eslint/no-non-null-asserted-optional-chain
-        content,
-        created_at: new Date(
-          new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }),
-        ).toISOString(),
-      } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload = {
+      customer_id: customerId,
+      sender_id: session?.user?.id!,
+      content,
+      created_at: new Date(
+        new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }),
+      ).toISOString(),
+    } as any;
+    
+    const res = await client.from("messages").insert(payload);
     if (res.error) throw new Error("Failed to send message");
 
     return ActionResponses.success(res);
