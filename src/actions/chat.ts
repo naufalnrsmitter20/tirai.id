@@ -9,6 +9,7 @@ import { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { findUserInById } from "@/utils/database/user.query";
 import { ChatUser } from "@/types/entityRelations";
 
+
 export const findChatById = async (
   id: string,
   page = 1,
@@ -43,21 +44,17 @@ export const sendMessage = async (
   const content = formData.get("message") as string;
   try {
     const client = await supabase();
-    
-  type MessageInsert = Database["public"]["Tables"]["messages"]["Insert"];
 
-  const payload: MessageInsert = {
-    customer_id: customerId,
-    sender_id: session?.user?.id!, // eslint-disable-line @typescript-eslint/no-non-null-asserted-optional-chain
-    content,
-    created_at: new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }),
-    ).toISOString(),
-  };
-
-  const res = await client.from("messages").insert(payload);
-
-  if (res.error) throw new Error("Failed to send message");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   const res = await client.from("messages").insert({
+        customer_id: customerId,
+        sender_id: session?.user?.id!, // eslint-disable-line @typescript-eslint/no-non-null-asserted-optional-chain
+        content,
+        created_at: new Date(
+          new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }),
+        ).toISOString(),
+      } as any);
+    if (res.error) throw new Error("Failed to send message");
 
     return ActionResponses.success(res);
   } catch (error) {
