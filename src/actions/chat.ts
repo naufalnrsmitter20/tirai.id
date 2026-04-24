@@ -12,7 +12,7 @@ import { ChatUser } from "@/types/entityRelations";
 export const findChatById = async (
   id: string,
   page = 1,
-): Promise<ActionResponse<PostgrestSingleResponse<any[]>>> => {
+): Promise<ActionResponse<PostgrestSingleResponse<Message[]>>> => {
   try {
     const client = await supabase();
     const perPage = 15;
