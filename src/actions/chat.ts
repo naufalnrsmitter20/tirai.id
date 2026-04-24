@@ -51,7 +51,7 @@ export const sendMessage = async (
       created_at: new Date(
         new Date().toLocaleString("en-US", { timeZone: "Asia/Jakarta" }),
       ).toISOString(),
-    });
+    } as any);
     if (res.error) throw new Error("Failed to send message");
 
     return ActionResponses.success(res);
