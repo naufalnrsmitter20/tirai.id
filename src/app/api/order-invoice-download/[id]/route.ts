@@ -397,7 +397,12 @@ export async function POST(
     // Generate PDF
     const pdfBytes = await pdfDoc.save();
 
-    return new NextResponse(new Blob([pdfBytes]), {
+    const buffer = pdfBytes.buffer.slice(
+      pdfBytes.byteOffset,
+      pdfBytes.byteOffset + pdfBytes.byteLength
+    ) as ArrayBuffer;
+
+    return new NextResponse(new Blob([buffer]), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
